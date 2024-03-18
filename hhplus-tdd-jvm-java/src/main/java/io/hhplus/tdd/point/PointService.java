@@ -19,4 +19,8 @@ public class PointService {
         UserPoint userPoint = userPointTable.selectById(userId);
         return userPointTable.insertOrUpdate(userPoint.id(), userPoint.point() + amount);
     }
+
+    public UserPoint pointCheck(Long userId) throws InterruptedException {
+        return userPointTable.selectById(userId);
+    }
 }
