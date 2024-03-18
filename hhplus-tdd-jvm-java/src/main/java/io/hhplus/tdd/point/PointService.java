@@ -37,6 +37,7 @@ public class PointService {
             throw new Exception("사용할 수 있는 포인트가 부족합니다. 현재 포인트 : " + userPoint.point());
         }
 
+        pointHistoryTable.insert(userId, amount, TransactionType.USE, System.currentTimeMillis());
         return userPointTable.insertOrUpdate(userId, userPoint.point() - amount);
     }
 }

@@ -56,7 +56,7 @@ public class PointServiceTest {
         UserPoint rechargeUserPoint = pointService.chargePoint(userId, 500L);
 
         // Then
-        UserPoint result = new UserPoint(userId, 1000L, rechargeUserPoint.updateMillis());
+        UserPoint result = pointService.checkPoint(userId);
         assertThat(rechargeUserPoint.id()).isEqualTo(result.id());
         assertThat(rechargeUserPoint.point()).isEqualTo(result.point());
     }
@@ -82,7 +82,8 @@ public class PointServiceTest {
     public void GivenUserId_WhenCheckingPoint_ThenNoPointExist() throws InterruptedException {
         //Given
         Long userId = 1L;
-        UserPoint userPoint = new UserPoint(userId, 0L, System.currentTimeMillis());
+        Long amount = 0L;
+        UserPoint userPoint = new UserPoint(userId, amount, System.currentTimeMillis());
 
         // When
         UserPoint result = pointService.checkPoint(userId);
@@ -90,41 +91,6 @@ public class PointServiceTest {
         // Then
         assertThat(userPoint.id()).isEqualTo(result.id());
         assertThat(userPoint.point()).isEqualTo(result.point());
-    }
-
-    @Test
-    @DisplayName("[포인트 충전 내역 조회] - 포인트 충전 내역이 있는 경우")
-    public void GivenUserId_WhenCheckingPointHistories_ThenNoPointHistoriesExist() throws InterruptedException {
-        //Given
-        Long userId = 1L;
-        Long amount = 1000L;
-        pointService.chargePoint(userId, amount);
-
-        // When
-        List<PointHistory> pointHistories = pointService.checkPointHistory(userId);
-
-        // Then
-        PointHistory result = new PointHistory(1L, userId, TransactionType.CHARGE, 1000L, System.currentTimeMillis());
-        assertThat(pointHistories).hasSize(1);
-
-        PointHistory firstPointHistory = pointHistories.get(0);
-        assertThat(firstPointHistory.id()).isEqualTo(result.id());
-        assertThat(firstPointHistory.userId()).isEqualTo(result.userId());
-        assertThat(firstPointHistory.type()).isEqualTo(result.type());
-        assertThat(firstPointHistory.amount()).isEqualTo(result.amount());
-    }
-
-    @Test
-    @DisplayName("[포인트 충전 내역 조회] - 포인트 충전 내역이 없는 경우")
-    public void GivenUserId_WhenCheckingPointHistories_ThenPointHistoriesExist() throws InterruptedException {
-        //Given
-        Long userId = 1L;
-
-        // When
-        List<PointHistory> pointHistories = pointService.checkPointHistory(userId);
-
-        // Then
-        assertThat(pointHistories).isEmpty();
     }
 
     @Test
@@ -155,5 +121,63 @@ public class PointServiceTest {
         // Then
         assertThat(userPoint.id()).isEqualTo(result.id());
         assertThat(chargePoint - usePoint).isEqualTo(result.point());
+    }
+
+    @Test
+    @DisplayName("[포인트 사용 내역 조회] - 포인트가 있는 경우")
+    public void GivenUserIdAndAmount_WhenUsingPointHistories_ThenPointHistory() throws Exception {
+        // Given
+        Long userId = 1L;
+        Long chargePoint = 1000L;
+        UserPoint userPoint = pointService.chargePoint(userId, chargePoint);
+
+        Long usePoint = 400L;
+        UserPoint result = pointService.usePoint(userId, usePoint);
+
+        // When
+        PointHistory pointHistory = pointService.checkPointHistory(userId)
+                .stream()
+                .filter(history -> history.type().equals(TransactionType.USE))
+                .findFirst()
+                .orElse(null);
+
+        // Then
+        assertThat(pointHistory.userId()).isEqualTo(userPoint.id());
+        assertThat(pointHistory.amount()).isEqualTo(usePoint);
+        assertThat(pointHistory.type()).isEqualTo(TransactionType.USE);
+    }
+
+    @Test
+    @DisplayName("[포인트 충전 내역 조회] - 포인트 충전 내역이 있는 경우")
+    public void GivenUserId_WhenCheckingPointHistories_ThenNoPointHistoriesExist() throws InterruptedException {
+        //Given
+        Long userId = 1L;
+        Long amount = 1000L;
+        UserPoint userPoint = pointService.chargePoint(userId, amount);
+
+        // When
+        PointHistory pointHistory = pointService.checkPointHistory(userId)
+                .stream()
+                .filter(history -> history.type().equals(TransactionType.CHARGE))
+                .findFirst()
+                .orElse(null);
+
+        // Then
+        assertThat(pointHistory.userId()).isEqualTo(userPoint.id());
+        assertThat(pointHistory.amount()).isEqualTo(userPoint.point());
+        assertThat(pointHistory.type()).isEqualTo(TransactionType.CHARGE);
+    }
+
+    @Test
+    @DisplayName("[포인트 충전 내역 조회] - 포인트 충전 내역이 없는 경우")
+    public void GivenUserId_WhenCheckingPointHistories_ThenPointHistoriesExist() throws InterruptedException {
+        //Given
+        Long userId = 1L;
+
+        // When
+        List<PointHistory> pointHistories = pointService.checkPointHistory(userId);
+
+        // Then
+        assertThat(pointHistories).isEmpty();
     }
 }
