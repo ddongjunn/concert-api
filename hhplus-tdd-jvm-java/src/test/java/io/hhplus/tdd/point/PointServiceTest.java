@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 public class PointServiceTest {
@@ -38,7 +39,7 @@ public class PointServiceTest {
         UserPoint userPoint = pointService.chargePoint(userId, amount);
 
         // Then
-        UserPoint result = new UserPoint(1L, 500L, System.currentTimeMillis());
+        UserPoint result = pointService.checkPoint(userId);
         assertThat(userPoint.id()).isEqualTo(result.id());
         assertThat(userPoint.point()).isEqualTo(result.point());
     }
@@ -49,9 +50,9 @@ public class PointServiceTest {
         // Given
         Long userId = 1L;
         Long amount = 500L;
+        pointService.chargePoint(userId, amount);
 
         // When
-        pointService.chargePoint(userId, amount);
         UserPoint rechargeUserPoint = pointService.chargePoint(userId, 500L);
 
         // Then
@@ -92,7 +93,7 @@ public class PointServiceTest {
     }
 
     @Test
-    @DisplayName("[포인트 내역 조회] - 포인트가 존재 하는 사용자 포인트 내역 조회")
+    @DisplayName("[포인트 충전 내역 조회] - 포인트가 존재 하는 사용자 포인트 내역 조회")
     public void GivenUserId_WhenCheckingPointHistories_ThenNoPointHistoriesExist() throws InterruptedException {
         //Given
         Long userId = 1L;
@@ -114,7 +115,7 @@ public class PointServiceTest {
     }
 
     @Test
-    @DisplayName("[포인트 내역 조회] - 포인트가 존재 하지 않는 사용자 포인트 내역 조회")
+    @DisplayName("[포인트 충전 내역 조회] - 포인트가 존재 하지 않는 사용자 포인트 충전 내역 조회")
     public void GivenUserId_WhenCheckingPointHistories_ThenPointHistoriesExist() throws InterruptedException {
         //Given
         Long userId = 1L;
@@ -123,6 +124,36 @@ public class PointServiceTest {
         List<PointHistory> pointHistories = pointService.checkPointHistory(userId);
 
         // Then
-        assertThat(pointHistories).hasSize(0);
+        assertThat(pointHistories).isEmpty();
+    }
+
+    @Test
+    @DisplayName("[포인트 사용] - 잔고가 부족한 경우")
+    public void GivenUserIdAndAmount_WhenUsingPoint_ThenException() throws Exception {
+        //Given
+        Long userId = 1L;
+        Long amount = 100L;
+        UserPoint userPoint = new UserPoint(1L, 0L, System.currentTimeMillis());
+
+        assertThatThrownBy(() -> pointService.usePoint(userId, amount))
+                .isInstanceOf(Exception.class)
+                .hasMessage("사용할 수 있는 포인트가 부족합니다. 현재 포인트 : " + userPoint.point());
+    }
+
+    @Test
+    @DisplayName("[포인트 사용] - 포인트가 존재하는 사용자")
+    public void GivenUserIdAndAmount_WhenUsingPoint_ThenRemainingPoint() throws Exception {
+        // Given
+        Long userId = 1L;
+        Long chargePoint = 1000L;
+        UserPoint userPoint = pointService.chargePoint(userId, chargePoint);
+
+        // When
+        Long usePoint = 400L;
+        UserPoint result = pointService.usePoint(userId, usePoint);
+
+        // Then
+        assertThat(userPoint.id()).isEqualTo(result.id());
+        assertThat(chargePoint - usePoint).isEqualTo(result.point());
     }
 }
