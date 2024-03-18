@@ -9,6 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -179,5 +184,45 @@ public class PointServiceTest {
 
         // Then
         assertThat(pointHistories).isEmpty();
+    }
+
+    @Test
+    @DisplayName("[포인트 사용 동시성 테스트]")
+    public void test() throws InterruptedException {
+        // Given
+        Long userId = 1L;
+        Long amount = 1000L;
+        Long[] usageAmounts = {300L, 700L};
+        pointService.chargePoint(userId, amount);
+
+        int threadsNum = 2;
+        AtomicInteger successCount = new AtomicInteger(0);
+        AtomicInteger failCount = new AtomicInteger(0);
+
+        // When
+        ExecutorService executorService = Executors.newFixedThreadPool(threadsNum);
+        CountDownLatch latch = new CountDownLatch(threadsNum);
+        try {
+            for (int i = 0; i < threadsNum; i++) {
+                long usageAmount = usageAmounts[i];
+                executorService.execute(() -> {
+                    try {
+                        pointService.usePoint(userId, usageAmount);
+                        successCount.incrementAndGet();
+                    } catch (Exception e) {e.printStackTrace();
+                        failCount.incrementAndGet();
+                    } finally {
+                        latch.countDown();
+                    }
+                });
+            }
+            latch.await();
+        } finally {
+            executorService.shutdown();
+        }
+
+        // Then
+        assertThat(pointService.checkPoint(userId).point()).isEqualTo(0L);
+        assertThat(successCount.intValue() + failCount.intValue()).isEqualTo(threadsNum);
     }
 }
