@@ -29,7 +29,7 @@ public class PointServiceTest {
     }
 
     @Test
-    @DisplayName("[포인트 충전] - 포인트가 존재 하지 않는 사용자의 포인트 충전")
+    @DisplayName("[포인트 충전] - 포인트가 없는 경우")
     public void GivenUserIdAndAmount_WhenChargingPoint_ThenUserPoint() throws InterruptedException {
         // Given
         Long userId = 1L;
@@ -45,7 +45,7 @@ public class PointServiceTest {
     }
 
     @Test
-    @DisplayName("[포인트 추가 충전] - 포인트가 존재하는 사용자의 포인트 충전")
+    @DisplayName("[포인트 추가 충전] - 포인트가 있는 경우")
     public void GivenUserIdAndAmount_WhenRechargingPoint_ThenUserPoint() throws InterruptedException {
         // Given
         Long userId = 1L;
@@ -62,7 +62,7 @@ public class PointServiceTest {
     }
 
     @Test
-    @DisplayName("[포인트 조회] - 포인트가 존재하는 사용자 포인트 조회")
+    @DisplayName("[포인트 조회] - 포인트가 있는 경우")
     public void GivenUserId_WhenCheckingPoint_ThenUserPoint() throws InterruptedException {
         //Given
         Long userId = 1L;
@@ -78,7 +78,7 @@ public class PointServiceTest {
     }
 
     @Test
-    @DisplayName("[포인트 조회] - 포인트가 존재 하지 않는 사용자 포인트 조회")
+    @DisplayName("[포인트 조회] - 포인트가 없는 경우")
     public void GivenUserId_WhenCheckingPoint_ThenNoPointExist() throws InterruptedException {
         //Given
         Long userId = 1L;
@@ -93,7 +93,7 @@ public class PointServiceTest {
     }
 
     @Test
-    @DisplayName("[포인트 충전 내역 조회] - 포인트가 존재 하는 사용자 포인트 내역 조회")
+    @DisplayName("[포인트 충전 내역 조회] - 포인트 충전 내역이 있는 경우")
     public void GivenUserId_WhenCheckingPointHistories_ThenNoPointHistoriesExist() throws InterruptedException {
         //Given
         Long userId = 1L;
@@ -115,7 +115,7 @@ public class PointServiceTest {
     }
 
     @Test
-    @DisplayName("[포인트 충전 내역 조회] - 포인트가 존재 하지 않는 사용자 포인트 충전 내역 조회")
+    @DisplayName("[포인트 충전 내역 조회] - 포인트 충전 내역이 없는 경우")
     public void GivenUserId_WhenCheckingPointHistories_ThenPointHistoriesExist() throws InterruptedException {
         //Given
         Long userId = 1L;
@@ -141,7 +141,7 @@ public class PointServiceTest {
     }
 
     @Test
-    @DisplayName("[포인트 사용] - 포인트가 존재하는 사용자")
+    @DisplayName("[포인트 사용] - 포인트가 있는 경우")
     public void GivenUserIdAndAmount_WhenUsingPoint_ThenRemainingPoint() throws Exception {
         // Given
         Long userId = 1L;
