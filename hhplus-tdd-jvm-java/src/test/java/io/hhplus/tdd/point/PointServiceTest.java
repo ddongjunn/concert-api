@@ -200,26 +200,24 @@ public class PointServiceTest {
         AtomicInteger failCount = new AtomicInteger(0);
 
         // When
-        ExecutorService executorService = Executors.newFixedThreadPool(threadsNum);
+        ExecutorService executorService = Executors.newFixedThreadPool(16);
         CountDownLatch latch = new CountDownLatch(threadsNum);
-        try {
-            for (int i = 0; i < threadsNum; i++) {
-                long usageAmount = usageAmounts[i];
-                executorService.execute(() -> {
-                    try {
-                        pointService.usePoint(userId, usageAmount);
-                        successCount.incrementAndGet();
-                    } catch (Exception e) {e.printStackTrace();
-                        failCount.incrementAndGet();
-                    } finally {
-                        latch.countDown();
-                    }
-                });
-            }
-            latch.await();
-        } finally {
-            executorService.shutdown();
+
+        for (int i = 0; i < threadsNum; i++) {
+            long usageAmount = usageAmounts[i];
+            executorService.submit(() -> {
+                try {
+                    pointService.usePoint(userId, usageAmount);
+                    successCount.incrementAndGet();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    failCount.incrementAndGet();
+                } finally {
+                    latch.countDown();
+                }
+            });
         }
+        latch.await();
 
         // Then
         assertThat(pointService.checkPoint(userId).point()).isEqualTo(0L);
