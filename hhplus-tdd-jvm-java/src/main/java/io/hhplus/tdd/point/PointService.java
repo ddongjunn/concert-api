@@ -17,7 +17,11 @@ public class PointService {
         this.pointHistoryTable = pointHistoryTable;
     }
 
-    public UserPoint chargePoint(Long userId, Long amount) throws InterruptedException {
+    public UserPoint chargePoint(Long userId, Long amount) throws Exception {
+        if(amount < 0){
+            throw new RuntimeException(ErrorCode.INCORRECT_AMOUNT.getCode());
+        }
+
         UserPoint userPoint = userPointTable.selectById(userId);
         pointHistoryTable.insert(userId, amount, TransactionType.CHARGE, System.currentTimeMillis());
         return userPointTable.insertOrUpdate(userPoint.id(), userPoint.point() + amount);

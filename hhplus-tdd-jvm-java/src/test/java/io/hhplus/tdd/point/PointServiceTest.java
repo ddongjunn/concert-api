@@ -13,7 +13,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -35,7 +34,7 @@ public class PointServiceTest {
 
     @Test
     @DisplayName("[포인트 충전] - 포인트가 없는 경우")
-    public void GivenUserIdAndAmount_WhenChargingPoint_ThenUserPoint() throws InterruptedException {
+    public void GivenUserIdAndAmount_WhenChargingPoint_ThenUserPoint() throws Exception {
         // Given
         Long userId = 1L;
         Long amount = 500L;
@@ -50,8 +49,21 @@ public class PointServiceTest {
     }
 
     @Test
+    @DisplayName("[포인트 충전] - 포인트를 음수로 충전하는 경우")
+    public void GivenUserIdAndNegativeAmount_WhenChargingPoint_ThenException() throws Exception {
+        // Given
+        Long userId = 1L;
+        Long amount = -500L;
+
+        // Then
+        assertThatThrownBy(() -> pointService.chargePoint(userId, amount))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage(ErrorCode.INCORRECT_AMOUNT.getCode());
+    }
+
+    @Test
     @DisplayName("[포인트 추가 충전] - 포인트가 있는 경우")
-    public void GivenUserIdAndAmount_WhenRechargingPoint_ThenUserPoint() throws InterruptedException {
+    public void GivenUserIdAndAmount_WhenRechargingPoint_ThenUserPoint() throws Exception {
         // Given
         Long userId = 1L;
         Long amount = 500L;
@@ -68,7 +80,7 @@ public class PointServiceTest {
 
     @Test
     @DisplayName("[포인트 조회] - 포인트가 있는 경우")
-    public void GivenUserId_WhenCheckingPoint_ThenUserPoint() throws InterruptedException {
+    public void GivenUserId_WhenCheckingPoint_ThenUserPoint() throws Exception {
         //Given
         Long userId = 1L;
         Long amount = 1000L;
@@ -154,7 +166,7 @@ public class PointServiceTest {
 
     @Test
     @DisplayName("[포인트 충전 내역 조회] - 포인트 충전 내역이 있는 경우")
-    public void GivenUserId_WhenCheckingPointHistories_ThenNoPointHistoriesExist() throws InterruptedException {
+    public void GivenUserId_WhenCheckingPointHistories_ThenNoPointHistoriesExist() throws Exception {
         //Given
         Long userId = 1L;
         Long amount = 1000L;
@@ -188,7 +200,7 @@ public class PointServiceTest {
 
     @Test
     @DisplayName("[포인트 사용 동시성 테스트]")
-    public void test() throws InterruptedException {
+    public void test() throws Exception {
         // Given
         Long userId = 1L;
         Long amount = 1000L;
