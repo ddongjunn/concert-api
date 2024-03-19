@@ -19,7 +19,7 @@ public class PointService {
 
     public UserPoint chargePoint(Long userId, Long amount) throws Exception {
         if(amount < 0){
-            throw new RuntimeException(ErrorCode.INCORRECT_AMOUNT.getCode());
+            throw new RuntimeException(ErrorCode.INCORRECT_AMOUNT.getMessage());
         }
 
         UserPoint userPoint = userPointTable.selectById(userId);
@@ -38,7 +38,7 @@ public class PointService {
     public synchronized UserPoint usePoint(Long userId, Long amount) throws Exception {
         UserPoint userPoint = userPointTable.selectById(userId);
         if(userPoint.point() - amount < 0){
-            throw new Exception("사용할 수 있는 포인트가 부족합니다. 현재 포인트 : " + userPoint.point());
+            throw new Exception(ErrorCode.INCORRECT_AMOUNT.getMessage(userPoint.point()));
         }
 
         pointHistoryTable.insert(userId, amount, TransactionType.USE, System.currentTimeMillis());

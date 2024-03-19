@@ -58,7 +58,7 @@ public class PointServiceTest {
         // Then
         assertThatThrownBy(() -> pointService.chargePoint(userId, amount))
                 .isInstanceOf(RuntimeException.class)
-                .hasMessage(ErrorCode.INCORRECT_AMOUNT.getCode());
+                .hasMessage(ErrorCode.INCORRECT_AMOUNT.getMessage());
     }
 
     @Test
@@ -116,11 +116,11 @@ public class PointServiceTest {
         //Given
         Long userId = 1L;
         Long amount = 100L;
-        UserPoint userPoint = new UserPoint(1L, 0L, System.currentTimeMillis());
+        UserPoint userPoint = new UserPoint(1L, 30L, System.currentTimeMillis());
 
         assertThatThrownBy(() -> pointService.usePoint(userId, amount))
                 .isInstanceOf(Exception.class)
-                .hasMessage("사용할 수 있는 포인트가 부족합니다. 현재 포인트 : " + userPoint.point());
+                .hasMessage(ErrorCode.INCORRECT_AMOUNT.getMessage(userPoint.point()));
     }
 
     @Test
