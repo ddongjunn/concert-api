@@ -10,12 +10,19 @@ import java.util.List;
 @RequestMapping("/point")
 @RestController
 public class PointController {
+
+    private final PointService pointService;
+
+    public PointController(PointService pointService) {
+        this.pointService = pointService;
+    }
+
     /**
      * TODO - 특정 유저의 포인트를 조회하는 기능을 작성해주세요.
      */
     @GetMapping("{id}")
-    public UserPoint point(@PathVariable Long id) {
-        return new UserPoint(0L, 0L, 0L);
+    public UserPoint point(@PathVariable Long id) throws InterruptedException {
+        return pointService.checkPoint(id);
     }
 
     /**
@@ -30,8 +37,8 @@ public class PointController {
      * TODO - 특정 유저의 포인트를 충전하는 기능을 작성해주세요.
      */
     @PatchMapping("{id}/charge")
-    public UserPoint charge(@PathVariable Long id, @RequestBody Long amount) {
-        return new UserPoint(0L, 0L, 0L);
+    public UserPoint charge(@PathVariable Long id, @RequestBody Long amount) throws Exception {
+        return pointService.chargePoint(id, amount);
     }
 
     /**
