@@ -17,7 +17,7 @@ public class PointService {
         this.pointHistoryTable = pointHistoryTable;
     }
 
-    public UserPoint chargePoint(Long userId, Long amount) throws Exception {
+    public synchronized UserPoint chargePoint(Long userId, Long amount) throws Exception {
         if(amount < 0){
             throw new RuntimeException(ErrorCode.INCORRECT_AMOUNT.getMessage());
         }

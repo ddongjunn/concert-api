@@ -7,6 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.task.support.ExecutorServiceAdapter;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -200,7 +201,7 @@ public class PointServiceTest {
 
     @Test
     @DisplayName("[포인트 사용 동시성 테스트]")
-    public void test() throws Exception {
+    public void givenAmount_whenConcurrentPointUse_thenPointZero() throws Exception {
         // Given
         Long userId = 1L;
         Long amount = 1000L;
@@ -234,5 +235,34 @@ public class PointServiceTest {
         // Then
         assertThat(pointService.checkPoint(userId).point()).isEqualTo(0L);
         assertThat(successCount.intValue() + failCount.intValue()).isEqualTo(threadsNum);
+    }
+
+    @Test
+    @DisplayName("[포인트 충전 동시성 테스트]")
+    public void givenUserPoint_whenConcurrentCharging_thenPoint() throws InterruptedException {
+        // Given
+        Long userId = 1L;
+        Long amount = 100L;
+
+        int threadNum = 10;
+        ExecutorService executorService = Executors.newFixedThreadPool(16);
+        CountDownLatch latch = new CountDownLatch(threadNum);
+
+        // When
+        for(int i = 0; i < threadNum; i++){
+            executorService.submit(() -> {
+                try {
+                    pointService.chargePoint(userId, amount);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+        latch.await();
+
+        // Then
+        assertThat(pointService.checkPoint(userId).point()).isEqualTo(1000L);
     }
 }
