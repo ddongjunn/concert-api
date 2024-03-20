@@ -1,5 +1,6 @@
 package io.hhplus.tdd.point;
 
+import io.hhplus.tdd.dto.PointRequestDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,22 +31,22 @@ public class PointController {
      */
     @GetMapping("{id}/histories")
     public List<PointHistory> history(@PathVariable Long id) {
-        return Collections.emptyList();
+        return pointService.checkPointHistory(id);
     }
 
     /**
      * TODO - 특정 유저의 포인트를 충전하는 기능을 작성해주세요.
      */
     @PatchMapping("{id}/charge")
-    public UserPoint charge(@PathVariable Long id, @RequestBody Long amount) throws Exception {
-        return pointService.chargePoint(id, amount);
+    public UserPoint charge(@PathVariable Long id, @RequestBody PointRequestDto pointRequestDto) throws Exception {
+        return pointService.chargePoint(id, pointRequestDto.amount());
     }
 
     /**
      * TODO - 특정 유저의 포인트를 사용하는 기능을 작성해주세요.
      */
     @PatchMapping("{id}/use")
-    public UserPoint use(@PathVariable Long id, @RequestBody Long amount) {
-        return new UserPoint(0L, 0L, 0L);
+    public UserPoint use(@PathVariable Long id, @RequestBody PointRequestDto pointRequestDto) throws Exception {
+        return pointService.usePoint(id, pointRequestDto.amount());
     }
 }

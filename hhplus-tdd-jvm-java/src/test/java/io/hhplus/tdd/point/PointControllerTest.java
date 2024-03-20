@@ -8,6 +8,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Collections;
+
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -44,7 +46,7 @@ public class PointControllerTest {
         then(pointService).should().checkPoint(userId);
     }
 
-    @DisplayName("[GET] - 포인트 충전")
+    @DisplayName("[PATCH] - 포인트 충전")
     @Test
     public void givenUserId_whenRequestingChargingPoint_thenReturnsUserPoint() throws Exception {
         // Given
@@ -53,13 +55,49 @@ public class PointControllerTest {
         given(pointService.chargePoint(userId, amount)).willReturn(new UserPoint(userId, amount, System.currentTimeMillis()));
 
         // When
-
         mvc.perform(patch("/point/" + userId + "/charge")
-                        //.contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"amount\": " + amount + "}")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"amount\" : 500}")
                     ).andExpect(status().isOk());
 
         // Then
-        then(pointService).should().chargePoint(userId, amount);
+        then(pointService).should().chargePoint(userId, 500L);
     }
+
+    @Test
+    @DisplayName("[GET] - 포인트 충전/이용 내역 조회")
+    void 포인트_충전_이용_내역_조회() throws Exception {
+        // Given
+        Long userId = 1L;
+        given(pointService.checkPointHistory(userId)).willReturn(Collections.emptyList());
+
+        // When
+        mvc.perform(get("/point/" + userId + "/histories"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+
+        // Then
+        then(pointService).should().checkPointHistory(userId);
+    }
+
+    @Test
+    @DisplayName("[PATCH] - 특정 사용자 포인트 사용")
+    void 특정_사용자_포인트_사용() throws Exception {
+        // Given
+        Long userId = 1L;
+        Long amount = 100L;
+        given(pointService.usePoint(userId, amount)).willReturn(new UserPoint(1L, 1000L, System.currentTimeMillis()));
+
+        // When
+        mvc.perform(patch("/point/" + userId + "/use")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"amount\" : 100}")
+                ).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+
+
+        // Then
+        then(pointService).should().usePoint(userId, amount);
+    }
+
 }
