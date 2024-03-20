@@ -1,4 +1,4 @@
-package io.hhplus.tdd.database;
+package io.hhplus.tdd.point.database;
 
 import io.hhplus.tdd.point.domain.UserPoint;
 import org.springframework.stereotype.Component;

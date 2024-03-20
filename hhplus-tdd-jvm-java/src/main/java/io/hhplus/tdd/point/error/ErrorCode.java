@@ -1,4 +1,4 @@
-package io.hhplus.tdd.error;
+package io.hhplus.tdd.point.error;
 
 public enum ErrorCode {
     INCORRECT_AMOUNT("포인트 충전 금액을 확인해주세요."),
