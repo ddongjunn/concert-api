@@ -1,10 +1,12 @@
-package io.hhplus.tdd.point;
+package io.hhplus.tdd.point.controller;
 
 import io.hhplus.tdd.dto.PointRequestDto;
+import io.hhplus.tdd.point.domain.PointHistory;
+import io.hhplus.tdd.point.service.PointService;
+import io.hhplus.tdd.point.domain.UserPoint;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
 
 @Slf4j

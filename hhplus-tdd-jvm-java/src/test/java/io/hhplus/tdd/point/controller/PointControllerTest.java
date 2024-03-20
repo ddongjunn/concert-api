@@ -1,5 +1,7 @@
-package io.hhplus.tdd.point;
+package io.hhplus.tdd.point.controller;
 
+import io.hhplus.tdd.point.domain.UserPoint;
+import io.hhplus.tdd.point.service.PointService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +33,7 @@ public class PointControllerTest {
 
     @DisplayName("[GET] - 포인트 조회")
     @Test
-    public void givenUserId_whenRequestingUserPoint_thenReturnsUserPoint() throws Exception {
+    public void givenUserIdAndAmount_whenRequesting_thenUserPoint() throws Exception {
         // Given
         Long userId = 1L;
         Long amount = 0L;
@@ -48,7 +50,7 @@ public class PointControllerTest {
 
     @DisplayName("[PATCH] - 포인트 충전")
     @Test
-    public void givenUserId_whenRequestingChargingPoint_thenReturnsUserPoint() throws Exception {
+    public void givenUserIdAndAmount_whenRequesting_thenChargingPoint() throws Exception {
         // Given
         Long userId = 1L;
         Long amount = 500L;
@@ -66,7 +68,7 @@ public class PointControllerTest {
 
     @Test
     @DisplayName("[GET] - 포인트 충전/이용 내역 조회")
-    void 포인트_충전_이용_내역_조회() throws Exception {
+    void givenUserId_whenRequesting_thenPointHistories() throws Exception {
         // Given
         Long userId = 1L;
         given(pointService.checkPointHistory(userId)).willReturn(Collections.emptyList());
@@ -82,7 +84,7 @@ public class PointControllerTest {
 
     @Test
     @DisplayName("[PATCH] - 특정 사용자 포인트 사용")
-    void 특정_사용자_포인트_사용() throws Exception {
+    void givenUserIdAndAmount_whenRequesting_thenUsingPoint() throws Exception {
         // Given
         Long userId = 1L;
         Long amount = 100L;

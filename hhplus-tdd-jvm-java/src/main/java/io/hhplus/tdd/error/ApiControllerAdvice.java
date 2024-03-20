@@ -1,5 +1,6 @@
-package io.hhplus.tdd;
+package io.hhplus.tdd.error;
 
+import io.hhplus.tdd.error.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

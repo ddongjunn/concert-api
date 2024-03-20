@@ -1,7 +1,11 @@
-package io.hhplus.tdd.point;
+package io.hhplus.tdd.point.service;
 
 import io.hhplus.tdd.database.PointHistoryTable;
 import io.hhplus.tdd.database.UserPointTable;
+import io.hhplus.tdd.error.ErrorCode;
+import io.hhplus.tdd.point.domain.constant.TransactionType;
+import io.hhplus.tdd.point.domain.PointHistory;
+import io.hhplus.tdd.point.domain.UserPoint;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
