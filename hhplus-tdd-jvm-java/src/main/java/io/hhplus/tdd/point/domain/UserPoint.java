@@ -5,4 +5,7 @@ public record UserPoint(
         Long point,
         Long updateMillis
 ) {
+    public static UserPoint empty(long id) {
+        return new UserPoint(id, 0L, System.currentTimeMillis());
+    }
 }
