@@ -1,7 +1,8 @@
 package io.hhplus.tdd.point.controller;
 
-import io.hhplus.tdd.point.dto.PointRequestDto;
+import io.hhplus.tdd.point.dto.PointDto;
 import io.hhplus.tdd.point.domain.PointHistory;
+import io.hhplus.tdd.point.dto.request.PointRequest;
 import io.hhplus.tdd.point.service.PointService;
 import io.hhplus.tdd.point.domain.UserPoint;
 import lombok.extern.slf4j.Slf4j;
@@ -40,15 +41,15 @@ public class PointController {
      * TODO - 특정 유저의 포인트를 충전하는 기능을 작성해주세요.
      */
     @PatchMapping("{id}/charge")
-    public UserPoint charge(@PathVariable Long id, @RequestBody PointRequestDto pointRequestDto) throws Exception {
-        return pointService.chargePoint(id, pointRequestDto.amount());
+    public UserPoint charge(@PathVariable Long id, @RequestBody PointRequest pointRequest) throws Exception {
+        return pointService.chargePoint(pointRequest.toDto(id, pointRequest.amount()));
     }
 
     /**
      * TODO - 특정 유저의 포인트를 사용하는 기능을 작성해주세요.
      */
     @PatchMapping("{id}/use")
-    public UserPoint use(@PathVariable Long id, @RequestBody PointRequestDto pointRequestDto) throws Exception {
-        return pointService.usePoint(id, pointRequestDto.amount());
+    public UserPoint use(@PathVariable Long id, @RequestBody PointRequest pointRequest) throws Exception {
+        return pointService.usePoint(pointRequest.toDto(id, pointRequest.amount()));
     }
 }

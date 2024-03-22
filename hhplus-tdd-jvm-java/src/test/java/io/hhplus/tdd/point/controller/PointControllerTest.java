@@ -1,6 +1,7 @@
 package io.hhplus.tdd.point.controller;
 
 import io.hhplus.tdd.point.domain.UserPoint;
+import io.hhplus.tdd.point.dto.request.PointRequest;
 import io.hhplus.tdd.point.service.PointService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -54,7 +55,9 @@ public class PointControllerTest {
         // Given
         Long userId = 1L;
         Long amount = 500L;
-        given(pointService.chargePoint(userId, amount)).willReturn(new UserPoint(userId, amount, System.currentTimeMillis()));
+        PointRequest pointRequest = new PointRequest(amount);
+
+        given(pointService.chargePoint(pointRequest.toDto(userId, amount))).willReturn(new UserPoint(userId, amount, System.currentTimeMillis()));
 
         // When
         mvc.perform(patch("/point/" + userId + "/charge")
@@ -63,7 +66,7 @@ public class PointControllerTest {
                     ).andExpect(status().isOk());
 
         // Then
-        then(pointService).should().chargePoint(userId, 500L);
+        then(pointService).should().chargePoint(pointRequest.toDto(userId, amount));
     }
 
     @Test
@@ -88,7 +91,8 @@ public class PointControllerTest {
         // Given
         Long userId = 1L;
         Long amount = 100L;
-        given(pointService.usePoint(userId, amount)).willReturn(new UserPoint(1L, 1000L, System.currentTimeMillis()));
+        PointRequest pointRequest = new PointRequest(amount);
+        given(pointService.usePoint(pointRequest.toDto(userId, amount))).willReturn(new UserPoint(1L, 1000L, System.currentTimeMillis()));
 
         // When
         mvc.perform(patch("/point/" + userId + "/use")
@@ -99,7 +103,7 @@ public class PointControllerTest {
 
 
         // Then
-        then(pointService).should().usePoint(userId, amount);
+        then(pointService).should().usePoint(pointRequest.toDto(userId, amount));
     }
 
 }

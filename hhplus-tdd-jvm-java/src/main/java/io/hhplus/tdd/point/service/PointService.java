@@ -2,6 +2,7 @@ package io.hhplus.tdd.point.service;
 
 import io.hhplus.tdd.point.database.PointHistoryTable;
 import io.hhplus.tdd.point.database.UserPointTable;
+import io.hhplus.tdd.point.dto.PointDto;
 import io.hhplus.tdd.point.error.ErrorCode;
 import io.hhplus.tdd.point.domain.constant.TransactionType;
 import io.hhplus.tdd.point.domain.PointHistory;
@@ -21,14 +22,12 @@ public class PointService {
         this.pointHistoryTable = pointHistoryTable;
     }
 
-    public synchronized UserPoint chargePoint(Long userId, Long amount) throws Exception {
-        if(amount < 0){
-            throw new RuntimeException(ErrorCode.INCORRECT_AMOUNT.getMessage());
-        }
+    public synchronized UserPoint chargePoint(PointDto pointDto) throws Exception {
+        UserPoint userPoint = userPointTable.selectById(pointDto.userId())
+                .charge(pointDto.amount());
 
-        UserPoint userPoint = userPointTable.selectById(userId);
-        pointHistoryTable.insert(userId, amount, TransactionType.CHARGE, System.currentTimeMillis());
-        return userPointTable.insertOrUpdate(userPoint.id(), userPoint.point() + amount);
+        pointHistoryTable.insert(pointDto.userId(), pointDto.amount(), TransactionType.CHARGE, System.currentTimeMillis());
+        return userPointTable.insertOrUpdate(userPoint.id(), userPoint.point());
     }
 
     public UserPoint checkPoint(Long userId) throws InterruptedException {
@@ -39,13 +38,11 @@ public class PointService {
         return pointHistoryTable.selectAllByUserId(userId);
     }
 
-    public synchronized UserPoint usePoint(Long userId, Long amount) throws Exception {
-        UserPoint userPoint = userPointTable.selectById(userId);
-        if(userPoint.point() - amount < 0){
-            throw new Exception(ErrorCode.INCORRECT_AMOUNT.getMessage(userPoint.point()));
-        }
+    public synchronized UserPoint usePoint(PointDto pointDto) throws Exception {
+        UserPoint userPoint = userPointTable.selectById(pointDto.userId())
+                .use(pointDto.amount());
 
-        pointHistoryTable.insert(userId, amount, TransactionType.USE, System.currentTimeMillis());
-        return userPointTable.insertOrUpdate(userId, userPoint.point() - amount);
+        pointHistoryTable.insert(pointDto.userId(), pointDto.amount(), TransactionType.USE, System.currentTimeMillis());
+        return userPointTable.insertOrUpdate(userPoint.id(), userPoint.point());
     }
 }

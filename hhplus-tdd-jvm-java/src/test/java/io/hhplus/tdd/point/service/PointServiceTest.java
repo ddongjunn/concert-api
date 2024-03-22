@@ -2,6 +2,8 @@ package io.hhplus.tdd.point.service;
 
 import io.hhplus.tdd.point.database.PointHistoryTable;
 import io.hhplus.tdd.point.database.UserPointTable;
+import io.hhplus.tdd.point.dto.PointDto;
+import io.hhplus.tdd.point.dto.request.PointRequest;
 import io.hhplus.tdd.point.error.ErrorCode;
 import io.hhplus.tdd.point.domain.PointHistory;
 import io.hhplus.tdd.point.domain.constant.TransactionType;
@@ -40,14 +42,13 @@ public class PointServiceTest {
     @DisplayName("[포인트 충전] - 포인트가 없는 경우")
     public void GivenUserIdAndAmount_WhenChargingPoint_ThenUserPoint() throws Exception {
         // Given
-        Long userId = 1L;
-        Long amount = 500L;
+        PointDto pointDto = getPointDto(1L, 500L);
 
         // When
-        UserPoint userPoint = pointService.chargePoint(userId, amount);
+        UserPoint userPoint = pointService.chargePoint(pointDto);
 
         // Then
-        UserPoint result = pointService.checkPoint(userId);
+        UserPoint result = pointService.checkPoint(pointDto.userId());
         assertThat(userPoint.id()).isEqualTo(result.id());
         assertThat(userPoint.point()).isEqualTo(result.point());
     }
@@ -56,28 +57,28 @@ public class PointServiceTest {
     @DisplayName("[포인트 충전] - 포인트를 음수로 충전하는 경우")
     public void GivenUserIdAndNegativeAmount_WhenChargingPoint_ThenException() throws Exception {
         // Given
-        Long userId = 1L;
-        Long amount = -500L;
+        PointDto pointDto = getPointDto(1L, -500L);
 
         // Then
-        assertThatThrownBy(() -> pointService.chargePoint(userId, amount))
+        assertThatThrownBy(() -> pointService.chargePoint(pointDto))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage(ErrorCode.INCORRECT_AMOUNT.getMessage());
+
     }
 
     @Test
     @DisplayName("[포인트 추가 충전] - 포인트가 있는 경우")
     public void GivenUserIdAndAmount_WhenRechargingPoint_ThenUserPoint() throws Exception {
         // Given
-        Long userId = 1L;
-        Long amount = 500L;
-        pointService.chargePoint(userId, amount);
+        PointDto pointDto = getPointDto(1L, 500L);
+
+        pointService.chargePoint(pointDto);
 
         // When
-        UserPoint rechargeUserPoint = pointService.chargePoint(userId, 500L);
+        UserPoint rechargeUserPoint = pointService.chargePoint(pointDto);
 
         // Then
-        UserPoint result = pointService.checkPoint(userId);
+        UserPoint result = pointService.checkPoint(pointDto.userId());
         assertThat(rechargeUserPoint.id()).isEqualTo(result.id());
         assertThat(rechargeUserPoint.point()).isEqualTo(result.point());
     }
@@ -86,12 +87,11 @@ public class PointServiceTest {
     @DisplayName("[포인트 조회] - 포인트가 있는 경우")
     public void GivenUserId_WhenCheckingPoint_ThenUserPoint() throws Exception {
         //Given
-        Long userId = 1L;
-        Long amount = 1000L;
-        UserPoint userPoint = pointService.chargePoint(userId, amount);
+        PointDto pointDto = getPointDto(1L, 1000L);
+        UserPoint userPoint = pointService.chargePoint(pointDto);
 
         // When
-        UserPoint result = pointService.checkPoint(userId);
+        UserPoint result = pointService.checkPoint(pointDto.userId());
 
         // Then
         assertThat(userPoint.id()).isEqualTo(result.id());
@@ -120,64 +120,63 @@ public class PointServiceTest {
         //Given
         Long userId = 1L;
         Long amount = 100L;
-        UserPoint userPoint = new UserPoint(1L, 30L, System.currentTimeMillis());
+        PointDto pointDto = getPointDto(userId, amount);
 
-        assertThatThrownBy(() -> pointService.usePoint(userId, amount))
+        assertThatThrownBy(() -> pointService.usePoint(pointDto))
                 .isInstanceOf(Exception.class)
-                .hasMessage(ErrorCode.INCORRECT_AMOUNT.getMessage(userPoint.point()));
+                .hasMessage(ErrorCode.INCORRECT_AMOUNT.getMessage(pointDto.amount()));
     }
 
     @Test
     @DisplayName("[포인트 사용] - 포인트가 있는 경우")
     public void GivenUserIdAndAmount_WhenUsingPoint_ThenRemainingPoint() throws Exception {
         // Given
-        Long userId = 1L;
-        Long chargePoint = 1000L;
-        UserPoint userPoint = pointService.chargePoint(userId, chargePoint);
+        PointDto chargePointDto = getPointDto(1L, 1000L);
+        UserPoint userPoint = pointService.chargePoint(chargePointDto);
 
         // When
-        Long usePoint = 400L;
-        UserPoint result = pointService.usePoint(userId, usePoint);
+        PointDto usePointDto = getPointDto(1L, 400L);
+        UserPoint result = pointService.usePoint(usePointDto);
 
         // Then
-        assertThat(userPoint.id()).isEqualTo(result.id());
-        assertThat(chargePoint - usePoint).isEqualTo(result.point());
+        assertThat(result.id()).isEqualTo(1L);
+        assertThat(result.point()).isEqualTo(600L);
     }
 
     @Test
     @DisplayName("[포인트 사용 내역 조회] - 포인트가 있는 경우")
     public void GivenUserIdAndAmount_WhenUsingPointHistories_ThenPointHistory() throws Exception {
         // Given
-        Long userId = 1L;
-        Long chargePoint = 1000L;
-        UserPoint userPoint = pointService.chargePoint(userId, chargePoint);
+        PointDto chargePointDto = getPointDto(1L, 1000L);
+        UserPoint userPoint = pointService.chargePoint(chargePointDto);
 
-        Long usePoint = 400L;
-        UserPoint result = pointService.usePoint(userId, usePoint);
+        PointDto usePointDto = getPointDto(1L, 400L);
+        UserPoint result = pointService.usePoint(usePointDto);
 
         // When
-        PointHistory pointHistory = pointService.checkPointHistory(userId)
+        PointHistory pointHistory = pointService.checkPointHistory(1L)
                 .stream()
                 .filter(history -> history.type().equals(TransactionType.USE))
                 .findFirst()
                 .orElse(null);
 
         // Then
-        assertThat(pointHistory.userId()).isEqualTo(userPoint.id());
-        assertThat(pointHistory.amount()).isEqualTo(usePoint);
+        assertThat(pointHistory.userId()).isEqualTo(1L);
+        assertThat(pointHistory.amount()).isEqualTo(400L);
         assertThat(pointHistory.type()).isEqualTo(TransactionType.USE);
+        assertThat(result.point()).isEqualTo(600L);
     }
 
     @Test
     @DisplayName("[포인트 충전 내역 조회] - 포인트 충전 내역이 있는 경우")
     public void GivenUserId_WhenCheckingPointHistories_ThenNoPointHistoriesExist() throws Exception {
         //Given
-        Long userId = 1L;
-        Long amount = 1000L;
-        UserPoint userPoint = pointService.chargePoint(userId, amount);
+        PointDto pointDto = getPointDto(1L, 1000L);
+        UserPoint userPoint = pointService.chargePoint(pointDto);
+
 
         // When
-        PointHistory pointHistory = pointService.checkPointHistory(userId)
+        PointHistory pointHistory = pointService.checkPointHistory(pointDto.userId())
                 .stream()
                 .filter(history -> history.type().equals(TransactionType.CHARGE))
                 .findFirst()
@@ -206,10 +205,9 @@ public class PointServiceTest {
     @DisplayName("[포인트 사용 동시성 테스트]")
     public void givenAmount_whenConcurrentPointUse_thenPointZero() throws Exception {
         // Given
-        Long userId = 1L;
-        Long amount = 1000L;
+        PointDto pointDto = getPointDto(1L, 1000L);
         Long[] usageAmounts = {300L, 700L};
-        pointService.chargePoint(userId, amount);
+        UserPoint userPoint = pointService.chargePoint(pointDto);
 
         int threadsNum = 2;
         AtomicInteger successCount = new AtomicInteger(0);
@@ -223,7 +221,7 @@ public class PointServiceTest {
             long usageAmount = usageAmounts[i];
             executorService.submit(() -> {
                 try {
-                    pointService.usePoint(userId, usageAmount);
+                    pointService.usePoint(pointDto);
                     successCount.incrementAndGet();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -236,7 +234,7 @@ public class PointServiceTest {
         latch.await();
 
         // Then
-        assertThat(pointService.checkPoint(userId).point()).isEqualTo(0L);
+        assertThat(pointService.checkPoint(pointDto.userId()).point()).isEqualTo(0L);
         assertThat(successCount.intValue() + failCount.intValue()).isEqualTo(threadsNum);
     }
 
@@ -244,8 +242,7 @@ public class PointServiceTest {
     @DisplayName("[포인트 충전 동시성 테스트]")
     public void givenUserPoint_whenConcurrentCharging_thenPoint() throws InterruptedException {
         // Given
-        Long userId = 1L;
-        Long amount = 100L;
+        PointDto pointDto = getPointDto(1L, 100L);
 
         int threadNum = 10;
         ExecutorService executorService = Executors.newFixedThreadPool(16);
@@ -255,7 +252,7 @@ public class PointServiceTest {
         for(int i = 0; i < threadNum; i++){
             executorService.submit(() -> {
                 try {
-                    pointService.chargePoint(userId, amount);
+                    pointService.chargePoint(pointDto);
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
@@ -266,6 +263,13 @@ public class PointServiceTest {
         latch.await();
 
         // Then
-        assertThat(pointService.checkPoint(userId).point()).isEqualTo(1000L);
+        assertThat(pointService.checkPoint(pointDto.userId()).point()).isEqualTo(1000L);
     }
+
+    private PointDto getPointDto(Long userId, Long amount){
+        PointRequest pointRequest = new PointRequest(amount);
+        return pointRequest.toDto(userId, amount);
+    }
+
+
 }
