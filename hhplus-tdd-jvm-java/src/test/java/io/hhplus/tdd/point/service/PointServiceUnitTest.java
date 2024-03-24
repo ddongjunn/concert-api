@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class PointServiceUnitTest {
@@ -58,6 +59,28 @@ public class PointServiceUnitTest {
         // Then
         assertThatThrownBy(() -> pointService.chargePoint(pointDto))
                 .isInstanceOf(RuntimeException.class);
+    }
+
+    @Test
+    //질문사항
+    public void 테스트() throws Exception {
+        // Given
+        PointDto pointDto = getPointDto(1L, 500L);
+
+        // (1)
+        //given(userPointTable.selectById(anyLong())).willReturn(new UserPoint(pointDto.userId(), 0L, System.currentTimeMillis()).charge(500L));
+        //given(userPointTable.insertOrUpdate(anyLong(), anyLong())).willReturn(new UserPoint(pointDto.userId(), pointDto.amount(), System.currentTimeMillis()));
+
+        // (2)
+        // 실제 서비스 코드에서 .charge(pointDto.amount()); 이럴때 테스트를 어떻게 해야할지...
+        // 강제로 결과값에 추가하게 되면 inserOr
+        given(userPointTable.selectById(1L)).willReturn(new UserPoint(pointDto.userId(), 0L, System.currentTimeMillis()));
+
+        given(userPointTable.insertOrUpdate(1L, 500L)).willReturn(new UserPoint(pointDto.userId(), pointDto.amount(), eq(System.currentTimeMillis())));
+
+        UserPoint userPoint = pointService.chargePoint(pointDto);
+
+        assertThat(userPoint.point()).isEqualTo(500L);
     }
 
 

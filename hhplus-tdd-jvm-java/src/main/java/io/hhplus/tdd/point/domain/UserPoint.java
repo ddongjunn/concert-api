@@ -23,6 +23,7 @@ public record UserPoint(
         if(amount < 0){
             throw new RuntimeException(ErrorCode.INCORRECT_AMOUNT.getMessage());
         }
+
         return new UserPoint(id, point + amount, System.currentTimeMillis());
     }
 
@@ -30,6 +31,7 @@ public record UserPoint(
         if(point - amount < 0){
             throw new Exception(ErrorCode.INCORRECT_AMOUNT.getMessage(point));
         }
+
         return new UserPoint(id, point - amount, System.currentTimeMillis());
     }
 }
