@@ -41,7 +41,6 @@ public class PointService {
     public synchronized UserPoint usePoint(PointDto pointDto) throws Exception {
         UserPoint userPoint = userPointTable.selectById(pointDto.userId())
                 .use(pointDto.amount());
-
         pointHistoryTable.insert(pointDto.userId(), pointDto.amount(), TransactionType.USE, System.currentTimeMillis());
         return userPointTable.insertOrUpdate(userPoint.id(), userPoint.point());
     }
