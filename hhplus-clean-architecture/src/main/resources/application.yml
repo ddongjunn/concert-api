@@ -1,6 +1,3 @@
-spring.application.name:
-  hhplus-clean-architecture
-
 spring:
   h2:
     console:
