@@ -6,9 +6,9 @@ import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class LectureRegistration {
+public class LectureHistory {
     Long id;
     Long lectureId;
     Long userId;
-    LocalDateTime registrationDate;
+    LocalDateTime registerDate;
 }
