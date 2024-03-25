@@ -41,6 +41,7 @@ class ApplyLectureServiceStubTest {
         public void modify(Lecture lecture) {
             lectures.put(lecture.getId(), lectures.getOrDefault(1L, Lecture.of(1L, "k8s", 0, 20, LocalDateTime.now())));
         }
+
     }
     @BeforeEach
     void setUp(){
