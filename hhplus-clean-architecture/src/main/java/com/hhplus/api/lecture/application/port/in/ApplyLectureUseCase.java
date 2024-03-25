@@ -1,5 +1,7 @@
 package com.hhplus.api.lecture.application.port.in;
 
-public interface ApplyLectureUseCase {
+import com.hhplus.api.common.ResponseMessage;
 
+public interface ApplyLectureUseCase {
+    ResponseMessage apply(ApplyLectureCommand command);
 }
