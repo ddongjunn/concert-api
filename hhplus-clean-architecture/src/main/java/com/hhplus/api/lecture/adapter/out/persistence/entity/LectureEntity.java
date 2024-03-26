@@ -4,12 +4,14 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "lecture")
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class LectureEntity {

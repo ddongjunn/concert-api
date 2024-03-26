@@ -2,7 +2,7 @@ package com.hhplus.api.lecture.application.service;
 
 import com.hhplus.api.common.ResponseMessage;
 import com.hhplus.api.lecture.application.port.in.ApplyLectureCommand;
-import com.hhplus.api.lecture.application.port.out.ApplyLecturePort;
+import com.hhplus.api.lecture.application.port.out.ApplyLectureHistoryPort;
 import com.hhplus.api.lecture.application.port.out.LoadLecturePort;
 import com.hhplus.api.lecture.application.port.out.ModifyLecturePort;
 import com.hhplus.api.lecture.domain.Lecture;
@@ -49,15 +49,15 @@ class ApplyLectureServiceStubTest {
     }
 
     @Mock
-    private final ApplyLecturePort applyLecturePort =
-            Mockito.mock(ApplyLecturePort.class);
+    private final ApplyLectureHistoryPort applyLectureHistoryPort =
+            Mockito.mock(ApplyLectureHistoryPort.class);
 
     TestLoadLecturePort testLoadLecturePort = new TestLoadLecturePort();
 
     TestModifyLecturePort testModifyLecturePort = new TestModifyLecturePort();
 
     private final ApplyLectureService applyLectureService =
-            new ApplyLectureService(testLoadLecturePort, applyLecturePort, testModifyLecturePort);
+            new ApplyLectureService(testLoadLecturePort, testModifyLecturePort, applyLectureHistoryPort);
 
     @Test
     void stub_동시성_테스트() throws InterruptedException {

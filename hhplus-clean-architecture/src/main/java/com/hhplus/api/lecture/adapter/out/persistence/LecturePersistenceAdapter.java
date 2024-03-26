@@ -1,13 +1,18 @@
 package com.hhplus.api.lecture.adapter.out.persistence;
 
+import com.hhplus.api.lecture.adapter.out.persistence.entity.LectureEntity;
 import com.hhplus.api.lecture.application.port.out.ApplyLectureHistoryPort;
 import com.hhplus.api.lecture.application.port.out.LoadLecturePort;
 import com.hhplus.api.lecture.application.port.out.ModifyLecturePort;
 import com.hhplus.api.lecture.domain.Lecture;
 import com.hhplus.api.lecture.domain.LectureHistory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.Persistence;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor

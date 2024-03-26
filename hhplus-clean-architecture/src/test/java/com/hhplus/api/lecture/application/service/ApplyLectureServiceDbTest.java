@@ -1,16 +1,17 @@
 package com.hhplus.api.lecture.application.service;
 
 import com.hhplus.api.lecture.application.port.in.ApplyLectureCommand;
-import com.hhplus.api.lecture.application.port.out.ApplyLecturePort;
+import com.hhplus.api.lecture.application.port.out.ApplyLectureHistoryPort;
 import com.hhplus.api.lecture.application.port.out.LoadLecturePort;
 import com.hhplus.api.lecture.application.port.out.ModifyLecturePort;
 import com.hhplus.api.lecture.domain.Lecture;
 import org.junit.jupiter.api.Test;
+import org.redisson.Redisson;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -19,29 +20,32 @@ import java.util.concurrent.Executors;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-@TestPropertySource(locations = "classpath:application.yml")
+//@TestPropertySource(locations = "classpath:application.yml")
 public class ApplyLectureServiceDbTest {
 
     private final LoadLecturePort loadLecturePort;
-    private final ApplyLecturePort applyLecturePort;
+    private final ApplyLectureHistoryPort applyLectureHistoryPort;
     private final ModifyLecturePort modifyLecturePort;
-
     private final ApplyLectureService applyLectureService;
+    private final RedissonClient redissonClient;
+
 
     @Autowired
     public ApplyLectureServiceDbTest(LoadLecturePort loadLecturePort,
-                                     ApplyLecturePort applyLecturePort,
-                                     ModifyLecturePort modifyLecturePort) {
+                                     ApplyLectureHistoryPort applyLectureHistoryPort,
+                                     ModifyLecturePort modifyLecturePort,
+                                     RedissonClient redissonClient) {
         this.loadLecturePort = loadLecturePort;
-        this.applyLecturePort = applyLecturePort;
+        this.applyLectureHistoryPort = applyLectureHistoryPort;
         this.modifyLecturePort = modifyLecturePort;
+        this.redissonClient = redissonClient;
 
-        this.applyLectureService = new ApplyLectureService(loadLecturePort, applyLecturePort, modifyLecturePort);
+
+        this.applyLectureService = new ApplyLectureService(loadLecturePort, modifyLecturePort, applyLectureHistoryPort, redissonClient);
     }
 
     @Test
     void db_동시성_테스트() throws InterruptedException {
-
         // Given
         ApplyLectureCommand command = new ApplyLectureCommand(
                 1L,
