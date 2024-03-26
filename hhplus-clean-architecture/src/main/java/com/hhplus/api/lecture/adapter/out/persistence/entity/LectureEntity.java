@@ -4,32 +4,22 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "lecture")
 @Getter
-@Setter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class LectureEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
-    @Column
-    String name;
-
-    @Column
-    int applicantCount;
-
-    @Column
-    int capacityLimit;
-
-    @Column
-    LocalDateTime startDate;
+    @Column String name;
+    @Column int applicantCount;
+    @Column int capacityLimit;
+    @Column LocalDateTime startDate;
 }
-

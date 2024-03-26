@@ -1,7 +1,7 @@
 package com.hhplus.api.lecture.adapter.out.persistence;
 
-import com.hhplus.api.lecture.adapter.out.persistence.entity.LectureEntity;
 import com.hhplus.api.lecture.adapter.out.persistence.entity.LectureHistoryEntity;
+import com.hhplus.api.lecture.adapter.out.persistence.entity.LectureEntity;
 import com.hhplus.api.lecture.domain.Lecture;
 import com.hhplus.api.lecture.domain.LectureHistory;
 import org.springframework.stereotype.Component;
