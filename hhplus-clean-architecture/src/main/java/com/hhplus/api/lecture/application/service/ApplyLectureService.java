@@ -2,9 +2,11 @@ package com.hhplus.api.lecture.application.service;
 
 import com.hhplus.api.common.ResponseMessage;
 import com.hhplus.api.common.annotation.RedissonLock;
+import com.hhplus.api.common.exception.CustomException;
 import com.hhplus.api.lecture.application.port.in.ApplyLectureCommand;
 import com.hhplus.api.lecture.application.port.in.ApplyLectureUseCase;
 import com.hhplus.api.lecture.application.port.out.ApplyLectureHistoryPort;
+import com.hhplus.api.lecture.application.port.out.LoadLectureHistoryPort;
 import com.hhplus.api.lecture.application.port.out.LoadLecturePort;
 import com.hhplus.api.lecture.application.port.out.ModifyLecturePort;
 import com.hhplus.api.lecture.domain.Lecture;
@@ -37,7 +39,12 @@ public class ApplyLectureService implements ApplyLectureUseCase {
             boolean available = lock.tryLock(10, 1, TimeUnit.SECONDS);
             if (!available) {
                 log.error("lock fail()");
-                return new ResponseMessage("신청 실패", "신청 실패");
+                return new ResponseMessage("fail", "신청 실패");
+            }
+
+            boolean isApplicationExists = applyLectureHistoryPort.isApplicationExists(command.getLectureId(), command.getUserId());
+            if(isApplicationExists){
+                return new ResponseMessage("fail", "이미 신청한 강의");
             }
 
             Lecture lecture = loadLecturePort.loadById(command.getLectureId());

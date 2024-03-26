@@ -57,7 +57,7 @@ class ApplyLectureServiceStubTest {
     TestModifyLecturePort testModifyLecturePort = new TestModifyLecturePort();
 
     private final ApplyLectureService applyLectureService =
-            new ApplyLectureService(testLoadLecturePort, testModifyLecturePort, applyLectureHistoryPort);
+            new ApplyLectureService(testLoadLecturePort, testModifyLecturePort, applyLectureHistoryPort, null);
 
     @Test
     void stub_동시성_테스트() throws InterruptedException {
