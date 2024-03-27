@@ -29,7 +29,7 @@ public record UserPoint(
 
     public UserPoint use(Long amount) throws Exception {
         if(point - amount < 0){
-            throw new Exception(ErrorCode.INCORRECT_AMOUNT.getMessage(point));
+            throw new RuntimeException(ErrorCode.INCORRECT_AMOUNT.getMessage(point));
         }
 
         return new UserPoint(id, point - amount, System.currentTimeMillis());

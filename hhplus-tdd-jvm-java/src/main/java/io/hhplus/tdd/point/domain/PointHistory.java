@@ -9,4 +9,8 @@ public record PointHistory(
         Long amount,
         Long timeMillis
 ) {
+
+    public static PointHistory Empty(long id){
+        return new PointHistory(1L, 0L, TransactionType.USE, 0L, System.currentTimeMillis());
+    }
 }

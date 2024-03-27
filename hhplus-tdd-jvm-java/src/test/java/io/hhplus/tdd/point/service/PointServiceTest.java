@@ -38,6 +38,7 @@ public class PointServiceTest {
         pointService = new PointService(new UserPointTable(), new PointHistoryTable());
     }
 
+    //포인트가 없는 경우 충전 한 금액 그대로 반환 되어야한다.
     @Test
     @DisplayName("[포인트 충전] - 포인트가 없는 경우")
     public void GivenUserIdAndAmount_WhenChargingPoint_ThenUserPoint() throws Exception {
@@ -53,6 +54,7 @@ public class PointServiceTest {
         assertThat(userPoint.point()).isEqualTo(result.point());
     }
 
+    //포인트는 음수로 충전할 수 없다.
     @Test
     @DisplayName("[포인트 충전] - 포인트를 음수로 충전하는 경우")
     public void GivenUserIdAndNegativeAmount_WhenChargingPoint_ThenException() throws Exception {
@@ -66,6 +68,7 @@ public class PointServiceTest {
 
     }
 
+    //포인트가 있는 경우 충전 한 금액과 기존 금액을 합한 금액이 반환되어야 한다.
     @Test
     @DisplayName("[포인트 추가 충전] - 포인트가 있는 경우")
     public void GivenUserIdAndAmount_WhenRechargingPoint_ThenUserPoint() throws Exception {
@@ -83,6 +86,7 @@ public class PointServiceTest {
         assertThat(rechargeUserPoint.point()).isEqualTo(result.point());
     }
 
+    //포인트가 있는 경우 현재 포인트를 반환한다.
     @Test
     @DisplayName("[포인트 조회] - 포인트가 있는 경우")
     public void GivenUserId_WhenCheckingPoint_ThenUserPoint() throws Exception {
@@ -98,6 +102,7 @@ public class PointServiceTest {
         assertThat(userPoint.point()).isEqualTo(result.point());
     }
 
+    //포인트가 없는 경우 0원을 반환한다.
     @Test
     @DisplayName("[포인트 조회] - 포인트가 없는 경우")
     public void GivenUserId_WhenCheckingPoint_ThenNoPointExist() throws InterruptedException {
@@ -114,6 +119,7 @@ public class PointServiceTest {
         assertThat(userPoint.point()).isEqualTo(result.point());
     }
 
+    //포인트 사용시 잔고가 부족한 경우 처리할 수 없다.
     @Test
     @DisplayName("[포인트 사용] - 잔고가 부족한 경우")
     public void GivenUserIdAndAmount_WhenUsingPoint_ThenException() throws Exception {
@@ -127,6 +133,7 @@ public class PointServiceTest {
                 .hasMessage(ErrorCode.INCORRECT_AMOUNT.getMessage(pointDto.amount()));
     }
 
+    //포인트 사용시 잔고가 포인트가 있는 경우 기존 포인트에서 차감해야 한다.
     @Test
     @DisplayName("[포인트 사용] - 포인트가 있는 경우")
     public void GivenUserIdAndAmount_WhenUsingPoint_ThenRemainingPoint() throws Exception {
@@ -143,6 +150,7 @@ public class PointServiceTest {
         assertThat(result.point()).isEqualTo(600L);
     }
 
+    //포인트 사용 내역 조회시 기존 충전 및 사용 내역이 반환된다.
     @Test
     @DisplayName("[포인트 사용 내역 조회] - 포인트가 있는 경우")
     public void GivenUserIdAndAmount_WhenUsingPointHistories_ThenPointHistory() throws Exception {
@@ -167,6 +175,7 @@ public class PointServiceTest {
         assertThat(result.point()).isEqualTo(600L);
     }
 
+    //포인트 사용 내역 조회시 기존 충전 및 사용 내역이 반환된다.
     @Test
     @DisplayName("[포인트 충전 내역 조회] - 포인트 충전 내역이 있는 경우")
     public void GivenUserId_WhenCheckingPointHistories_ThenNoPointHistoriesExist() throws Exception {
@@ -188,6 +197,7 @@ public class PointServiceTest {
         assertThat(pointHistory.type()).isEqualTo(TransactionType.CHARGE);
     }
 
+    //포인트 사용 내역 조회시 기존 충전 및 사용 내역이 반환된다.
     @Test
     @DisplayName("[포인트 충전 내역 조회] - 포인트 충전 내역이 없는 경우")
     public void GivenUserId_WhenCheckingPointHistories_ThenPointHistoriesExist() throws InterruptedException {
@@ -201,6 +211,8 @@ public class PointServiceTest {
         assertThat(pointHistories).isEmpty();
     }
 
+    //멀티 스레드 환경에서 포인트를 동시에 사용하는 경우
+    // 1000원 충전 후 300원과 700원을 동시 요청 하는 경우 0원이 반환 되어야 한다.
     @Test
     @DisplayName("[포인트 사용 동시성 테스트]")
     public void givenAmount_whenConcurrentPointUse_thenPointZero() throws Exception {
@@ -238,6 +250,8 @@ public class PointServiceTest {
         assertThat(successCount.intValue() + failCount.intValue()).isEqualTo(threadsNum);
     }
 
+    //멀티 스레드 환경에서 포인트를 동시에 충전하는 경우
+    // 포인트 충전 (100원)을 10번 동시에 요청하는 경우 반환금액은 1000원 이어야 한다.
     @Test
     @DisplayName("[포인트 충전 동시성 테스트]")
     public void givenUserPoint_whenConcurrentCharging_thenPoint() throws InterruptedException {
