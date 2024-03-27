@@ -18,6 +18,12 @@ public class LectureApiControllerAdvice extends ResponseEntityExceptionHandler {
         return ResponseEntity.internalServerError().body(responseMessage);
     }
 
+    @ExceptionHandler(LectureApplicationFullException.class)
+    public ResponseEntity<ResponseMessage> LectureApplicationFullExceptionHandle(Exception e) {
+        ResponseMessage responseMessage = new ResponseMessage(Return.FAIL.toString(), e.getMessage());
+        return ResponseEntity.internalServerError().body(responseMessage);
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ResponseMessage> handleException(Exception e) {
         log.error("error: ", e);

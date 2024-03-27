@@ -1,7 +1,6 @@
 package com.hhplus.api.lecture.adapter.out.persistence;
 
 import com.hhplus.api.lecture.adapter.out.persistence.entity.LectureHistoryEntity;
-import com.hhplus.api.lecture.domain.LectureHistory;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -15,6 +14,8 @@ public interface LectureHistoryRepository extends JpaRepository<LectureHistoryEn
 
     @Query(value = "SELECT a FROM LectureHistoryEntity a WHERE a.lectureId = :lectureId AND a.userId = :userId")
     Optional<LectureHistoryEntity> findByLectureIdAndUserId(Long lectureId, Long userId);
+
+    boolean existsByLectureIdAndUserId(Long lectureId, Long userId);
 
     List<LectureHistoryEntity> findByLectureId(Long lectureId);
 }

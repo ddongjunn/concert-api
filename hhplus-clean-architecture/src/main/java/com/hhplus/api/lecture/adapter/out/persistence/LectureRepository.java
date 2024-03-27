@@ -23,4 +23,6 @@ public interface LectureRepository extends JpaRepository<LectureEntity, Long> {
     @Query(value = "SELECT a FROM LectureEntity a WHERE a.id = :lectureId")
     Optional<LectureEntity> findByIdWithPessimisticLock(Long lectureId);
 
+
+    long countById(Long letureId);
 }

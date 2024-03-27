@@ -18,10 +18,8 @@ public class LectureHistoryPersistenceAdapter implements LoadLectureHistoryPort,
     private final LectureHistoryRepository lectureHistoryRepository;
 
     @Override
-    @Transactional
     public boolean exitsByLectureIdAndUserId(Long lectureId, Long userId) {
-        return lectureHistoryRepository.findByLectureIdAndUserId(lectureId, userId)
-                .isPresent();
+        return lectureHistoryRepository.existsByLectureIdAndUserId(lectureId, userId);
     }
 
     @Override
