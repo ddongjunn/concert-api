@@ -4,5 +4,5 @@ import com.hhplus.api.lecture.adapter.out.persistence.entity.LectureEntity;
 import com.hhplus.api.lecture.domain.Lecture;
 
 public interface ModifyLecturePort {
-    void modify(Lecture lecture);
+    void decrementApplicantCountById(Long lectureId);
 }

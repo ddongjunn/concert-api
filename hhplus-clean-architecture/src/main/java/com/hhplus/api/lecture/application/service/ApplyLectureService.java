@@ -1,25 +1,24 @@
 package com.hhplus.api.lecture.application.service;
 
 import com.hhplus.api.common.ResponseMessage;
-import com.hhplus.api.common.annotation.RedissonLock;
-import com.hhplus.api.common.exception.CustomException;
+import com.hhplus.api.common.enums.Return;
+import com.hhplus.api.common.enums.ReturnMessage;
+import com.hhplus.api.lecture.application.exception.AlreadyApplyException;
+import com.hhplus.api.lecture.application.exception.LectureQuotaExceededException;
 import com.hhplus.api.lecture.application.port.in.ApplyLectureCommand;
 import com.hhplus.api.lecture.application.port.in.ApplyLectureUseCase;
-import com.hhplus.api.lecture.application.port.out.ApplyLectureHistoryPort;
 import com.hhplus.api.lecture.application.port.out.LoadLectureHistoryPort;
 import com.hhplus.api.lecture.application.port.out.LoadLecturePort;
 import com.hhplus.api.lecture.application.port.out.ModifyLecturePort;
+import com.hhplus.api.lecture.application.port.out.WriteLectureHistoryPort;
 import com.hhplus.api.lecture.domain.Lecture;
 import com.hhplus.api.lecture.domain.LectureHistory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.concurrent.TimeUnit;
 
 
 @Slf4j
@@ -29,46 +28,53 @@ public class ApplyLectureService implements ApplyLectureUseCase {
 
     private final LoadLecturePort loadLecturePort;
     private final ModifyLecturePort modifyLecturePort;
-    private final ApplyLectureHistoryPort applyLectureHistoryPort;
-    private final RedissonClient redissonClient;
+    private final LoadLectureHistoryPort loadLectureHistoryPort;
+    private final WriteLectureHistoryPort writeLectureHistoryPort;
 
     @Transactional
+    @Override
     public ResponseMessage apply(ApplyLectureCommand command) {
-        RLock lock = redissonClient.getLock(command.getLectureId().toString());
+        checkIfAlreadyApplied(command.getLectureId(), command.getUserId());
+
+        Lecture lecture = findLectureAndIncrementApplicantCount(command.getLectureId());
         try {
-            boolean available = lock.tryLock(10, 1, TimeUnit.SECONDS);
-            if (!available) {
-                log.error("lock fail()");
-                return new ResponseMessage("fail", "신청 실패");
-            }
-
-            boolean isApplicationExists = applyLectureHistoryPort.isApplicationExists(command.getLectureId(), command.getUserId());
-            if(isApplicationExists){
-                return new ResponseMessage("fail", "이미 신청한 강의");
-            }
-
-            Lecture lecture = loadLecturePort.loadById(command.getLectureId());
-            if (!lecture.isApplicationPossible()) {
-                return new ResponseMessage("에러", "정원 초과");
-            }
-
-            lecture.incrementApplicantCount();
-            modifyLecturePort.modify(lecture);
-
-            applyLectureHistoryPort.save(
-                    LectureHistory.of(lecture.getId(),
-                            command.getUserId(),
-                            LocalDateTime.now()
-                    )
-            );
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            lock.unlock();
+            applyApplicationForLecture(lecture);
+            writeLectureHistory(command.getLectureId(), command.getUserId());
+        } catch (LectureQuotaExceededException e) {
+            decrementApplicantCount(lecture.getId());
+            return new ResponseMessage(Return.FAIL.toString(), Return.FAIL.getDescription());
         }
-
-        return new ResponseMessage("성공", "신청 완료");
+        return new ResponseMessage(Return.SUCCESS.toString(), Return.SUCCESS.getDescription());
     }
 
+    public void checkIfAlreadyApplied(Long lectureId, Long userId) {
+        if(loadLectureHistoryPort.exitsByLectureIdAndUserId(lectureId, userId)){
+            throw new AlreadyApplyException(ReturnMessage.ALREADY_SIGNED_UP_FOR_LECTURE.getMessage());
+        }
+    }
+
+    @Transactional//t1
+    public Lecture findLectureAndIncrementApplicantCount(Long lectureId){
+        return loadLecturePort.loadById(lectureId);
+    }
+
+    public void writeLectureHistory(Long lectureId, Long userId) {
+        writeLectureHistoryPort.save(LectureHistory.of(
+                lectureId,
+                userId,
+                LocalDateTime.now()
+        ));
+    }
+
+    @Transactional//t2
+    public void applyApplicationForLecture(Lecture lecture){
+        if(!lecture.isApplicationPossible()){
+            throw new LectureQuotaExceededException();
+        }
+    }
+
+    @Transactional()//t3
+    public void decrementApplicantCount(Long lectureId){
+        modifyLecturePort.decrementApplicantCountById(lectureId);
+    }
 }

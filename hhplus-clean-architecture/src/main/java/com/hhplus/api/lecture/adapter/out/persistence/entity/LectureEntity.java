@@ -24,4 +24,12 @@ public class LectureEntity {
     @Column int applicantCount;
     @Column int capacityLimit;
     @Column LocalDateTime startDate;
+
+    public void incrementApplicantCount(){
+        this.applicantCount++;
+    }
+
+    public void decrementApplicantCount() {
+        this.applicantCount--;
+    }
 }

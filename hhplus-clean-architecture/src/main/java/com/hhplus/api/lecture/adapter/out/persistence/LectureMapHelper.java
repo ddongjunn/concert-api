@@ -7,6 +7,8 @@ import com.hhplus.api.lecture.domain.LectureHistory;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class LectureMapHelper {
@@ -44,5 +46,15 @@ public class LectureMapHelper {
                 lectureHistoryEntity.getUserId(),
                 lectureHistoryEntity.getRegisterDate()
         );
+    }
+
+    public List<LectureHistory> entityToDomain(List<LectureHistoryEntity> entities) {
+        return entities.stream()
+                .map(entity ->
+                        LectureHistory.of(entity.getId(),
+                                entity.getLectureId(),
+                                entity.getUserId(),
+                                entity.getRegisterDate()))
+                .collect(Collectors.toList());
     }
 }

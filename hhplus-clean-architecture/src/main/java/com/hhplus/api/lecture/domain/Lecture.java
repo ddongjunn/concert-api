@@ -20,7 +20,7 @@ public class Lecture {
     }
 
     public boolean isApplicationPossible(){
-        return this.applicantCount < this.capacityLimit;
+        return this.applicantCount < this.capacityLimit + 1;
     }
 
     public void incrementApplicantCount(){

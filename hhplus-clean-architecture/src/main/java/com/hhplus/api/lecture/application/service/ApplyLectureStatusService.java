@@ -15,10 +15,10 @@ public class ApplyLectureStatusService implements ApplyLectureStatusUseCase {
 
     @Override
     public ResponseMessage applyStatus(ApplyLectureStatusCommand command) {
-        boolean applicationSuccessful = loadLectureHistoryPort.loadById(command.getLectureId(), command.getUserId());
+        /*boolean applicationSuccessful = loadLectureHistoryPort.loadById(command.getLectureId(), command.getUserId());
         String statusCode = applicationSuccessful ? "200" : "500";
-        String message = applicationSuccessful ? "신청 성공" : "신청 실패";
+        String message = applicationSuccessful ? "신청 성공" : "신청 실패";*/
 
-        return new ResponseMessage(statusCode, message);
+        return null;
     }
 }

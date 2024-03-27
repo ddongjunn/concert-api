@@ -1,4 +1,4 @@
-package com.hhplus.api.common.exception;
+package com.hhplus.api.lecture.application.exception;
 
 public class CustomException extends RuntimeException {
     public CustomException(String message){

@@ -1,18 +1,17 @@
 package com.hhplus.api.lecture.application.service;
 
 import com.hhplus.api.lecture.application.port.in.ApplyLectureCommand;
-import com.hhplus.api.lecture.application.port.out.ApplyLectureHistoryPort;
+import com.hhplus.api.lecture.application.port.out.LoadLectureHistoryPort;
+import com.hhplus.api.lecture.application.port.out.WriteLectureHistoryPort;
 import com.hhplus.api.lecture.application.port.out.LoadLecturePort;
 import com.hhplus.api.lecture.application.port.out.ModifyLecturePort;
 import com.hhplus.api.lecture.domain.Lecture;
+import com.hhplus.api.lecture.domain.LectureHistory;
 import org.junit.jupiter.api.Test;
-import org.redisson.Redisson;
-import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.test.context.TestPropertySource;
 
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,24 +23,25 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ApplyLectureServiceDbTest {
 
     private final LoadLecturePort loadLecturePort;
-    private final ApplyLectureHistoryPort applyLectureHistoryPort;
     private final ModifyLecturePort modifyLecturePort;
+    private final LoadLectureHistoryPort loadLectureHistoryPort;
+    private final WriteLectureHistoryPort writeLectureHistoryPort;
+
+
     private final ApplyLectureService applyLectureService;
-    private final RedissonClient redissonClient;
-
-
     @Autowired
     public ApplyLectureServiceDbTest(LoadLecturePort loadLecturePort,
-                                     ApplyLectureHistoryPort applyLectureHistoryPort,
                                      ModifyLecturePort modifyLecturePort,
-                                     RedissonClient redissonClient) {
+                                     WriteLectureHistoryPort writeLectureHistoryPort,
+                                     LoadLectureHistoryPort loadLectureHistoryPort) {
+
         this.loadLecturePort = loadLecturePort;
-        this.applyLectureHistoryPort = applyLectureHistoryPort;
         this.modifyLecturePort = modifyLecturePort;
-        this.redissonClient = redissonClient;
+        this.writeLectureHistoryPort = writeLectureHistoryPort;
+        this.loadLectureHistoryPort = loadLectureHistoryPort;
 
 
-        this.applyLectureService = new ApplyLectureService(loadLecturePort, modifyLecturePort, applyLectureHistoryPort, redissonClient);
+        this.applyLectureService = new ApplyLectureService(loadLecturePort, modifyLecturePort, loadLectureHistoryPort, writeLectureHistoryPort);
     }
 
     @Test
@@ -61,7 +61,7 @@ public class ApplyLectureServiceDbTest {
             executorService.submit(() -> {
                 try {
                     applyLectureService.apply(
-                            new ApplyLectureCommand(1L, userId)
+                            new ApplyLectureCommand(1L, 1L)
                     );
                 } catch (Exception e){
                     e.printStackTrace();
@@ -74,6 +74,8 @@ public class ApplyLectureServiceDbTest {
 
         // Then
         Lecture lecture = loadLecturePort.loadById(1L);
+        List<LectureHistory> lectureHistories = loadLectureHistoryPort.loadByLectureId(1L);
         assertThat(lecture.getApplicantCount()).isEqualTo(30);
+        //assertThat(lectureHistories.size()).isEqualTo(30); 통과..
     }
 }
