@@ -4,6 +4,7 @@ import com.hhplus.api.common.ResponseMessage;
 import com.hhplus.api.common.enums.Return;
 import com.hhplus.api.common.enums.ReturnMessage;
 import com.hhplus.api.lecture.application.exception.AlreadyApplyException;
+import com.hhplus.api.lecture.application.exception.EarlyApplicationLectureException;
 import com.hhplus.api.lecture.application.exception.LectureApplicationFullException;
 import com.hhplus.api.lecture.application.port.in.ApplyLectureCommand;
 import com.hhplus.api.lecture.application.port.out.LoadLectureHistoryPort;
@@ -185,6 +186,32 @@ class ApplyLectureServiceTest {
         assertThatThrownBy(() -> applyLectureService.applyApplicationForLecture(lecture))
                 .isInstanceOf(LectureApplicationFullException.class)
                 .hasMessage(ReturnMessage.LECTURE_FULL.getMessage());
+    }
+
+    @DisplayName("강의 신청일 이전에 신청하면 예외발생")
+    @Test
+    void givenLectureIdAndUserId_whenBeforeLectureApplyDate_thenException(){
+        // Given
+        LocalDateTime beforeDate = LocalDateTime.of(2025, 5, 31, 2, 13, 1);
+        Lecture lecture = Lecture.of(1L, "tdd", 0, 30, beforeDate);
+
+        // When & Then
+        assertThatThrownBy(() -> applyLectureService.checkApplicationStartDate(lecture))
+                .isInstanceOf(EarlyApplicationLectureException.class)
+                .hasMessage(ReturnMessage.LECTURE_BEFORE_DATE.getMessage());
+    }
+
+    @DisplayName("강의 신청일 이후 신청")
+    @Test
+    void givenLectureIdAndUserId_whenBeforeLectureApplyDate_thenNoException(){
+        // Given
+        LocalDateTime afterDate = LocalDateTime.now().minusDays(1);
+        Lecture lecture = Lecture.of(1L, "tdd", 0, 30, afterDate);
+
+        // When & Then
+        assertDoesNotThrow(() -> {
+            applyLectureService.checkApplicationStartDate(lecture);
+        });
     }
 
 }

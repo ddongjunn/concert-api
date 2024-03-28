@@ -22,4 +22,8 @@ public class Lecture {
     public boolean isApplicationPossible(){
         return this.applicantCount < this.capacityLimit + 1;
     }
+
+    public boolean isApplicationDateAvailable() {
+        return this.startDate.isBefore(LocalDateTime.now());
+    }
 }

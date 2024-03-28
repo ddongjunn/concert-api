@@ -4,6 +4,7 @@ import com.hhplus.api.common.ResponseMessage;
 import com.hhplus.api.common.enums.Return;
 import com.hhplus.api.common.enums.ReturnMessage;
 import com.hhplus.api.lecture.application.exception.AlreadyApplyException;
+import com.hhplus.api.lecture.application.exception.EarlyApplicationLectureException;
 import com.hhplus.api.lecture.application.exception.LectureApplicationFullException;
 import com.hhplus.api.lecture.application.port.in.ApplyLectureCommand;
 import com.hhplus.api.lecture.application.port.in.ApplyLectureUseCase;
@@ -38,9 +39,20 @@ public class ApplyLectureService implements ApplyLectureUseCase {
         return new ResponseMessage(Return.SUCCESS.toString(), Return.SUCCESS.getDescription());
     }
 
+    public Lecture findLectureAndIncrementApplicantCount(Long lectureId){
+        return loadLecturePort.loadByIdAndIncrementApplicantCount(lectureId);
+    }
+
     public void lectureApplyValidation(ApplyLectureCommand command, Lecture lecture){
+        checkApplicationStartDate(lecture);
         checkAlreadyApplied(command.getLectureId(), command.getUserId()); //row가 없으면 lock안 걸림.
         applyApplicationForLecture(lecture);
+    }
+
+    public void checkApplicationStartDate(Lecture lecture){
+        if(!lecture.isApplicationDateAvailable()){
+            throw new EarlyApplicationLectureException(ReturnMessage.LECTURE_BEFORE_DATE.getMessage());
+        }
     }
 
     public void checkAlreadyApplied(Long lectureId, Long userId) {
@@ -49,8 +61,10 @@ public class ApplyLectureService implements ApplyLectureUseCase {
         }
     }
 
-    public Lecture findLectureAndIncrementApplicantCount(Long lectureId){
-        return loadLecturePort.loadByIdAndIncrementApplicantCount(lectureId);
+    public void applyApplicationForLecture(Lecture lecture){
+        if(!lecture.isApplicationPossible()){
+            throw new LectureApplicationFullException(ReturnMessage.LECTURE_FULL.getMessage());
+        }
     }
 
     public void writeLectureHistory(Long lectureId, Long userId) {
@@ -59,11 +73,5 @@ public class ApplyLectureService implements ApplyLectureUseCase {
                 userId,
                 LocalDateTime.now()
         ));
-    }
-
-    public void applyApplicationForLecture(Lecture lecture){
-        if(!lecture.isApplicationPossible()){
-            throw new LectureApplicationFullException(ReturnMessage.LECTURE_FULL.getMessage());
-        }
     }
 }
