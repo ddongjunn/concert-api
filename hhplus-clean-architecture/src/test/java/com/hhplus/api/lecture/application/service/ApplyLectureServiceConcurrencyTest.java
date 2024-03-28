@@ -32,7 +32,7 @@ public class ApplyLectureServiceConcurrencyTest {
 
 
     @Test
-    void 여러_사용자가_동시에_강의를_신청하는_경우() throws InterruptedException {
+    void 여러_사용자가_강의를_신청하는_경우() throws InterruptedException {
         // Given
         ApplyLectureCommand command = new ApplyLectureCommand(
                 1L,
@@ -67,7 +67,7 @@ public class ApplyLectureServiceConcurrencyTest {
     }
 
     @Test
-    void 한명의_사용자가_동시에_강의를_신청하는_경우() throws InterruptedException {
+    void 한명의_사용자가_동일한_강의를_신청하는_경우() throws InterruptedException {
         // Given
         ApplyLectureCommand command = new ApplyLectureCommand(
                 1L,
