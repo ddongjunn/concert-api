@@ -1,10 +1,7 @@
 package com.hhplus.api.lecture.adapter.in.web;
 
-import com.hhplus.api.common.ResponseMessage;
-import com.hhplus.api.lecture.application.port.in.ApplyLectureCommand;
-import com.hhplus.api.lecture.application.port.in.ApplyLectureStatusCommand;
-import com.hhplus.api.lecture.application.port.in.ApplyLectureStatusUseCase;
-import com.hhplus.api.lecture.application.port.in.ApplyLectureUseCase;
+import com.hhplus.api.lecture.adapter.in.web.model.LecturesDetailResponse;
+import com.hhplus.api.lecture.application.port.in.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +16,7 @@ public class LectureController {
 
     private final ApplyLectureUseCase applyLectureUseCase;
     private final ApplyLectureStatusUseCase applyLectureStatusUseCase;
+    private final LoadLecturesUseCase loadLecturesUseCase;
 
     //강의 신청
     @PostMapping("/lectures/{lectureId}/apply/{userId}")
@@ -45,5 +43,10 @@ public class LectureController {
                         userId
                 )
         ), HttpStatus.OK);
+    }
+
+    @GetMapping("/lectures")
+    public LecturesDetailResponse getLectures(){
+        return new LecturesDetailResponse(loadLecturesUseCase.load());
     }
 }

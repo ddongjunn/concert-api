@@ -31,6 +31,17 @@ public class LectureMapHelper {
         );
     }
 
+    public List<Lecture> lectureEntityToDomain(List<Lecture> entities) {
+        return entities.stream()
+                .map(entity ->
+                        Lecture.of(entity.getId(),
+                                entity.getName(),
+                                entity.getApplicantCount(),
+                                entity.getCapacityLimit(),
+                                entity.getStartDate()))
+                .collect(Collectors.toList());
+    }
+
     public LectureHistoryEntity domainToEntity(LectureHistory lectureHistory) {
         return new LectureHistoryEntity(
                 lectureHistory.getLectureId(),
