@@ -20,6 +20,7 @@ public class LectureController {
     private final ApplyLectureUseCase applyLectureUseCase;
     private final ApplyLectureStatusUseCase applyLectureStatusUseCase;
 
+    //강의 신청
     @PostMapping("/lectures/{lectureId}/apply/{userId}")
     public ResponseEntity<?> applyLecture(
             @PathVariable("lectureId") Long lectureId,
@@ -32,6 +33,7 @@ public class LectureController {
         ), HttpStatus.OK);
     }
 
+    //강의 신청 조회
     @GetMapping("/lectures/{lectureId}/check/{userId}")
     public ResponseEntity<?> checkLecture(
             @PathVariable("lectureId") Long lectureId,
