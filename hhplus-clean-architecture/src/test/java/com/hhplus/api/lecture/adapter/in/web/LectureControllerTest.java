@@ -42,7 +42,6 @@ class LectureControllerTest {
         this.mvc = mvc;
     }
 
-
     @DisplayName("[POST] 강의 신청")
     @Test
     void givenApplyLectureCommand_whenRequesting_thenApplyLecture() throws Exception {
