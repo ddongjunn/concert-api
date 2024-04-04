@@ -1,14 +1,14 @@
 ## Concert API
-| Method | URI                                  | Description           |
-|-----|--------------------------------------|-----------------------|
-| POST | /concert/waiting/register | 대기열 등록                |              
-| GET | /concert/waiting/status/{userId} | 대기열 상태 조회             |
-| GET |/concert/reservation/dates | 예약 가능한 콘서트와 날짜 리스트 조회 |
-| GET | /concert/{concertId}/reservation/seats | 예약 가능한 좌석 정보 리스트 조회   |
-| POST | /concert/reservation  | 콘서트 예약                |
-|POST| /concert/payment         | 좌석 결제                 |
-|PATCH| /point                | 포인트 충전                |
-|GET| /point/{userId}       | 포인트 조회                |
+| Method | URI                                | Description           |
+|-----|------------------------------------|-----------------------|
+| POST | [/concert/waiting/register](#1-대기열-등록) | 대기열 등록                |              
+| GET | [/concert/waiting/status/{userId}](#2-대기열-상태-조회) | 대기열 상태 조회             |
+| GET | [/concert/reservation/dates](#3-예약-가능한-콘서트-조회) | 예약 가능한 콘서트와 날짜 리스트 조회 |
+| GET | [/concert/{concertId}/reservation/seats](#4-콘서트-좌석-조회) | 예약 가능한 좌석 정보 리스트 조회   |
+| POST | [/concert/reservation](#5-콘서트-좌석-예약) | 콘서트 예약                |
+|POST| [/concert/payment](#6-결재)          | 좌석 결제                 |
+|PATCH| [/point](#7-포인트-충전)                | 포인트 충전                |
+|GET| [/point/{userId}](#8-포인트-조회)       | 포인트 조회                |
 --------------------------------------------------------------------------
 ### 1. 대기열 등록
 콘서트 예약을 위한 대기자 명단에 사용자를 등록합니다.
@@ -245,7 +245,7 @@ status - WAIT(대기), ONGOING(진행), DONE(만료)
 } 
 ```
 --------------------------------------------------------------------------
-### 6. 포인트 충전
+### 7. 포인트 충전
 포인트를 충전합니다.
 
 | Method | URI | Description          |
@@ -270,7 +270,7 @@ status - WAIT(대기), ONGOING(진행), DONE(만료)
 }
 ```
 --------------------------------------------------------------------------
-### 7. 포인트 조회
+### 8. 포인트 조회
 포인트를 조회합니다.
 
 | Method | URI | Description           |
