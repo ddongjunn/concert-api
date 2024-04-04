@@ -28,13 +28,13 @@
 <b>Response</b>
 ```json
 {
-  "wait_number": 5
+  "code": "ALREADY_WAITING_USER",
+  "message": "이미 대기중인 사용자"
 }
 ```
 ```json
 {
-  "code": "ALREADY_WAITING_USER",
-  "message": "이미 대기중인 사용자"
+  "wait_number": 5
 }
 ```
 --------------------------------------------------------------------------
