@@ -1,12 +1,9 @@
-package com.api.concert.api.point.controller;
+package com.api.concert.controller.payment;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-public class PointController {
+public class PaymentController {
 
     @PatchMapping("/point")
     public String patchPoint(){
@@ -28,4 +25,15 @@ public class PointController {
                 }
                 """;
     }
+
+    @PostMapping("/concert/payment")
+    public String concertPayment(){
+        return """
+                {
+                  "status": "SUCCESS",
+                  "message": "{concertStartDate} | {concertName} | {seatNo}"
+                }
+                """;
+    }
+
 }

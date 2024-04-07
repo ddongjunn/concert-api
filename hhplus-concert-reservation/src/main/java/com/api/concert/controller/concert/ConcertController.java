@@ -1,4 +1,4 @@
-package com.api.concert.api.concert.controller;
+package com.api.concert.controller.concert;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -85,16 +85,6 @@ public class ConcertController {
                 {
                   "code": "SUCCESS",
                   "message": "좌석 임시 배정 완료, 만료시간 : yyyy-mm-dd hh:mm:ss"
-                }
-                """;
-    }
-
-    @PostMapping("/concert/payment")
-    public String concertPayment(){
-        return """
-                {
-                  "status": "SUCCESS",
-                  "message": "{concertStartDate} | {concertName} | {seatNo}"
                 }
                 """;
     }
