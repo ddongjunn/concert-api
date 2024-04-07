@@ -13,7 +13,7 @@ public class QueueRepository implements IQueueRepository {
     private final QueueJpaRepository queueJpaRepository;
 
     @Override
-    public long getOngoingCountStatusCount() {
+    public long getCountByOngoingStatus() {
         return queueJpaRepository.countByStatus(WaitingStatus.ONGOING);
     }
 

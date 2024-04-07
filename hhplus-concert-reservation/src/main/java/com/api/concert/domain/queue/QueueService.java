@@ -30,7 +30,7 @@ public class QueueService {
 
     public Queue createQueue(Long userId) {
         Queue queue = Queue.of(userId);
-        long ongoingCount = iQueueRepository.getOngoingCountStatusCount();
+        long ongoingCount = iQueueRepository.getCountByOngoingStatus();
         queue.updateStatusForOngoingCount(ongoingCount);
         return queue;
     }
