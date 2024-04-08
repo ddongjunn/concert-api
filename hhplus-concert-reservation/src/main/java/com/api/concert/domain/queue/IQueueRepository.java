@@ -11,11 +11,13 @@ public interface IQueueRepository {
 
     Queue save(QueueEntity queueEntity);
 
-    boolean existsByUserIdAndOngoingStatus(Long userId);
+    boolean existsByUserIdAndStatusIsOngoingOrWaiting(Long userId);
 
-    List<Queue> getExpiredOngoingStatus(LocalDateTime queueExpiredTime);
+    List<Queue> getExpiredOngoingStatus();
 
-    void updateStatusQueues(List<QueueEntity> updateStatusQueueList);
+    void updateStatusToDone(List<Long> updateIds);
+
+    void updateStatusToOngoing(List<QueueEntity> entities);
 
     List<Queue> getQueuesInWaitStatus(int limit);
 }

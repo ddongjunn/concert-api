@@ -31,7 +31,6 @@ public class Queue {
     }
 
     public void updateStatusForOngoingCount(long ongoingCount, int limit) {
-        log.info("QUEUE_LIMIT {}, ongoingCount {}", limit, ongoingCount);
 
         if(ongoingCount >= limit){
             setWaitingStatus(WaitingStatus.WAIT);
@@ -54,7 +53,8 @@ public class Queue {
         this.status = WaitingStatus.DONE;
     }
 
-    public void updateStatusToOngoing() {
+    public void updateStatusToOngoingAndExpiredAt() {
         this.status = WaitingStatus.ONGOING;
+        this.expiredAt = LocalDateTime.now().plusMinutes(1);
     }
 }
