@@ -8,6 +8,7 @@ public class QueueConverter {
 
     public static QueueEntity toEntity(Queue queue){
         return QueueEntity.builder()
+                .concertWaitingId(queue.getConcertWaitingId())
                 .userId(queue.getUserId())
                 .status(queue.getStatus())
                 .expiredAt(queue.getExpiredAt())

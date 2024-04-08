@@ -30,7 +30,8 @@ public class QueueEntity extends BaseEntity {
     LocalDateTime expiredAt;
 
     @Builder
-    public QueueEntity(Long userId, WaitingStatus status, LocalDateTime expiredAt){
+    public QueueEntity(Long concertWaitingId, Long userId, WaitingStatus status, LocalDateTime expiredAt){
+        this.concertWaitingId = concertWaitingId;
         this.userId = userId;
         this.status = status;
         this.expiredAt = expiredAt;
