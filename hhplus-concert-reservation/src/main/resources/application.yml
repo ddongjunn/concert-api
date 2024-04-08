@@ -20,3 +20,7 @@ spring:
     show-sql: true
     open-in-view: false
     # defer-datasource-initialization: true
+
+queue:
+  scan-time: "0 * * * * *"
+  expired-time: "1"
