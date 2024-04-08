@@ -5,6 +5,7 @@ import com.api.concert.controller.queue.dto.QueueResponse;
 import com.api.concert.global.common.exception.AlreadyWaitingUserException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -30,7 +31,7 @@ public class QueueService {
 
     public Queue createQueue(Long userId) {
         Queue queue = Queue.of(userId);
-        long ongoingCount = iQueueRepository.getCountByOngoingStatus();
+        long ongoingCount = iQueueRepository.getCountOfOngoingStatus();
         queue.updateStatusForOngoingCount(ongoingCount);
         return queue;
     }
