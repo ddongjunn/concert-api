@@ -6,44 +6,46 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class QueueTest {
 
     private Queue queue;
+    private final long QUEUE_EXPIRED_TIME = 10L;
+    private final int QUEUE_LIMIT = 50;
 
     @BeforeEach
     void setUp(){
         this.queue = new Queue();
     }
 
-    @DisplayName("현재 대기열이 50이상인 경우 WAIT 상태")
     @Test
-    void givenOngoingCount50Over_when(){
+    @DisplayName("현재 대기열이 가득찬 경우 WAIT 상태로 반환")
+    void givenOngoingCount_whenQueueIsFull_thenStatusWait(){
         // Given
-        int ongoingCount = 50;
+        long ongoingCount = 50;
 
         // When
-        queue.updateStatusForOngoingCount(ongoingCount);
+        queue.updateStatusForOngoingCount(ongoingCount, QUEUE_LIMIT, QUEUE_EXPIRED_TIME);
 
         // Then
         assertThat(queue.getStatus()).isEqualTo(WaitingStatus.WAIT);
     }
 
-    @DisplayName("현재 대기열이 50미만인 경우 ONGOING 상태")
     @Test
-    void givenOngoingCount50less_when(){
+    @DisplayName("현재 대기열이 가득차지않은 경우 ONGOING 상태로 반환")
+    void givenOngoingCount_whenQueueIsNotFull_thenStatusOngoing(){
         // Given
-        int ongoingCount = 49;
+        long ongoingCount = 49;
 
         // When
-        queue.updateStatusForOngoingCount(ongoingCount);
+        queue.updateStatusForOngoingCount(ongoingCount, QUEUE_LIMIT, QUEUE_EXPIRED_TIME);
 
         // Then
         assertThat(queue.getStatus()).isEqualTo(WaitingStatus.ONGOING);
-        assertThat(queue.getExpiredAt().toLocalDate()).isEqualTo(LocalDateTime.now().plusMinutes(10).toLocalDate());
-        assertThat(queue.getExpiredAt().getHour()).isEqualTo(LocalDateTime.now().plusMinutes(10).getHour());
-        assertThat(queue.getExpiredAt().getMinute()).isEqualTo(LocalDateTime.now().plusMinutes(10).getMinute());
+        assertThat(queue.getExpiredAt().truncatedTo(ChronoUnit.SECONDS))
+                .isEqualTo(LocalDateTime.now().plusMinutes(QUEUE_EXPIRED_TIME).truncatedTo(ChronoUnit.SECONDS));
     }
 }
