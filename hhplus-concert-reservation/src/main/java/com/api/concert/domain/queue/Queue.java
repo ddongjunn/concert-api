@@ -3,7 +3,6 @@ package com.api.concert.domain.queue;
 import com.api.concert.domain.queue.constant.WaitingStatus;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
 
@@ -30,31 +29,25 @@ public class Queue {
         return new Queue(userId);
     }
 
-    public void updateStatusForOngoingCount(long ongoingCount, int limit) {
-
+    public void updateStatusForOngoingCount(long ongoingCount, final int limit, final long QUEUE_EXPIRED_TIME) {
         if(ongoingCount >= limit){
-            setWaitingStatus(WaitingStatus.WAIT);
-        }
-
-        if(ongoingCount < limit){
-            setWaitingStatus(WaitingStatus.ONGOING);
-            updateQueueExpiredAt();
+            setStatusAndExpiredAt(WaitingStatus.WAIT, null);
+        }else{
+            setStatusAndExpiredAt(WaitingStatus.ONGOING, LocalDateTime.now().plusMinutes(QUEUE_EXPIRED_TIME));
         }
     }
 
-    public void setWaitingStatus(WaitingStatus status){
+    public void setStatusAndExpiredAt(WaitingStatus status, LocalDateTime expiredAt) {
         this.status = status;
-    }
-    public void updateQueueExpiredAt(){
-        this.expiredAt = LocalDateTime.now().plusMinutes(1);
+        this.expiredAt = expiredAt;
     }
 
     public void updateStatusToDone() {
         this.status = WaitingStatus.DONE;
     }
 
-    public void updateStatusToOngoingAndExpiredAt() {
+    public void updateStatusToOngoingAndExpiredAt(final long QUEUE_EXPIRED_TIME) {
         this.status = WaitingStatus.ONGOING;
-        this.expiredAt = LocalDateTime.now().plusMinutes(1);
+        this.expiredAt = LocalDateTime.now().plusMinutes(QUEUE_EXPIRED_TIME);
     }
 }
