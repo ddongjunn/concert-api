@@ -21,9 +21,10 @@ public class QueueService {
     private final long QUEUE_EXPIRED_TIME = 1L;
     private final int QUEUE_LIMIT = 5;
 
+    // 대기열 등록
     public QueueResponse register(QueueRequest queueRequestDto){
         Long userId = queueRequestDto.getUserId();
-        isUserAlreadyRegistered(userId);
+        isUserAlreadyRegistered(userId); //대기열에 WAIT, ONGOING 상태인 userId 존재 확인
 
         Queue queue = createQueue(userId);
         Queue savedQueue = iQueueRepository.save(QueueConverter.toEntity(queue));
@@ -31,7 +32,6 @@ public class QueueService {
     }
 
     public void isUserAlreadyRegistered(Long userId) {
-        log.info("userId : {}", userId);
         if(iQueueRepository.existsByUserIdAndStatusIsOngoingOrWaiting(userId)){
             throw new AlreadyWaitingUserException();
         }
@@ -40,7 +40,7 @@ public class QueueService {
     public Queue createQueue(Long userId) {
         Queue queue = Queue.of(userId);
         long ongoingCount = iQueueRepository.getCountOfOngoingStatus();
-        queue.updateStatusForOngoingCount(ongoingCount, QUEUE_LIMIT);
+        queue.updateStatusForOngoingCount(ongoingCount, QUEUE_LIMIT, QUEUE_EXPIRED_TIME);
         return queue;
     }
 
@@ -67,7 +67,7 @@ public class QueueService {
         int availableQueueSpace = calculateAvailableQueueSpace();
 
         List<Queue> queuesInWaitStatus = iQueueRepository.getQueuesInWaitStatus(availableQueueSpace);
-        queuesInWaitStatus.forEach(Queue::updateStatusToOngoingAndExpiredAt);
+        queuesInWaitStatus.forEach(queue -> queue.updateStatusToOngoingAndExpiredAt(QUEUE_EXPIRED_TIME));
 
         iQueueRepository.updateStatusToOngoing(
                 queuesInWaitStatus.stream()
@@ -81,8 +81,5 @@ public class QueueService {
         return (int) (QUEUE_LIMIT - currentOngoingCount);
     }
 
-    /*public void updateStatusQueues(List<Queue> queues) {
-        iQueueRepository.updateStatusQueues(queues.stream().map(QueueConverter::toEntity).toList());
-    }*/
 
 }
