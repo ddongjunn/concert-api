@@ -15,7 +15,8 @@ import java.time.LocalDateTime;
 @Getter
 @Table(name = "concert_waiting")
 @Entity
-public class QueueEntity extends BaseEntity {
+public class
+QueueEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,9 +38,4 @@ public class QueueEntity extends BaseEntity {
         this.expiredAt = expiredAt;
     }
 
-    public static QueueEntity of(Queue queue){
-        return QueueEntity.builder()
-                .userId(queue.getUserId())
-                .build();
-    }
 }
