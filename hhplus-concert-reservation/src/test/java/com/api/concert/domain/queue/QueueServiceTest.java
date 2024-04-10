@@ -2,6 +2,7 @@ package com.api.concert.domain.queue;
 
 import com.api.concert.controller.queue.dto.QueueRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -9,7 +10,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.api.concert.domain.queue.QueueOption.QUEUE_LIMIT;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,15 +29,14 @@ public class QueueServiceTest {
         this.iQueueRepository = iQueueRepository;
     }
 
+    @DisplayName("동시에 여러명이 대기열 등록")
     @Test
-    void test() throws InterruptedException{
+    void test_register() throws InterruptedException{
         //Given
         QueueRequest queueRequest = QueueRequest.builder().userId(1L).build();
-        AtomicInteger successCount = new AtomicInteger();
-        AtomicInteger failCount = new AtomicInteger();
 
         //When
-        int numberOfRequests = 50;
+        int numberOfRequests = 100;
         CountDownLatch latch = new CountDownLatch(numberOfRequests);
         ExecutorService executorService = Executors.newFixedThreadPool(numberOfRequests);
 
@@ -46,10 +45,8 @@ public class QueueServiceTest {
             executorService.submit(() -> {
                 try {
                     queueService.register(QueueRequest.builder().userId(userId).build());
-                    successCount.incrementAndGet();
                 } catch (Exception e) {
                     log.error(e.getMessage());
-                    failCount.incrementAndGet();
                 } finally {
                     latch.countDown();
                 }
@@ -58,9 +55,6 @@ public class QueueServiceTest {
         latch.await();
 
         //Then
-        log.info("success count {} ", successCount);
-        log.info("fail count {}", failCount);
-        log.info("status ONGOING {}", iQueueRepository.getCountOfOngoingStatus());
         long countOfOngoingStatus = iQueueRepository.getCountOfOngoingStatus();
         assertThat(countOfOngoingStatus).isEqualTo(QUEUE_LIMIT);
     }
