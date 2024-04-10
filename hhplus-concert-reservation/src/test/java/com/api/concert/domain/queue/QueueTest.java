@@ -8,40 +8,52 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
+import static com.api.concert.domain.queue.QueueOption.QUEUE_EXPIRED_TIME;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class QueueTest {
 
     private Queue queue;
-    private final long QUEUE_EXPIRED_TIME = 10L;
-    private final int QUEUE_LIMIT = 50;
 
     @BeforeEach
     void setUp(){
         this.queue = new Queue();
     }
 
+    @DisplayName("[대기열 상태 변경] status -> done")
     @Test
-    @DisplayName("현재 대기열이 가득찬 경우 WAIT 상태로 반환")
-    void givenOngoingCount_whenQueueIsFull_thenStatusWait(){
+    void test_toDone(){
         // Given
-        long ongoingCount = 50;
+        Queue queue = Queue.builder().userId(1L).build();
 
         // When
-        queue.updateStatusForOngoingCount(ongoingCount, QUEUE_LIMIT, QUEUE_EXPIRED_TIME);
+        queue.toDone();
+
+        // Then
+        assertThat(queue.getStatus()).isEqualTo(WaitingStatus.DONE);
+    }
+
+    @DisplayName("[대기열 상태 변경] status -> wait")
+    @Test
+    void test_toWait(){
+        // Given
+        Queue queue = Queue.builder().userId(1L).build();
+
+        // When
+        queue.toWait();
 
         // Then
         assertThat(queue.getStatus()).isEqualTo(WaitingStatus.WAIT);
     }
 
+    @DisplayName("[대기열 상태 변경] status -> ongoing")
     @Test
-    @DisplayName("현재 대기열이 가득차지않은 경우 ONGOING 상태로 반환")
-    void givenOngoingCount_whenQueueIsNotFull_thenStatusOngoing(){
+    void test_toOngoing(){
         // Given
-        long ongoingCount = 49;
+        Queue queue = Queue.builder().userId(1L).build();
 
         // When
-        queue.updateStatusForOngoingCount(ongoingCount, QUEUE_LIMIT, QUEUE_EXPIRED_TIME);
+        queue.toOngoing(QUEUE_EXPIRED_TIME);
 
         // Then
         assertThat(queue.getStatus()).isEqualTo(WaitingStatus.ONGOING);
