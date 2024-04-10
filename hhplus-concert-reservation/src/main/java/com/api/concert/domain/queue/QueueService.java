@@ -3,6 +3,7 @@ package com.api.concert.domain.queue;
 import com.api.concert.controller.queue.dto.QueueRequest;
 import com.api.concert.controller.queue.dto.QueueResponse;
 import com.api.concert.global.common.exception.AlreadyWaitingUserException;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -12,23 +13,32 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.api.concert.domain.queue.QueueOption.QUEUE_EXPIRED_TIME;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class QueueService {
+    private final QueueOption queueOption;
     private final IQueueRepository iQueueRepository;
 
-    private final long QUEUE_EXPIRED_TIME = 1L;
-    private final int QUEUE_LIMIT = 5;
+    @PostConstruct
+    public void initializeQueueCount(){
+        queueOption.initializeQueueCount(iQueueRepository.getCountOfOngoingStatus());
+    }
 
     // 대기열 등록
+    @Transactional
     public QueueResponse register(QueueRequest queueRequestDto){
         Long userId = queueRequestDto.getUserId();
         isUserAlreadyRegistered(userId); //대기열에 WAIT, ONGOING 상태인 userId 존재 확인
 
-        Queue queue = createQueue(userId);
-        Queue savedQueue = iQueueRepository.save(QueueConverter.toEntity(queue));
-        return QueueConverter.toResponse(savedQueue);
+        Queue queue = Queue.builder().userId(userId).build();
+        assignQueueStatus(queue);
+
+        return QueueConverter.toResponse(
+                iQueueRepository.save(QueueConverter.toEntity(queue))
+        );
     }
 
     public void isUserAlreadyRegistered(Long userId) {
@@ -37,11 +47,12 @@ public class QueueService {
         }
     }
 
-    public Queue createQueue(Long userId) {
-        Queue queue = Queue.builder().userId(userId).build();
-        long ongoingCount = iQueueRepository.getCountOfOngoingStatus();
-        queue.updateStatusForOngoingCount(ongoingCount, QUEUE_LIMIT, QUEUE_EXPIRED_TIME);
-        return queue;
+    public void assignQueueStatus(Queue queue) {
+        if(queueOption.hasAvailableSpaceInOngoingQueue()) {
+            queue.toOngoing(QUEUE_EXPIRED_TIME);
+        } else {
+            queue.toWait();
+        }
     }
 
     @Transactional
@@ -57,17 +68,21 @@ public class QueueService {
     public void updateStatusToDone(List<Queue> queues) {
         List<Long> updateIds = new ArrayList<>();
         queues.forEach( queue -> {
-            queue.updateStatusToDone();
+            queue.toDone();
+            queueOption.decrementOngoingCount();
             updateIds.add(queue.getConcertWaitingId());
         });
         iQueueRepository.updateStatusToDone(updateIds);
     }
 
     public void updateStatusToOngoingForWaitQueues() {
-        int availableQueueSpace = calculateAvailableQueueSpace();
+        int availableQueueSpace = queueOption.calculateAvailableQueueSpace();
 
         List<Queue> queuesInWaitStatus = iQueueRepository.getQueuesInWaitStatus(availableQueueSpace);
-        queuesInWaitStatus.forEach(queue -> queue.updateStatusToOngoingAndExpiredAt(QUEUE_EXPIRED_TIME));
+        queuesInWaitStatus.forEach( queue -> {
+            queue.toOngoing(QUEUE_EXPIRED_TIME);
+            queueOption.incrementOngoingCount();
+        });
 
         iQueueRepository.updateStatusToOngoing(
                 queuesInWaitStatus.stream()
@@ -75,11 +90,4 @@ public class QueueService {
                         .toList()
         );
     }
-
-    public int calculateAvailableQueueSpace() {
-        long currentOngoingCount = iQueueRepository.getCountOfOngoingStatus();
-        return (int) (QUEUE_LIMIT - currentOngoingCount);
-    }
-
-
 }

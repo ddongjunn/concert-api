@@ -26,24 +26,14 @@ public class Queue {
         this.userId = userId;
     }
 
-    public void updateStatusForOngoingCount(long ongoingCount, final int limit, final long QUEUE_EXPIRED_TIME) {
-        if(ongoingCount >= limit){
-            setStatusAndExpiredAt(WaitingStatus.WAIT, null);
-        }else{
-            setStatusAndExpiredAt(WaitingStatus.ONGOING, LocalDateTime.now().plusMinutes(QUEUE_EXPIRED_TIME));
-        }
-    }
-
-    public void setStatusAndExpiredAt(WaitingStatus status, LocalDateTime expiredAt) {
-        this.status = status;
-        this.expiredAt = expiredAt;
-    }
-
-    public void updateStatusToDone() {
+    public void toDone() {
         this.status = WaitingStatus.DONE;
     }
 
-    public void updateStatusToOngoingAndExpiredAt(final long QUEUE_EXPIRED_TIME) {
+    public void toWait(){
+        this.status = WaitingStatus.WAIT;
+    }
+    public void toOngoing(final long QUEUE_EXPIRED_TIME){
         this.status = WaitingStatus.ONGOING;
         this.expiredAt = LocalDateTime.now().plusMinutes(QUEUE_EXPIRED_TIME);
     }
