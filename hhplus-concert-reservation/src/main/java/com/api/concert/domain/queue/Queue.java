@@ -21,12 +21,9 @@ public class Queue {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    @Builder
     private Queue(Long userId) {
         this.userId = userId;
-    }
-
-    public static Queue of(Long userId){
-        return new Queue(userId);
     }
 
     public void updateStatusForOngoingCount(long ongoingCount, final int limit, final long QUEUE_EXPIRED_TIME) {

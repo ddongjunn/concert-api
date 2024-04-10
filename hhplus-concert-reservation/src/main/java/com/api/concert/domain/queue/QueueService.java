@@ -38,7 +38,7 @@ public class QueueService {
     }
 
     public Queue createQueue(Long userId) {
-        Queue queue = Queue.of(userId);
+        Queue queue = Queue.builder().userId(userId).build();
         long ongoingCount = iQueueRepository.getCountOfOngoingStatus();
         queue.updateStatusForOngoingCount(ongoingCount, QUEUE_LIMIT, QUEUE_EXPIRED_TIME);
         return queue;
@@ -46,9 +46,9 @@ public class QueueService {
 
     @Transactional
     @Scheduled(cron = "${queue.scan-time}")
-    public void updateStatusToDoneAndOngoing(){
+    public void expiredOngoingStatusToDone(){
         List<Queue> expiredOngoingStatus = iQueueRepository.getExpiredOngoingStatus();
-        if(expiredOngoingStatus.size() > 0){
+        if(!expiredOngoingStatus.isEmpty()){
             updateStatusToDone(expiredOngoingStatus);
             updateStatusToOngoingForWaitQueues();
         }
