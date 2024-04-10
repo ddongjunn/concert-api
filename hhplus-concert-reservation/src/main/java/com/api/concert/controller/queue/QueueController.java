@@ -15,7 +15,7 @@ public class QueueController {
     private final QueueFacade queueFacade;
 
     @PostMapping("/concert/waiting/register")
-    public ResponseEntity<QueueResponse> queueRegister(@RequestBody QueueRequest queueRequestDto){;
+    public ResponseEntity<QueueResponse> queueRegister(@RequestBody QueueRequest queueRequestDto){
         return ResponseEntity.status(HttpStatus.OK).body(queueFacade.register(queueRequestDto));
     }
 
