@@ -2,11 +2,13 @@ package com.api.concert.domain.queue;
 
 import com.api.concert.controller.queue.dto.QueueRegisterRequest;
 import com.api.concert.controller.queue.dto.QueueRegisterResponse;
+import com.api.concert.controller.queue.dto.QueueStatusResponse;
 import com.api.concert.domain.queue.constant.WaitingStatus;
 import com.api.concert.global.common.exception.AlreadyWaitingUserException;
 import com.api.concert.global.common.exception.CommonException;
 import com.api.concert.global.common.model.ResponseCode;
 import com.api.concert.infrastructure.queue.QueueEntity;
+import com.api.concert.infrastructure.queue.projection.WaitingRank;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +34,9 @@ class QueueServiceUnitTest {
 
     @Mock
     QueueOption queueOption;
+
+    @Mock
+    WaitingRank waitingRank;
 
     @InjectMocks
     QueueService queueService;
@@ -177,9 +182,9 @@ class QueueServiceUnitTest {
                 .containsOnly(WaitingStatus.ONGOING);
     }
 
-    @DisplayName("대기열 상태 조회")
+    @DisplayName("[대기열 상태 조회] - 존재하지 않는 번호표")
     @Test
-    void test(){
+    void test_detail_notExist(){
         // Given
         Long concertWaitingId = 1L;
 
@@ -190,7 +195,43 @@ class QueueServiceUnitTest {
         assertThatThrownBy(() -> queueService.detail(concertWaitingId))
                 .isInstanceOf(CommonException.class)
                 .hasMessage(ResponseCode.TICKET_NOT_ISSUED.getMessage());
+    }
 
+    @DisplayName("[대기열 상태 조회] - WAIT")
+    @Test
+    void test_detail_statusWait(){
+        // Given
+        Long concertWaitingId = 1L;
+        Queue queue = Queue.builder().concertWaitingId(1L).waitingNumber(1).status(WaitingStatus.WAIT).build();
+
+        // When
+        when(iQueueRepository.findById(anyLong())).thenReturn(queue);
+        when(waitingRank.getRanking()).thenReturn(1);
+        when(iQueueRepository.countWaitingAhead(concertWaitingId)).thenReturn(waitingRank);
+
+        // Then
+        QueueStatusResponse result = queueService.detail(concertWaitingId);
+        assertThat(result.getWaitNumber()).isEqualTo(1);
+        assertThat(result.getStatus()).isEqualTo(WaitingStatus.WAIT);
+        assertThat(result.getMessage()).isEqualTo("현재 고객님 순번 : %s", queue.getWaitingNumber());
+    }
+
+    @DisplayName("[대기열 상태 조회] - ONGOING")
+    @Test
+    void test_detail_statusOngoing(){
+        // Given
+        Long concertWaitingId = 1L;
+        Queue queue = Queue.builder().concertWaitingId(1L).expiredAt(LocalDateTime.now()).status(WaitingStatus.ONGOING).build();
+        String message = String.format("대기열 만료 시간 [%s]", queue.getExpiredAt());
+
+        // When
+        when(iQueueRepository.findById(anyLong())).thenReturn(queue);
+
+        // Then
+        assertThatThrownBy(() -> queueService.detail(concertWaitingId))
+                .isInstanceOf(CommonException.class)
+                .hasFieldOrPropertyWithValue("responseCode", ResponseCode.ALREADY_ONGOING_USER)
+                .hasMessage(message);
     }
 
 }
