@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-public class QueueResponse {
+public class QueueRegisterResponse {
 
     private Long waitNumber;
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -23,7 +23,7 @@ public class QueueResponse {
     private String message;
 
     @Builder
-    private QueueResponse(Long waitNumber, LocalDateTime expiredAt, String message){
+    private QueueRegisterResponse(Long waitNumber, LocalDateTime expiredAt, String message){
         this.waitNumber = waitNumber;
         this.expiredAt = expiredAt;
         this.message = message;

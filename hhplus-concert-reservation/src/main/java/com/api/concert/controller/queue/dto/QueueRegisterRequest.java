@@ -9,6 +9,6 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class QueueRequest {
+public class QueueRegisterRequest {
     private Long userId;
 }
