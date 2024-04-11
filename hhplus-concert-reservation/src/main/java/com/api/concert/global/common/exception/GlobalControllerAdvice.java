@@ -1,6 +1,7 @@
 package com.api.concert.global.common.exception;
 
 import com.api.concert.global.common.model.CommonResponse;
+import com.api.concert.global.common.model.ResponseCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -12,8 +13,13 @@ public class GlobalControllerAdvice {
 
     @ExceptionHandler(AlreadyWaitingUserException.class)
     public ResponseEntity<CommonResponse> AlreadyApplyExceptionHandle() {
-        CommonResponse response = new CommonResponse(ReturnCode.ALREADY_WAITING_USER, ReturnCode.ALREADY_WAITING_USER.getMessage());
+        CommonResponse response = new CommonResponse(ResponseCode.ALREADY_WAITING_USER, ResponseCode.ALREADY_WAITING_USER.getMessage());
         return ResponseEntity.ok().body(response);
     }
 
+    @ExceptionHandler(CommonException.class)
+    public ResponseEntity<CommonResponse> CommonExceptionHandle(CommonException e) {
+        CommonResponse response = new CommonResponse(e.getResponseCode(), e.getMessage());
+        return ResponseEntity.ok().body(response);
+    }
 }
