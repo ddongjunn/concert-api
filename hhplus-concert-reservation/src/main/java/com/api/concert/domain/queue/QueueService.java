@@ -1,11 +1,17 @@
 package com.api.concert.domain.queue;
 
-import com.api.concert.controller.queue.dto.QueueRequest;
-import com.api.concert.controller.queue.dto.QueueResponse;
+import com.api.concert.controller.queue.dto.QueueRegisterRequest;
+import com.api.concert.controller.queue.dto.QueueRegisterResponse;
+import com.api.concert.controller.queue.dto.QueueStatusResponse;
+import com.api.concert.domain.queue.constant.WaitingStatus;
 import com.api.concert.global.common.exception.AlreadyWaitingUserException;
+import com.api.concert.global.common.exception.CommonException;
+import com.api.concert.global.common.model.ResponseCode;
+import com.api.concert.infrastructure.queue.projection.WaitingRank;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.message.StringFormattedMessage;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,14 +35,14 @@ public class QueueService {
 
     // 대기열 등록
     @Transactional
-    public QueueResponse register(QueueRequest queueRequestDto){
-        Long userId = queueRequestDto.getUserId();
+    public QueueRegisterResponse register(QueueRegisterRequest queueRegisterRequestDto){
+        Long userId = queueRegisterRequestDto.getUserId();
         isUserAlreadyRegistered(userId); //대기열에 WAIT, ONGOING 상태인 userId 존재 확인
 
         Queue queue = Queue.builder().userId(userId).build();
         assignQueueStatus(queue);
 
-        return QueueConverter.toResponse(
+        return QueueConverter.toRegisterResponse(
                 iQueueRepository.save(QueueConverter.toEntity(queue))
         );
     }
@@ -88,6 +94,25 @@ public class QueueService {
                 queuesInWaitStatus.stream()
                         .map(QueueConverter::toEntity)
                         .toList()
+        );
+    }
+
+    public QueueStatusResponse detail(Long concertWaitingId) {
+        Queue queue = iQueueRepository.findById(concertWaitingId);
+
+        if(queue.getStatus() == WaitingStatus.ONGOING){
+            String message = String.format("대기열 만료 시간 [%s]", queue.getExpiredAt());
+            throw new CommonException(ResponseCode.ALREADY_ONGOING_USER, message);
+        }
+
+        if(queue.getStatus() == WaitingStatus.WAIT){
+            WaitingRank waitingRank = iQueueRepository.countWaitingAhead(concertWaitingId);
+            queue.waitingNumber(waitingRank.getRanking());
+            return QueueConverter.toStatusResponse(queue);
+        }
+
+        return QueueConverter.toStatusResponse(
+                iQueueRepository.findById(concertWaitingId)
         );
     }
 }

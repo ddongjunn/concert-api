@@ -1,6 +1,8 @@
 package com.api.concert.domain.queue;
 
 import com.api.concert.domain.queue.constant.WaitingStatus;
+import com.api.concert.global.common.exception.CommonException;
+import com.api.concert.global.common.model.ResponseCode;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,6 +18,7 @@ public class Queue {
 
     private Long concertWaitingId;
     private Long userId;
+    private int waitingNumber;
     private WaitingStatus status;
     private LocalDateTime expiredAt;
     private LocalDateTime createdAt;
@@ -37,4 +40,9 @@ public class Queue {
         this.status = WaitingStatus.ONGOING;
         this.expiredAt = LocalDateTime.now().plusMinutes(QUEUE_EXPIRED_TIME);
     }
+
+    public void waitingNumber(int ranking) {
+        this.waitingNumber = ranking;
+    }
+
 }

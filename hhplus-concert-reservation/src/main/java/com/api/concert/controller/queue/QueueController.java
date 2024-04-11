@@ -1,8 +1,9 @@
 package com.api.concert.controller.queue;
 
 import com.api.concert.application.QueueFacade;
-import com.api.concert.controller.queue.dto.QueueRequest;
-import com.api.concert.controller.queue.dto.QueueResponse;
+import com.api.concert.controller.queue.dto.QueueRegisterRequest;
+import com.api.concert.controller.queue.dto.QueueRegisterResponse;
+import com.api.concert.controller.queue.dto.QueueStatusResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,18 +16,13 @@ public class QueueController {
     private final QueueFacade queueFacade;
 
     @PostMapping("/concert/waiting/register")
-    public ResponseEntity<QueueResponse> queueRegister(@RequestBody QueueRequest queueRequestDto){
-        return ResponseEntity.status(HttpStatus.OK).body(queueFacade.register(queueRequestDto));
+    public ResponseEntity<QueueRegisterResponse> queueRegister(@RequestBody QueueRegisterRequest queueRegisterRequestDto){
+        return ResponseEntity.status(HttpStatus.OK).body(queueFacade.register(queueRegisterRequestDto));
     }
 
-    @GetMapping("/concert/waiting/status/{userId}")
-    public String queueDetail(@PathVariable Long userId){
-        return """
-                {
-                  "code": "WAIT",
-                  "message": "고객님의 순번까지 N명 남았습니다."
-                }
-                """;
+    @GetMapping("/concert/waiting/status/{concertWaitingId}")
+    public ResponseEntity<QueueStatusResponse> queueDetail(@PathVariable Long concertWaitingId){
+        return ResponseEntity.status(HttpStatus.OK).body(queueFacade.detail(concertWaitingId));
     }
 
 

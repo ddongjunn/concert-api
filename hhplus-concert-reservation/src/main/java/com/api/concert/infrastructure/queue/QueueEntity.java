@@ -4,10 +4,7 @@ import com.api.concert.domain.queue.Queue;
 import com.api.concert.global.entity.BaseEntity;
 import com.api.concert.domain.queue.constant.WaitingStatus;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -15,6 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 @Table(name = "concert_waiting")
 @Entity
+@ToString
 public class
 QueueEntity extends BaseEntity {
 

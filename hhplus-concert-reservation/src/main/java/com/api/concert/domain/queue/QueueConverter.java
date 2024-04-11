@@ -1,6 +1,7 @@
 package com.api.concert.domain.queue;
 
-import com.api.concert.controller.queue.dto.QueueResponse;
+import com.api.concert.controller.queue.dto.QueueRegisterResponse;
+import com.api.concert.controller.queue.dto.QueueStatusResponse;
 import com.api.concert.domain.queue.constant.WaitingStatus;
 import com.api.concert.infrastructure.queue.QueueEntity;
 
@@ -26,13 +27,22 @@ public class QueueConverter {
                 .build();
     }
 
-    public static QueueResponse toResponse(Queue queue){
+    public static QueueRegisterResponse toRegisterResponse(Queue queue){
         String ONGOING_MESSAGE = "현재 고객님 순번으로 예약 만료시간까지 예약이 가능합니다.";
 
-        return QueueResponse.builder()
+        return QueueRegisterResponse.builder()
                 .waitNumber(queue.getConcertWaitingId())
                 .expiredAt(queue.getExpiredAt())
                 .message(queue.getStatus() == WaitingStatus.ONGOING ? ONGOING_MESSAGE : null)
+                .build();
+    }
+
+    public static QueueStatusResponse toStatusResponse(Queue queue) {
+        return QueueStatusResponse.builder()
+                .waitNumber(queue.getConcertWaitingId())
+                .status(queue.getStatus())
+                .expiredAt(queue.getExpiredAt())
+                .message("message")
                 .build();
     }
 }

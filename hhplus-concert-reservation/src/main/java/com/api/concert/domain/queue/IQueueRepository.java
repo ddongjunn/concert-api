@@ -1,6 +1,7 @@
 package com.api.concert.domain.queue;
 
 import com.api.concert.infrastructure.queue.QueueEntity;
+import com.api.concert.infrastructure.queue.projection.WaitingRank;
 
 import java.util.List;
 
@@ -18,4 +19,8 @@ public interface IQueueRepository {
     void updateStatusToOngoing(List<QueueEntity> entities);
 
     List<Queue> getQueuesInWaitStatus(int limit);
+
+    Queue findById(Long concertWaitingId);
+
+    WaitingRank countWaitingAhead(Long concertWaitingId);
 }

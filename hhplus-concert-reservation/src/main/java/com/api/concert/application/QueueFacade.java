@@ -1,7 +1,8 @@
 package com.api.concert.application;
 
-import com.api.concert.controller.queue.dto.QueueRequest;
-import com.api.concert.controller.queue.dto.QueueResponse;
+import com.api.concert.controller.queue.dto.QueueRegisterRequest;
+import com.api.concert.controller.queue.dto.QueueRegisterResponse;
+import com.api.concert.controller.queue.dto.QueueStatusResponse;
 import com.api.concert.domain.queue.QueueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -11,7 +12,12 @@ import org.springframework.stereotype.Component;
 public class QueueFacade {
 
     private final QueueService queueService;
-    public QueueResponse register(QueueRequest queueRequestDto) {
-        return queueService.register(queueRequestDto);
+    public QueueRegisterResponse register(QueueRegisterRequest queueRegisterRequestDto) {
+        return queueService.register(queueRegisterRequestDto);
     }
+
+    public QueueStatusResponse detail(Long concertWaitingId) {
+        return queueService.detail(concertWaitingId);
+    }
+
 }
