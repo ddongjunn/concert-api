@@ -10,8 +10,8 @@ import java.util.concurrent.atomic.AtomicLong;
 @Getter
 @RequiredArgsConstructor
 public class QueueOption {
-    public static final long QUEUE_EXPIRED_TIME = 1L;
-    public static final int QUEUE_LIMIT = 5;
+    public static final long QUEUE_EXPIRED_TIME = 10L;
+    public static final int QUEUE_LIMIT = 1;
 
     private final AtomicLong ongoingStatusCount = new AtomicLong();
 
