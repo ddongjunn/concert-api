@@ -45,4 +45,10 @@ public class Queue {
         this.waitingNumber = ranking;
     }
 
+    public void ifStatusOngoingThrowException() {
+        if(this.status == WaitingStatus.ONGOING){
+            String message = String.format("대기열 만료 시간 [%s]", this.getExpiredAt());
+            throw new CommonException(ResponseCode.ALREADY_ONGOING_USER, message);
+        }
+    }
 }

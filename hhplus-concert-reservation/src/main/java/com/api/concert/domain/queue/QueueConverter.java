@@ -38,11 +38,12 @@ public class QueueConverter {
     }
 
     public static QueueStatusResponse toStatusResponse(Queue queue) {
+        String message = String.format("현재 고객님 순번 : %s", queue.getWaitingNumber());
+
         return QueueStatusResponse.builder()
-                .waitNumber(queue.getConcertWaitingId())
+                .waitNumber(queue.getWaitingNumber())
                 .status(queue.getStatus())
-                .expiredAt(queue.getExpiredAt())
-                .message("message")
+                .message(message)
                 .build();
     }
 }

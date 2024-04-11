@@ -11,7 +11,6 @@ import com.api.concert.infrastructure.queue.projection.WaitingRank;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.message.StringFormattedMessage;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -99,20 +98,10 @@ public class QueueService {
 
     public QueueStatusResponse detail(Long concertWaitingId) {
         Queue queue = iQueueRepository.findById(concertWaitingId);
+        queue.ifStatusOngoingThrowException();
 
-        if(queue.getStatus() == WaitingStatus.ONGOING){
-            String message = String.format("대기열 만료 시간 [%s]", queue.getExpiredAt());
-            throw new CommonException(ResponseCode.ALREADY_ONGOING_USER, message);
-        }
-
-        if(queue.getStatus() == WaitingStatus.WAIT){
-            WaitingRank waitingRank = iQueueRepository.countWaitingAhead(concertWaitingId);
-            queue.waitingNumber(waitingRank.getRanking());
-            return QueueConverter.toStatusResponse(queue);
-        }
-
-        return QueueConverter.toStatusResponse(
-                iQueueRepository.findById(concertWaitingId)
-        );
+        WaitingRank waitingRank = iQueueRepository.countWaitingAhead(concertWaitingId);
+        queue.waitingNumber(waitingRank.getRanking());
+        return QueueConverter.toStatusResponse(queue);
     }
 }
