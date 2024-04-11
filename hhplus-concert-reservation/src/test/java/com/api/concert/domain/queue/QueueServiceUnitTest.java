@@ -1,9 +1,11 @@
 package com.api.concert.domain.queue;
 
-import com.api.concert.controller.queue.dto.QueueRequest;
-import com.api.concert.controller.queue.dto.QueueResponse;
+import com.api.concert.controller.queue.dto.QueueRegisterRequest;
+import com.api.concert.controller.queue.dto.QueueRegisterResponse;
 import com.api.concert.domain.queue.constant.WaitingStatus;
 import com.api.concert.global.common.exception.AlreadyWaitingUserException;
+import com.api.concert.global.common.exception.CommonException;
+import com.api.concert.global.common.model.ResponseCode;
 import com.api.concert.infrastructure.queue.QueueEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,8 +41,8 @@ class QueueServiceUnitTest {
     @Test
     void test_register(){
         // Given
-        QueueRequest queueRequest = QueueRequest.builder().userId(1L).build();
-        Long userId = queueRequest.getUserId();
+        QueueRegisterRequest queueRegisterRequest = QueueRegisterRequest.builder().userId(1L).build();
+        Long userId = queueRegisterRequest.getUserId();
         Queue queue = Queue.builder().userId(userId).build();
 
         // When
@@ -50,8 +52,8 @@ class QueueServiceUnitTest {
         Queue savedQueue = Queue.builder().concertWaitingId(1L).userId(1L).status(WaitingStatus.ONGOING).build();
         when(iQueueRepository.save(any(QueueEntity.class))).thenReturn(savedQueue);
 
-        QueueResponse expected = QueueConverter.toResponse(savedQueue);
-        QueueResponse result = queueService.register(queueRequest);
+        QueueRegisterResponse expected = QueueConverter.toRegisterResponse(savedQueue);
+        QueueRegisterResponse result = queueService.register(queueRegisterRequest);
 
         // Then
         assertThat(result.getWaitNumber()).isEqualTo(expected.getWaitNumber());
@@ -173,6 +175,22 @@ class QueueServiceUnitTest {
         assertThat(queuesInWaitStatus)
                 .extracting(Queue::getStatus)
                 .containsOnly(WaitingStatus.ONGOING);
+    }
+
+    @DisplayName("대기열 상태 조회")
+    @Test
+    void test(){
+        // Given
+        Long concertWaitingId = 1L;
+
+        // When
+        when(iQueueRepository.findById(anyLong())).thenThrow(new CommonException(ResponseCode.TICKET_NOT_ISSUED, ResponseCode.TICKET_NOT_ISSUED.getMessage()));
+
+        // Then
+        assertThatThrownBy(() -> queueService.detail(concertWaitingId))
+                .isInstanceOf(CommonException.class)
+                .hasMessage(ResponseCode.TICKET_NOT_ISSUED.getMessage());
+
     }
 
 }
