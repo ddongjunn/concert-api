@@ -4,6 +4,9 @@ import com.api.concert.domain.queue.IQueueRepository;
 import com.api.concert.domain.queue.Queue;
 import com.api.concert.domain.queue.QueueConverter;
 import com.api.concert.domain.queue.constant.WaitingStatus;
+import com.api.concert.global.common.exception.CommonException;
+import com.api.concert.global.common.model.ResponseCode;
+import com.api.concert.infrastructure.queue.projection.WaitingRank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -61,5 +64,18 @@ public class QueueRepository implements IQueueRepository {
                 .stream()
                 .map(QueueConverter::toDomain)
                 .toList();
+    }
+
+    @Override
+    public Queue findById(Long concertWaitingId) {
+        return QueueConverter.toDomain(
+                queueJpaRepository.findById(concertWaitingId)
+                .orElseThrow(() -> new CommonException(ResponseCode.TICKET_NOT_ISSUED, ResponseCode.TICKET_NOT_ISSUED.getMessage()))
+        );
+    }
+
+    @Override
+    public WaitingRank countWaitingAhead(Long concertWaitingId) {
+        return queueJpaRepository.findWaitingRankById(concertWaitingId,"WAIT");
     }
 }
