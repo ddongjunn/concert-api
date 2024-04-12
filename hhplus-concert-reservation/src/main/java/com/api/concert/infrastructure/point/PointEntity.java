@@ -1,16 +1,14 @@
 package com.api.concert.infrastructure.point;
 
 import com.api.concert.global.entity.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @Getter
 @Entity
+@Table(name = "point")
 public class PointEntity extends BaseEntity {
 
     @Id
