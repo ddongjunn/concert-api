@@ -10,11 +10,9 @@ import java.time.LocalDateTime;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Table(name = "concert_waiting")
+@Table(name = "queue")
 @Entity
-@ToString
-public class
-QueueEntity extends BaseEntity {
+public class QueueEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
