@@ -15,13 +15,9 @@ import java.util.List;
 public class ConcertRepository implements IConcertRepository {
 
     private final ConcertJpaRepository concertJpaRepository;
+
     @Override
-    public List<Concert> findAvailableConcerts() {
-        int limit = 5;
-        List<ConcertInfo> availableConcerts = concertJpaRepository.findAvailableConcerts();
-        availableConcerts.forEach(
-                c -> log.info("concert {} {} {} {} {}", c.getConcertId(), c.getName(), c.getSinger(), c.getVenue(), c.getStartDate())
-        );
-        return null;
+    public List<ConcertInfo> availableConcerts() {
+        return concertJpaRepository.findAvailableConcerts();
     }
 }

@@ -1,11 +1,16 @@
 package com.api.concert.controller.concert;
 
 import com.api.concert.application.ConcertFacade;
+import com.api.concert.controller.concert.dto.ConcertResponseDto;
+import com.api.concert.global.common.model.ApiResponse;
+import com.api.concert.infrastructure.concert.projection.ConcertInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -13,8 +18,8 @@ public class ConcertController {
 
     private final ConcertFacade concertFacade;
     @GetMapping("/concert/reservation/dates")
-    public String concertsForReservationList(){
-        return concertFacade.getAvailableConcerts();
+    public List<ConcertInfo> concerts(){
+        return concertFacade.getConcerts();
     }
 
     @GetMapping("/concert/{concertId}/reservation/seats")

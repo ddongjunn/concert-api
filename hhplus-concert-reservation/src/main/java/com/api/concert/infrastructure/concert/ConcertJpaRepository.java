@@ -9,7 +9,7 @@ import java.util.List;
 public interface ConcertJpaRepository extends JpaRepository<ConcertEntity, Long> {
 
     @Query(value =
-            "SELECT c.concertId AS concertId, c.name AS name, c.singer AS singer, co.venue AS venue, co.startDate AS startDate " +
+            "SELECT co.concertOptionId AS concertOptionId, c.name AS name, c.singer AS singer, co.venue AS venue, co.startDate AS startDate " +
             "FROM ConcertEntity c " +
             "JOIN ConcertOptionEntity co ON c.concertId = co.concertId " +
             "WHERE co.reservationStartDate < now() AND co.startDate > now()")
