@@ -15,9 +15,9 @@ public class PointEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long pointId;
+    private Long pointId;
 
-    Long userId;
+    private Long userId;
 
-    Long point;
+    private Long point;
 }

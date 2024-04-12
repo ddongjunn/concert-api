@@ -1,6 +1,5 @@
 package com.api.concert.infrastructure.queue;
 
-import com.api.concert.domain.queue.Queue;
 import com.api.concert.global.entity.BaseEntity;
 import com.api.concert.domain.queue.constant.WaitingStatus;
 import jakarta.persistence.*;
@@ -16,15 +15,15 @@ public class QueueEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long concertWaitingId;
+    private Long concertWaitingId;
 
-    Long userId;
+    private Long userId;
 
     @Enumerated(EnumType.STRING)
-    WaitingStatus status;
+    private WaitingStatus status;
 
     @Column(nullable = true)
-    LocalDateTime expiredAt;
+    private LocalDateTime expiredAt;
 
     @Builder
     public QueueEntity(Long concertWaitingId, Long userId, WaitingStatus status, LocalDateTime expiredAt){

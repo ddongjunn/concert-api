@@ -15,16 +15,16 @@ public class ConcertSeatEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long seatId;
+    private Long seatId;
 
-    Long concert_option_id;
+    private Long concert_option_id;
 
     @Enumerated(EnumType.STRING)
-    SeatStatus status;
+    private SeatStatus status;
 
-    int seatNo;
+    private int seatNo;
 
-    int price;
+    private int price;
 
     @Builder
     public ConcertSeatEntity(Long seatId, Long concert_option_id, SeatStatus status, int seatNo, int price) {

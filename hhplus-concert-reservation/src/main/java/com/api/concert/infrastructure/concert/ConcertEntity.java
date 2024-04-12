@@ -14,11 +14,11 @@ public class ConcertEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long concertId;
+    private Long concertId;
 
-    String name;
+    private String name;
 
-    String singer;
+    private String singer;
 
     @Builder
     public ConcertEntity(Long concertId, String name, String singer) {

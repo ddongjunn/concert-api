@@ -15,9 +15,11 @@ public class ConcertOptionEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long concertOptionId;
+    private Long concertOptionId;
 
-    Long concertId;
+    private Long concertId;
 
-    LocalDateTime startDate;
+    private String venue;
+
+    private LocalDateTime startDate;
 }

@@ -14,9 +14,9 @@ public class UserEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long userId;
+    private Long userId;
 
-    Long point;
+    private Long point;
 
     @Builder
     public UserEntity(Long userId, Long point){
