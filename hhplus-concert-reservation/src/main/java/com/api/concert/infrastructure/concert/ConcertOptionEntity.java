@@ -21,5 +21,7 @@ public class ConcertOptionEntity extends BaseEntity {
 
     private String venue;
 
+    private LocalDateTime reservationStartDate;
+
     private LocalDateTime startDate;
 }
