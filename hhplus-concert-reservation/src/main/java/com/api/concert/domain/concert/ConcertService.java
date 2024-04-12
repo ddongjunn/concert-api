@@ -14,7 +14,7 @@ public class ConcertService {
     private final IConcertRepository iConcertRepository;
 
     public List<Concert> findAvailableConcerts() {
-
+        iConcertRepository.findAvailableConcerts();
         return List.of();
     }
 }

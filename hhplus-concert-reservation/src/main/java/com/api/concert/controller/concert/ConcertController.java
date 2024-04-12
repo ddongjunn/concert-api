@@ -1,42 +1,20 @@
 package com.api.concert.controller.concert;
 
+import com.api.concert.application.ConcertFacade;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@RequiredArgsConstructor
 @RestController
 public class ConcertController {
 
+    private final ConcertFacade concertFacade;
     @GetMapping("/concert/reservation/dates")
     public String concertsForReservationList(){
-        return """
-                {
-                    "concerts" [
-                        {
-                            "concert_id": 1,
-                            "concert_name": "다나카 내한 공연［SAYONARA... TANAKA",
-                            "concert_singer": "다나카",
-                            "concert_venue": "서강대 메리홀 대극장",
-                            "concert_start_date": "2024-04-26 20:00:00"
-                        },
-                        {
-                            "concert_id": 2,
-                            "concert_name": "2024 성시경의 축가 콘서트",
-                            "concert_singer": "성시경",
-                            "concert_venue": "연세대학교 노천극장",
-                            "concert_start_date": "2024-09-10 19:30:00"
-                        },
-                        {
-                             "concert_id": 3,
-                             "concert_name": "황영웅 대전콘서트 〈봄날의 고백>",
-                             "concert_singer": "황영웅",
-                             "concert_venue": "대전 컨벤션센터 제2전시장",
-                             "concert_start_date": "2024-05-25 17:00:00"
-                        }
-                    ]
-                }
-                """;
+        return concertFacade.getAvailableConcerts();
     }
 
     @GetMapping("/concert/{concertId}/reservation/seats")
