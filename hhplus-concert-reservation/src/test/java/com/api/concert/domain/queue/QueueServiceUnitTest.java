@@ -54,6 +54,7 @@ class QueueServiceUnitTest {
         queueService.isUserAlreadyRegistered(userId);
         queueService.assignQueueStatus(queue);
 
+        when(iQueueRepository.existsByUserIdAndStatusIsOngoingOrWaiting(anyLong())).thenReturn(false);
         Queue savedQueue = Queue.builder().concertWaitingId(1L).userId(1L).status(WaitingStatus.ONGOING).build();
         when(iQueueRepository.save(any(QueueEntity.class))).thenReturn(savedQueue);
 
