@@ -36,9 +36,9 @@ public interface QueueJpaRepository extends JpaRepository<QueueEntity, Long> {
     @Query(value = "SELECT ranking " +
                     "FROM ( " +
                         "SELECT rank() over (ORDER BY created_at) AS ranking, concert_waiting_id " +
-                        "FROM concert_waiting " +
+                        "FROM queue " +
                         "WHERE status = :status " +
                     ") AS ranked_waiting " +
-                "WHERE concert_waiting_id = :id", nativeQuery = true)
+                "WHERE queueId = :id", nativeQuery = true)
     WaitingRank findWaitingRankById(@Param("id") Long id, @Param("status") String status);
 }
