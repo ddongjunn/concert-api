@@ -17,9 +17,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface QueueJpaRepository extends JpaRepository<QueueEntity, Long> {
-    long countByStatus(WaitingStatus status);
-
-    boolean existsByUserIdAndStatusIn(Long userId, List<WaitingStatus> statuses);
 
     List<QueueEntity> findByStatusAndExpiredAtIsBefore(WaitingStatus status, LocalDateTime queueExpiredTime);
 
@@ -41,8 +38,9 @@ public interface QueueJpaRepository extends JpaRepository<QueueEntity, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT q FROM QueueEntity q WHERE q.status = :status")
-    List<QueueEntity> findByStatus(@Param("status") WaitingStatus status);
+    List<QueueEntity> findByStatusWithPessimisticLock(@Param("status") WaitingStatus status);
 
     Optional<QueueEntity> findByUserIdAndStatusIn(Long userId, List<WaitingStatus> asList);
 
+    long countByStatus(WaitingStatus ongoing);
 }
