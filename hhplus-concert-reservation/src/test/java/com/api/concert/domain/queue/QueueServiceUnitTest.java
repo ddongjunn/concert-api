@@ -4,7 +4,6 @@ import com.api.concert.controller.queue.dto.QueueRegisterRequest;
 import com.api.concert.controller.queue.dto.QueueRegisterResponse;
 import com.api.concert.controller.queue.dto.QueueStatusResponse;
 import com.api.concert.domain.queue.constant.WaitingStatus;
-import com.api.concert.global.common.exception.AlreadyWaitingUserException;
 import com.api.concert.global.common.exception.CommonException;
 import com.api.concert.global.common.model.ResponseCode;
 import com.api.concert.infrastructure.queue.QueueEntity;
@@ -42,12 +41,13 @@ class QueueServiceUnitTest {
     QueueService queueService;
 
 
-    @DisplayName("[대기열 등록] - 대기열이 가득 차지 않은 경우 ONGOING 으로 등록")
+    @DisplayName("[대기열 신청] - 대기열이 가득 차지 않은 경우 ONGOING")
     @Test
-    void test_register(){
+    void test_register_ongoing(){
         // Given
         QueueRegisterRequest queueRegisterRequest = createTestQueueRegisterRequestByUserId(1L);
         Long userId = queueRegisterRequest.getUserId();
+        Queue queue = Queue.builder().userId(userId).build();
 
         // When
         when(iQueueRepository.findByUserIdAndStatusIn(anyLong(), anyList())).thenReturn(null);
@@ -55,7 +55,6 @@ class QueueServiceUnitTest {
 
         List<Queue> ongoingStatus = getOngoingQueueListBySize(QUEUE_LIMIT - 1);
         when(iQueueRepository.findByStatusWithPessimisticLock(any(WaitingStatus.class))).thenReturn(ongoingStatus);
-        Queue queue = Queue.builder().userId(userId).build();
         queueService.assignQueueStatusByAvailability(queue);
 
         Queue savedQueue = Queue.builder().queueId(6L).userId(6L).status(WaitingStatus.ONGOING).build();
@@ -70,64 +69,101 @@ class QueueServiceUnitTest {
         assertThat(result.getMessage()).isEqualTo(expected.getMessage());
     }
 
-    /*@DisplayName("[대기열 중복 신청] 대기열에 이미 존재하는 사용자가 신청하는 경우 Exception")
+    @DisplayName("[대기열 신청] - 대기열이 가득 찬 경우 WAIT")
     @Test
-    void test_isUserAlreadyRegistered(){
+    void test_register_wait(){
         // Given
-        Long userId = 1L;
+        QueueRegisterRequest queueRegisterRequest = createTestQueueRegisterRequestByUserId(1L);
+        Long userId = queueRegisterRequest.getUserId();
+        Queue queue = Queue.builder().userId(userId).build();
 
         // When
-        when(iQueueRepository.existsByUserIdAndStatusIsOngoingOrWaiting(userId)).thenReturn(true);
+        when(iQueueRepository.findByUserIdAndStatusIn(anyLong(), anyList())).thenReturn(null);
+        queueService.validateUserNotRegisteredOrThrow(userId);
+
+        List<Queue> ongoingStatus = getOngoingQueueListBySize(QUEUE_LIMIT);
+        when(iQueueRepository.findByStatusWithPessimisticLock(any(WaitingStatus.class))).thenReturn(ongoingStatus);
+        queueService.assignQueueStatusByAvailability(queue);
+
+        Queue savedQueue = Queue.builder().queueId(6L).userId(6L).status(WaitingStatus.WAIT).build();
+        when(iQueueRepository.save(any(QueueEntity.class))).thenReturn(savedQueue);
+
+        QueueRegisterResponse expected = QueueConverter.toRegisterResponse(savedQueue);
+        QueueRegisterResponse result = queueService.register(queueRegisterRequest);
 
         // Then
-        assertThatThrownBy(() -> queueService.isUserAlreadyRegistered(userId))
-                .isInstanceOf(AlreadyWaitingUserException.class);
+        assertThat(result.getWaitNumber()).isEqualTo(expected.getWaitNumber());
+        assertThat(result.getExpiredAt()).isEqualTo(expected.getExpiredAt());
+        assertThat(result.getMessage()).isEqualTo(expected.getMessage());
+    }
+
+    @DisplayName("[대기열 중복 신청] - 대기열에 이미 등록된 경우 WAIT")
+    @Test
+    void test_register_alreadyWait(){
+        // Given
+        QueueRegisterRequest queueRegisterRequest = createTestQueueRegisterRequestByUserId(1L);
+        Long userId = queueRegisterRequest.getUserId();
+        Queue queue = createTestQueueByUserIdAndStatus(1L ,WaitingStatus.WAIT);
+
+        // When & Then
+        when(iQueueRepository.findByUserIdAndStatusIn(anyLong(), anyList())).thenReturn(queue);
+        assertThatThrownBy(() -> queueService.validateUserNotRegisteredOrThrow(userId))
+                .isInstanceOf(CommonException.class)
+                .hasFieldOrPropertyWithValue("ResponseCode", ResponseCode.ALREADY_WAITING_USER)
+                .hasMessage(ResponseCode.ALREADY_WAITING_USER.getMessage());
+
+    }
+
+    @DisplayName("[대기열 중복 신청] - 대기열에 이미 등록된 경우 ONGOING")
+    @Test
+    void test_register_alreadyOngoing(){
+        // Given
+        QueueRegisterRequest queueRegisterRequest = createTestQueueRegisterRequestByUserId(1L);
+        Long userId = queueRegisterRequest.getUserId();
+        Queue queue = createTestQueueByUserIdAndStatus(1L ,WaitingStatus.ONGOING);
+        String message = String.format("대기열 만료 시간 [%s]", queue.getExpiredAt());
+
+        // When & Then
+        when(iQueueRepository.findByUserIdAndStatusIn(anyLong(), anyList())).thenReturn(queue);
+        assertThatThrownBy(() -> queueService.validateUserNotRegisteredOrThrow(userId))
+                .isInstanceOf(CommonException.class)
+                .hasFieldOrPropertyWithValue("ResponseCode", ResponseCode.ALREADY_ONGOING_USER)
+                .hasMessage(message);
+
     }
 
 
-    *//***
-     * 1. 대기열 만료시간이 지난 리스트 ONGOING -> DONE
-     * 2. 대기열 만료시간이 지난 리스트 !isEmpty()
+    /**
+     * 1. 대기열 만료시간이 지난 리스트 status update : ONGOING -> null, isExpired -> true
      * 3. 대기열 만료시간이 지난 리스트 수 만큼 WAIT 상태 리스트(created_at ASC) WAIT -> ONGOING
-     *//*
-    @DisplayName("[대기열 상태 갱신] ONGOING -> DONE, WAIT -> ONGOING")
+     */
+    @DisplayName("[대기열 상태 갱신] 만료된 대기열 리스트 개수 만큼 WAIT 상태 대기열 활성화")
     @Test
-    void test_expiredOngoingStatusToDone(){
+    void test_updateExpiredQueuesAndActivateNewOnes(){
         // Given
         LocalDateTime currentDateTimeMinusOneMinutes = LocalDateTime.now().minusMinutes(1);
-        List<Queue> expiredOngoingStatus = List.of(
-                Queue.builder().concertWaitingId(1L).userId(1L).status(WaitingStatus.ONGOING).expiredAt(currentDateTimeMinusOneMinutes).build(),
-                Queue.builder().concertWaitingId(2L).userId(2L).status(WaitingStatus.ONGOING).expiredAt(currentDateTimeMinusOneMinutes).build(),
-                Queue.builder().concertWaitingId(3L).userId(3L).status(WaitingStatus.ONGOING).expiredAt(currentDateTimeMinusOneMinutes).build(),
-                Queue.builder().concertWaitingId(4L).userId(4L).status(WaitingStatus.ONGOING).expiredAt(currentDateTimeMinusOneMinutes).build(),
-                Queue.builder().concertWaitingId(5L).userId(5L).status(WaitingStatus.ONGOING).expiredAt(currentDateTimeMinusOneMinutes).build()
-        );
-
-        List<Queue> queuesInWaitStatus = List.of(
-                Queue.builder().concertWaitingId(6L).userId(6L).status(WaitingStatus.WAIT).build(),
-                Queue.builder().concertWaitingId(7L).userId(7L).status(WaitingStatus.WAIT).build(),
-                Queue.builder().concertWaitingId(8L).userId(8L).status(WaitingStatus.WAIT).build(),
-                Queue.builder().concertWaitingId(9L).userId(9L).status(WaitingStatus.WAIT).build(),
-                Queue.builder().concertWaitingId(10L).userId(10L).status(WaitingStatus.WAIT).build()
-        );
+        List<Queue> expiredQueues = createOngoingListBySizeAndExpiredAt(5, currentDateTimeMinusOneMinutes);
+        List<Queue> waitQueues = createWaitListBySize(5);
 
         // When
-        when(iQueueRepository.getExpiredOngoingStatus()).thenReturn(expiredOngoingStatus);
+        when(iQueueRepository.findExpiredOngoingStatus(any(WaitingStatus.class), any(LocalDateTime.class))).thenReturn(expiredQueues);
 
-        queueService.updateStatusToDone(expiredOngoingStatus);
-        doNothing().when(iQueueRepository).updateStatusToDone(anyList());
+        queueService.expireQueues(expiredQueues);
+        doNothing().when(iQueueRepository).updateStatusFromWaitToOngoingOrExpired(anyList());
 
-        queueService.updateStatusToOngoingForWaitQueues();
-        when(iQueueRepository.getQueuesInWaitStatus(anyInt())).thenReturn(queuesInWaitStatus);
-        doNothing().when(iQueueRepository).updateStatusToOngoing(anyList());
+        queueService.activateQueuesByExpireQueuesSize(expiredQueues.size());
+        when(iQueueRepository.findQueuesInWaitStatus(any(WaitingStatus.class), anyInt())).thenReturn(waitQueues);
+        doNothing().when(iQueueRepository).updateStatusFromWaitToOngoingOrExpired(anyList());
 
         // Then
-        queueService.expiredOngoingStatusToDone();
-        assertThat(expiredOngoingStatus)
-                .extracting(Queue::getStatus)
-                .containsOnly(WaitingStatus.DONE);
+        queueService.updateExpiredQueuesAndActivateNewOnes();
+        assertThat(expiredQueues)
+                .allSatisfy(queue -> {
+                    assertThat(queue.getStatus()).isNull();
+                    assertThat(queue.isExpired()).isEqualTo(true);
+                });
 
-        assertThat(queuesInWaitStatus)
+        assertThat(waitQueues)
             .allSatisfy(queue -> {
                 assertThat(queue.getStatus()).isEqualTo(WaitingStatus.ONGOING);
                 assertThat(queue.getExpiredAt().truncatedTo(ChronoUnit.SECONDS))
@@ -135,55 +171,46 @@ class QueueServiceUnitTest {
             });
     }
 
-    @DisplayName("[대기열 만료된 토큰 갱신] ONGOING -> DONE")
+    @DisplayName("[대기열 만료된 토큰 상태값 변경] ONGOING -> DONE")
     @Test
-    void test_updateStatusToDone(){
+    void test_expireQueues(){
         // Given
         LocalDateTime currentDateTimeMinusOneMinutes = LocalDateTime.now().minusMinutes(1);
-        List<Queue> expiredOngoingStatus = List.of(
-                Queue.builder().concertWaitingId(1L).userId(1L).status(WaitingStatus.ONGOING).expiredAt(currentDateTimeMinusOneMinutes).build(),
-                Queue.builder().concertWaitingId(2L).userId(2L).status(WaitingStatus.ONGOING).expiredAt(currentDateTimeMinusOneMinutes).build(),
-                Queue.builder().concertWaitingId(3L).userId(3L).status(WaitingStatus.ONGOING).expiredAt(currentDateTimeMinusOneMinutes).build(),
-                Queue.builder().concertWaitingId(4L).userId(4L).status(WaitingStatus.ONGOING).expiredAt(currentDateTimeMinusOneMinutes).build(),
-                Queue.builder().concertWaitingId(5L).userId(5L).status(WaitingStatus.ONGOING).expiredAt(currentDateTimeMinusOneMinutes).build()
-        );
+        List<Queue> expiredQueues = createOngoingListBySizeAndExpiredAt(5, currentDateTimeMinusOneMinutes);
 
         // When
-        doNothing().when(iQueueRepository).updateStatusToDone(anyList());
-        queueService.updateStatusToDone(expiredOngoingStatus);
+        doNothing().when(iQueueRepository).updateStatusFromWaitToOngoingOrExpired(anyList());
+        queueService.expireQueues(expiredQueues);
 
         // Then
-        verify(iQueueRepository).updateStatusToDone(anyList());
-
-        assertThat(expiredOngoingStatus)
-                .extracting(Queue::getStatus)
-                .containsOnly(WaitingStatus.DONE);
+        verify(iQueueRepository).updateStatusFromWaitToOngoingOrExpired(anyList());
+        assertThat(expiredQueues)
+                .allSatisfy(queue -> {
+                    assertThat(queue.getStatus()).isNull();
+                    assertThat(queue.isExpired()).isEqualTo(true);
+                });
     }
 
-    @DisplayName("[대기열 토큰 갱신] WAIT -> ONGOING")
+    @DisplayName("[대기열 대기중인 토큰 갱신] WAIT -> ONGOING")
     @Test
-    void test_updateStatusToOngoingForWaitQueues(){
+    void test_activateQueuesByExpireQueuesSize(){
         // Given
         int availableQueueSpace = 3;
-        given(queueOption.calculateAvailableQueueSpace()).willReturn(availableQueueSpace);
-
-        List<Queue> queuesInWaitStatus = List.of(
-                Queue.builder().concertWaitingId(1L).userId(1L).status(WaitingStatus.WAIT).build(),
-                Queue.builder().concertWaitingId(2L).userId(2L).status(WaitingStatus.WAIT).build(),
-                Queue.builder().concertWaitingId(3L).userId(3L).status(WaitingStatus.WAIT).build()
-        );
+        List<Queue> waitQueues = createWaitListBySize(availableQueueSpace);
 
         // When
-        when(iQueueRepository.getQueuesInWaitStatus(availableQueueSpace)).thenReturn(queuesInWaitStatus);
-        doNothing().when(iQueueRepository).updateStatusToOngoing(anyList());
+        when(iQueueRepository.findQueuesInWaitStatus(any(WaitingStatus.class), anyInt())).thenReturn(waitQueues);
+        doNothing().when(iQueueRepository).updateStatusFromWaitToOngoingOrExpired(anyList());
 
         // Then
-        queueService.updateStatusToOngoingForWaitQueues();
-        verify(iQueueRepository).updateStatusToOngoing(anyList());
-
-        assertThat(queuesInWaitStatus)
-                .extracting(Queue::getStatus)
-                .containsOnly(WaitingStatus.ONGOING);
+        queueService.activateQueuesByExpireQueuesSize(availableQueueSpace);
+        verify(iQueueRepository).updateStatusFromWaitToOngoingOrExpired(anyList());
+        assertThat(waitQueues)
+                .allSatisfy(queue -> {
+                    assertThat(queue.getStatus()).isEqualTo(WaitingStatus.ONGOING);
+                    assertThat(queue.getExpiredAt().truncatedTo(ChronoUnit.SECONDS))
+                            .isEqualTo(LocalDateTime.now().plusMinutes(QUEUE_EXPIRED_TIME).truncatedTo(ChronoUnit.SECONDS));
+                });
     }
 
     @DisplayName("[대기열 상태 조회] - 존재하지 않는 번호표")
@@ -206,7 +233,7 @@ class QueueServiceUnitTest {
     void test_detail_statusWait(){
         // Given
         Long concertWaitingId = 1L;
-        Queue queue = Queue.builder().concertWaitingId(1L).waitingNumber(1).status(WaitingStatus.WAIT).build();
+        Queue queue = Queue.builder().queueId(1L).waitingNumber(1).status(WaitingStatus.WAIT).build();
 
         // When
         when(iQueueRepository.findById(anyLong())).thenReturn(queue);
@@ -217,7 +244,7 @@ class QueueServiceUnitTest {
         QueueStatusResponse result = queueService.detail(concertWaitingId);
         assertThat(result.getWaitNumber()).isEqualTo(1);
         assertThat(result.getStatus()).isEqualTo(WaitingStatus.WAIT);
-        assertThat(result.getMessage()).isEqualTo("현재 고객님 순번 : %s", queue.getWaitingNumber());
+        assertThat(result.getMessage()).isEqualTo("대기열 순번 : %s", queue.getWaitingNumber());
     }
 
     @DisplayName("[대기열 상태 조회] - ONGOING")
@@ -225,7 +252,7 @@ class QueueServiceUnitTest {
     void test_detail_statusOngoing(){
         // Given
         Long concertWaitingId = 1L;
-        Queue queue = Queue.builder().concertWaitingId(1L).expiredAt(LocalDateTime.now()).status(WaitingStatus.ONGOING).build();
+        Queue queue = Queue.builder().queueId(1L).expiredAt(LocalDateTime.now()).status(WaitingStatus.ONGOING).build();
         String message = String.format("대기열 만료 시간 [%s]", queue.getExpiredAt());
 
         // When
@@ -236,7 +263,7 @@ class QueueServiceUnitTest {
                 .isInstanceOf(CommonException.class)
                 .hasFieldOrPropertyWithValue("responseCode", ResponseCode.ALREADY_ONGOING_USER)
                 .hasMessage(message);
-    }*/
+    }
 
     public QueueRegisterRequest createTestQueueRegisterRequestByUserId(Long userId){
         return QueueRegisterRequest
@@ -256,6 +283,35 @@ class QueueServiceUnitTest {
         List<Queue> ongoingStatus = new ArrayList<>();
         for(int i = 1; i <= size; i++) {
             ongoingStatus.add(createTestQueueByUserIdAndStatus((long) i, WaitingStatus.ONGOING));
+        }
+        return ongoingStatus;
+    }
+
+    public List<Queue> createOngoingListBySizeAndExpiredAt(int size, LocalDateTime time) {
+        List<Queue> ongoingStatus = new ArrayList<>();
+        for(int i = 1; i <= size; i++) {
+            ongoingStatus.add(
+                    Queue.builder()
+                            .queueId((long) i)
+                            .userId((long) i)
+                            .status(WaitingStatus.ONGOING)
+                            .expiredAt(time)
+                            .build()
+            );
+        }
+        return ongoingStatus;
+    }
+
+    public List<Queue> createWaitListBySize(int size) {
+        List<Queue> ongoingStatus = new ArrayList<>();
+        for(int i = 1; i <= size; i++) {
+            ongoingStatus.add(
+                    Queue.builder()
+                            .queueId((long) i + 10)
+                            .userId((long) i + 10)
+                            .status(WaitingStatus.WAIT)
+                            .build()
+            );
         }
         return ongoingStatus;
     }
