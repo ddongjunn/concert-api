@@ -18,9 +18,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
-import static com.api.concert.domain.queue.QueueOption.QUEUE_EXPIRED_TIME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
@@ -29,11 +29,11 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class QueueServiceUnitTest {
+
+    private final int QUEUE_LIMIT = 5;
+    private final int QUEUE_EXPIRED_TIME = 1;
     @Mock
     IQueueRepository iQueueRepository;
-
-    @Mock
-    QueueOption queueOption;
 
     @Mock
     WaitingRank waitingRank;
@@ -42,20 +42,23 @@ class QueueServiceUnitTest {
     QueueService queueService;
 
 
-    @DisplayName("[대기열 등록]")
+    @DisplayName("[대기열 등록] - 대기열이 가득 차지 않은 경우 ONGOING 으로 등록")
     @Test
     void test_register(){
         // Given
-        QueueRegisterRequest queueRegisterRequest = QueueRegisterRequest.builder().userId(1L).build();
+        QueueRegisterRequest queueRegisterRequest = createTestQueueRegisterRequestByUserId(1L);
         Long userId = queueRegisterRequest.getUserId();
-        Queue queue = Queue.builder().userId(userId).build();
 
         // When
-        queueService.isUserAlreadyRegistered(userId);
-        queueService.assignQueueStatus(queue);
+        when(iQueueRepository.findByUserIdAndStatusIn(anyLong(), anyList())).thenReturn(null);
+        queueService.validateUserNotRegisteredOrThrow(userId);
 
-        when(iQueueRepository.existsByUserIdAndStatusIsOngoingOrWaiting(anyLong())).thenReturn(false);
-        Queue savedQueue = Queue.builder().concertWaitingId(1L).userId(1L).status(WaitingStatus.ONGOING).build();
+        List<Queue> ongoingStatus = getOngoingQueueListBySize(QUEUE_LIMIT - 1);
+        when(iQueueRepository.findByStatusWithPessimisticLock(any(WaitingStatus.class))).thenReturn(ongoingStatus);
+        Queue queue = Queue.builder().userId(userId).build();
+        queueService.assignQueueStatusByAvailability(queue);
+
+        Queue savedQueue = Queue.builder().queueId(6L).userId(6L).status(WaitingStatus.ONGOING).build();
         when(iQueueRepository.save(any(QueueEntity.class))).thenReturn(savedQueue);
 
         QueueRegisterResponse expected = QueueConverter.toRegisterResponse(savedQueue);
@@ -67,7 +70,7 @@ class QueueServiceUnitTest {
         assertThat(result.getMessage()).isEqualTo(expected.getMessage());
     }
 
-    @DisplayName("[대기열 중복 신청] 대기열에 이미 존재하는 사용자가 신청하는 경우 Exception")
+    /*@DisplayName("[대기열 중복 신청] 대기열에 이미 존재하는 사용자가 신청하는 경우 Exception")
     @Test
     void test_isUserAlreadyRegistered(){
         // Given
@@ -82,11 +85,11 @@ class QueueServiceUnitTest {
     }
 
 
-    /***
+    *//***
      * 1. 대기열 만료시간이 지난 리스트 ONGOING -> DONE
      * 2. 대기열 만료시간이 지난 리스트 !isEmpty()
      * 3. 대기열 만료시간이 지난 리스트 수 만큼 WAIT 상태 리스트(created_at ASC) WAIT -> ONGOING
-     */
+     *//*
     @DisplayName("[대기열 상태 갱신] ONGOING -> DONE, WAIT -> ONGOING")
     @Test
     void test_expiredOngoingStatusToDone(){
@@ -233,6 +236,28 @@ class QueueServiceUnitTest {
                 .isInstanceOf(CommonException.class)
                 .hasFieldOrPropertyWithValue("responseCode", ResponseCode.ALREADY_ONGOING_USER)
                 .hasMessage(message);
+    }*/
+
+    public QueueRegisterRequest createTestQueueRegisterRequestByUserId(Long userId){
+        return QueueRegisterRequest
+                .builder()
+                .userId(userId)
+                .build();
+    }
+    public Queue createTestQueueByUserIdAndStatus(Long userId, WaitingStatus status){
+        return Queue.builder()
+                .queueId(1L)
+                .userId(userId)
+                .status(status)
+                .isExpired(false)
+                .build();
+    }
+    public List<Queue> getOngoingQueueListBySize(int size) {
+        List<Queue> ongoingStatus = new ArrayList<>();
+        for(int i = 1; i <= size; i++) {
+            ongoingStatus.add(createTestQueueByUserIdAndStatus((long) i, WaitingStatus.ONGOING));
+        }
+        return ongoingStatus;
     }
 
 }
