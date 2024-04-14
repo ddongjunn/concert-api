@@ -4,8 +4,6 @@ import com.api.concert.domain.queue.IQueueRepository;
 import com.api.concert.domain.queue.Queue;
 import com.api.concert.domain.queue.QueueConverter;
 import com.api.concert.domain.queue.constant.WaitingStatus;
-import com.api.concert.global.common.exception.CommonException;
-import com.api.concert.global.common.model.ResponseCode;
 import com.api.concert.infrastructure.queue.projection.WaitingRank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,28 +37,23 @@ public class QueueRepository implements IQueueRepository {
     }
 
     @Override
-    public List<Queue> getExpiredOngoingStatus() {
-        return queueJpaRepository.findByStatusAndExpiredAtIsBefore(WaitingStatus.ONGOING, LocalDateTime.now())
+    public List<Queue> findExpiredOngoingStatus(WaitingStatus status, LocalDateTime now) {
+        return queueJpaRepository.findByStatusAndExpiredAtIsBefore(status, now)
                 .stream()
                 .map(QueueConverter::toDomain)
                 .toList();
     }
 
     @Override
-    public void updateStatusToDone(List<Long> updateIds) {
-        queueJpaRepository.updateStatusByConcertWaitingIds(WaitingStatus.DONE, updateIds);
-    }
-
-    @Override
-    public void updateStatusToOngoing(List<QueueEntity> entities) {
+    public void updateStatusFromWaitToOngoingOrExpired(List<QueueEntity> entities) {
         entities.forEach(queueEntity -> {
-            queueJpaRepository.updateStatusAndExpiredAtByConcertWaitingId(WaitingStatus.ONGOING, queueEntity.getExpiredAt(), queueEntity.getConcertWaitingId());
+            queueJpaRepository.updateStatusAndExpiredAtById(queueEntity.getStatus(), queueEntity.isExpired(), queueEntity.getExpiredAt(), queueEntity.getQueueId());
         });
     }
 
     @Override
-    public List<Queue> getQueuesInWaitStatus(int limit) {
-        return queueJpaRepository.findWaitStatusOrderByCreatedAt(WaitingStatus.WAIT, PageRequest.of(0, limit))
+    public List<Queue> findQueuesInWaitStatus(WaitingStatus status, int limit) {
+        return queueJpaRepository.findWaitStatusOrderByCreatedAt(status, PageRequest.of(0, limit))
                 .stream()
                 .map(QueueConverter::toDomain)
                 .toList();
@@ -68,14 +61,28 @@ public class QueueRepository implements IQueueRepository {
 
     @Override
     public Queue findById(Long concertWaitingId) {
-        return QueueConverter.toDomain(
-                queueJpaRepository.findById(concertWaitingId)
-                .orElseThrow(() -> new CommonException(ResponseCode.TICKET_NOT_ISSUED, ResponseCode.TICKET_NOT_ISSUED.getMessage()))
-        );
+        return queueJpaRepository.findById(concertWaitingId)
+                .map(QueueConverter::toDomain)
+                .orElse(null);
     }
 
     @Override
     public WaitingRank countWaitingAhead(Long concertWaitingId) {
         return queueJpaRepository.findWaitingRankById(concertWaitingId,"WAIT");
+    }
+
+    @Override
+    public List<Queue> findOngoingStatus(WaitingStatus status) {
+        return queueJpaRepository.findByStatus(status)
+                .stream()
+                .map(QueueConverter::toDomain)
+                .toList();
+    }
+
+    @Override
+    public Queue findByUserIdAndStatusIn(Long userId, List<WaitingStatus> asList) {
+        return queueJpaRepository.findByUserIdAndStatusIn(userId, asList)
+                .map(QueueConverter::toDomain)
+                .orElseGet(Queue.builder()::build);
     }
 }

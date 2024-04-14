@@ -7,6 +7,7 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Slf4j
 @Getter
@@ -16,21 +17,20 @@ import java.time.LocalDateTime;
 @ToString
 public class Queue {
 
-    private Long concertWaitingId;
+    private Long queueId;
     private Long userId;
     private int waitingNumber;
     private WaitingStatus status;
     private LocalDateTime expiredAt;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private boolean isExpired;
 
-    @Builder
-    private Queue(Long userId) {
-        this.userId = userId;
+    public void updateWaitingNumber(int ranking) {
+        this.waitingNumber = ranking;
     }
 
-    public void toDone() {
-        this.status = WaitingStatus.DONE;
+    public void expiry() {
+        this.status = null;
+        this.isExpired = true;
     }
 
     public void toWait(){
@@ -41,14 +41,17 @@ public class Queue {
         this.expiredAt = LocalDateTime.now().plusMinutes(QUEUE_EXPIRED_TIME);
     }
 
-    public void waitingNumber(int ranking) {
-        this.waitingNumber = ranking;
+    public void assertNotWait() {
+        if(this.status == WaitingStatus.WAIT){
+            throw new CommonException(ResponseCode.ALREADY_WAITING_USER, ResponseCode.ALREADY_WAITING_USER.getMessage());
+        }
     }
 
-    public void ifStatusOngoingThrowException() {
+    public void assertNotOngoing() {
         if(this.status == WaitingStatus.ONGOING){
             String message = String.format("대기열 만료 시간 [%s]", this.getExpiredAt());
             throw new CommonException(ResponseCode.ALREADY_ONGOING_USER, message);
         }
     }
+
 }
