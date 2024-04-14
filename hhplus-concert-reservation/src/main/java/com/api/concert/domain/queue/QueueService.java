@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Service
@@ -53,7 +52,7 @@ public class QueueService {
     public void assignQueueStatusByAvailability(Queue queue) {
         //findByStatusWithPessimisticLock -> 비관적 락을 걸어도 동시성 의미 없는 상태
         List<Queue> ongoingStatus = iQueueRepository.findByStatusWithPessimisticLock(WaitingStatus.ONGOING);
-        log.info("QueueService assignQueueStatusByAvailability {}",ongoingStatus.size());
+
         if (ongoingStatus.size() < QUEUE_LIMIT) {
             queue.toOngoing(QUEUE_EXPIRED_TIME);
         } else {
@@ -63,7 +62,7 @@ public class QueueService {
 
     @Transactional
     @Scheduled(cron = "${queue.scan-time}")
-    public void expiredOngoingStatusToDone(){
+    public void updateExpiredQueuesAndActivateNewOnes(){
         List<Queue> expiredOngoingStatus = iQueueRepository.findExpiredOngoingStatus(WaitingStatus.ONGOING, LocalDateTime.now());
         if(!expiredOngoingStatus.isEmpty()){
             expireQueues(expiredOngoingStatus);
