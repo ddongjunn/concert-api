@@ -9,36 +9,36 @@ public class QueueConverter {
 
     public static QueueEntity toEntity(Queue queue){
         return QueueEntity.builder()
-                .concertWaitingId(queue.getConcertWaitingId())
+                .queueId(queue.getQueueId())
                 .userId(queue.getUserId())
                 .status(queue.getStatus())
                 .expiredAt(queue.getExpiredAt())
+                .isExpired(queue.isExpired())
                 .build();
     }
 
     public static Queue toDomain(QueueEntity queueEntity){
         return Queue.builder()
-                .concertWaitingId(queueEntity.getConcertWaitingId())
+                .queueId(queueEntity.getQueueId())
                 .userId(queueEntity.getUserId())
                 .status(queueEntity.getStatus())
                 .expiredAt(queueEntity.getExpiredAt())
-                .createdAt(queueEntity.getCreatedAt())
-                .updatedAt(queueEntity.getUpdatedAt())
+                .isExpired(queueEntity.isExpired())
                 .build();
     }
 
     public static QueueRegisterResponse toRegisterResponse(Queue queue){
-        String ONGOING_MESSAGE = "현재 고객님 순번으로 예약 만료시간까지 예약이 가능합니다.";
+        String ONGOING_MESSAGE = "대기열 활성화 상태";
 
         return QueueRegisterResponse.builder()
-                .waitNumber(queue.getConcertWaitingId())
+                .waitNumber(queue.getQueueId())
                 .expiredAt(queue.getExpiredAt())
                 .message(queue.getStatus() == WaitingStatus.ONGOING ? ONGOING_MESSAGE : null)
                 .build();
     }
 
     public static QueueStatusResponse toStatusResponse(Queue queue) {
-        String message = String.format("현재 고객님 순번 : %s", queue.getWaitingNumber());
+        String message = String.format("대기열 순번 : %s", queue.getWaitingNumber());
 
         return QueueStatusResponse.builder()
                 .waitNumber(queue.getWaitingNumber())

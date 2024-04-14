@@ -1,9 +1,12 @@
 package com.api.concert.domain.queue;
 
+import com.api.concert.domain.queue.constant.WaitingStatus;
 import com.api.concert.infrastructure.queue.QueueEntity;
 import com.api.concert.infrastructure.queue.projection.WaitingRank;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface IQueueRepository {
     long getCountOfOngoingStatus();
@@ -12,15 +15,17 @@ public interface IQueueRepository {
 
     boolean existsByUserIdAndStatusIsOngoingOrWaiting(Long userId);
 
-    List<Queue> getExpiredOngoingStatus();
+    List<Queue> findExpiredOngoingStatus(WaitingStatus status, LocalDateTime now);
 
-    void updateStatusToDone(List<Long> updateIds);
+    void updateStatusFromWaitToOngoingOrExpired(List<QueueEntity> entities);
 
-    void updateStatusToOngoing(List<QueueEntity> entities);
-
-    List<Queue> getQueuesInWaitStatus(int limit);
+    List<Queue> findQueuesInWaitStatus(WaitingStatus status, int limit);
 
     Queue findById(Long concertWaitingId);
 
     WaitingRank countWaitingAhead(Long concertWaitingId);
+
+    List<Queue> findOngoingStatus(WaitingStatus status);
+
+    Queue findByUserIdAndStatusIn(Long userId, List<WaitingStatus> asList);
 }

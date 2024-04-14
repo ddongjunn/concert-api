@@ -3,54 +3,52 @@ package com.api.concert.domain.queue;
 import com.api.concert.controller.queue.dto.QueueRegisterRequest;
 import com.api.concert.controller.queue.dto.QueueRegisterResponse;
 import com.api.concert.controller.queue.dto.QueueStatusResponse;
-import com.api.concert.global.common.exception.AlreadyWaitingUserException;
+import com.api.concert.domain.queue.constant.WaitingStatus;
+import com.api.concert.global.common.exception.CommonException;
+import com.api.concert.global.common.model.ResponseCode;
 import com.api.concert.infrastructure.queue.projection.WaitingRank;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.api.concert.domain.queue.QueueOption.QUEUE_EXPIRED_TIME;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class QueueService {
-    private final QueueOption queueOption;
-    private final IQueueRepository iQueueRepository;
 
-    @PostConstruct
-    public void initializeQueueCount(){
-        queueOption.initializeQueueCount(iQueueRepository.getCountOfOngoingStatus());
-    }
+    private final int QUEUE_LIMIT = 5;
+    private final int QUEUE_EXPIRED_TIME = 1;
+    private final IQueueRepository iQueueRepository;
 
     // 대기열 등록
     @Transactional
     public QueueRegisterResponse register(QueueRegisterRequest queueRegisterRequestDto){
         Long userId = queueRegisterRequestDto.getUserId();
-        isUserAlreadyRegistered(userId); //대기열에 WAIT, ONGOING 상태인 userId 존재 확인
+        validateUserNotRegisteredOrThrow(userId);
 
         Queue queue = Queue.builder().userId(userId).build();
-        assignQueueStatus(queue);
+        assignQueueStatusByAvailability(queue);
 
         return QueueConverter.toRegisterResponse(
                 iQueueRepository.save(QueueConverter.toEntity(queue))
         );
     }
 
-    public void isUserAlreadyRegistered(Long userId) {
-        if(iQueueRepository.existsByUserIdAndStatusIsOngoingOrWaiting(userId)){
-            throw new AlreadyWaitingUserException();
-        }
+    public void validateUserNotRegisteredOrThrow(Long userId) {
+        Queue queue = iQueueRepository.findByUserIdAndStatusIn(userId, List.of(WaitingStatus.WAIT, WaitingStatus.ONGOING));
+        queue.assertNotWait();
+        queue.assertNotOngoing();
     }
 
-    public void assignQueueStatus(Queue queue) {
-        if(queueOption.hasAvailableSpaceInOngoingQueue()) {
+    public void assignQueueStatusByAvailability(Queue queue) {
+        List<Queue> ongoingStatus = iQueueRepository.findOngoingStatus(WaitingStatus.ONGOING);
+        if (ongoingStatus.size() < QUEUE_LIMIT) {
             queue.toOngoing(QUEUE_EXPIRED_TIME);
         } else {
             queue.toWait();
@@ -60,33 +58,30 @@ public class QueueService {
     @Transactional
     @Scheduled(cron = "${queue.scan-time}")
     public void expiredOngoingStatusToDone(){
-        List<Queue> expiredOngoingStatus = iQueueRepository.getExpiredOngoingStatus();
+        List<Queue> expiredOngoingStatus = iQueueRepository.findExpiredOngoingStatus(WaitingStatus.ONGOING, LocalDateTime.now());
         if(!expiredOngoingStatus.isEmpty()){
-            updateStatusToDone(expiredOngoingStatus);
-            updateStatusToOngoingForWaitQueues();
+            expireQueues(expiredOngoingStatus);
+            activateQueuesByExpireQueuesSize(expiredOngoingStatus.size());
         }
     }
 
-    public void updateStatusToDone(List<Queue> queues) {
-        List<Long> updateIds = new ArrayList<>();
-        queues.forEach( queue -> {
-            queue.toDone();
-            queueOption.decrementOngoingCount();
-            updateIds.add(queue.getConcertWaitingId());
-        });
-        iQueueRepository.updateStatusToDone(updateIds);
+    public void expireQueues(List<Queue> expiredQueues) {
+        expiredQueues.forEach(Queue::expiry);
+
+        iQueueRepository.updateStatusFromWaitToOngoingOrExpired(
+                expiredQueues.stream()
+                        .map(QueueConverter::toEntity)
+                        .toList()
+        );
     }
 
-    public void updateStatusToOngoingForWaitQueues() {
-        int availableQueueSpace = queueOption.calculateAvailableQueueSpace();
-
-        List<Queue> queuesInWaitStatus = iQueueRepository.getQueuesInWaitStatus(availableQueueSpace);
+    public void activateQueuesByExpireQueuesSize(int availableQueueSpace) {
+        List<Queue> queuesInWaitStatus = iQueueRepository.findQueuesInWaitStatus(WaitingStatus.WAIT, availableQueueSpace);
         queuesInWaitStatus.forEach( queue -> {
             queue.toOngoing(QUEUE_EXPIRED_TIME);
-            queueOption.incrementOngoingCount();
         });
 
-        iQueueRepository.updateStatusToOngoing(
+        iQueueRepository.updateStatusFromWaitToOngoingOrExpired(
                 queuesInWaitStatus.stream()
                         .map(QueueConverter::toEntity)
                         .toList()
@@ -95,10 +90,21 @@ public class QueueService {
 
     public QueueStatusResponse detail(Long concertWaitingId) {
         Queue queue = iQueueRepository.findById(concertWaitingId);
-        queue.ifStatusOngoingThrowException();
+        validateQueueExists(queue);
 
-        WaitingRank waitingRank = iQueueRepository.countWaitingAhead(concertWaitingId);
-        queue.waitingNumber(waitingRank.getRanking());
+        queue.assertNotOngoing();
+        updateQueueByWaitingRank(queue, concertWaitingId);
         return QueueConverter.toStatusResponse(queue);
+    }
+
+    public void validateQueueExists(Queue queue) {
+        if (queue == null) {
+            throw new CommonException(ResponseCode.TICKET_NOT_ISSUED, ResponseCode.TICKET_NOT_ISSUED.getMessage());
+        }
+    }
+
+    public void updateQueueByWaitingRank(Queue queue, Long concertWaitingId) {
+        WaitingRank waitingRank = iQueueRepository.countWaitingAhead(concertWaitingId);
+        queue.updateWaitingNumber(waitingRank.getRanking());
     }
 }
