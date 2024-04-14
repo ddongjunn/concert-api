@@ -7,7 +7,6 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Slf4j
 @Getter
@@ -24,6 +23,14 @@ public class Queue {
     private LocalDateTime expiredAt;
     private boolean isExpired;
 
+    @Builder
+    public Queue(Long queueId, Long userId, WaitingStatus status, boolean isExpired) {
+        this.queueId = queueId;
+        this.userId = userId;
+        this.status = status;
+        this.isExpired = isExpired;
+    }
+
     public void updateWaitingNumber(int ranking) {
         this.waitingNumber = ranking;
     }
@@ -36,6 +43,7 @@ public class Queue {
     public void toWait(){
         this.status = WaitingStatus.WAIT;
     }
+
     public void toOngoing(final long QUEUE_EXPIRED_TIME){
         this.status = WaitingStatus.ONGOING;
         this.expiredAt = LocalDateTime.now().plusMinutes(QUEUE_EXPIRED_TIME);

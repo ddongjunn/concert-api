@@ -14,8 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Service
@@ -42,12 +42,18 @@ public class QueueService {
 
     public void validateUserNotRegisteredOrThrow(Long userId) {
         Queue queue = iQueueRepository.findByUserIdAndStatusIn(userId, List.of(WaitingStatus.WAIT, WaitingStatus.ONGOING));
+        if(queue == null){
+            return;
+        }
+
         queue.assertNotWait();
         queue.assertNotOngoing();
     }
 
     public void assignQueueStatusByAvailability(Queue queue) {
-        List<Queue> ongoingStatus = iQueueRepository.findOngoingStatus(WaitingStatus.ONGOING);
+        //findByStatusWithPessimisticLock -> 비관적 락을 걸어도 동시성 의미 없는 상태
+        List<Queue> ongoingStatus = iQueueRepository.findByStatusWithPessimisticLock(WaitingStatus.ONGOING);
+        log.info("QueueService assignQueueStatusByAvailability {}",ongoingStatus.size());
         if (ongoingStatus.size() < QUEUE_LIMIT) {
             queue.toOngoing(QUEUE_EXPIRED_TIME);
         } else {

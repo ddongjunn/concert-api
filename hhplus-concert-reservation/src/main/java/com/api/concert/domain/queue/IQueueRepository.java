@@ -9,11 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface IQueueRepository {
-    long getCountOfOngoingStatus();
-
     Queue save(QueueEntity queueEntity);
-
-    boolean existsByUserIdAndStatusIsOngoingOrWaiting(Long userId);
 
     List<Queue> findExpiredOngoingStatus(WaitingStatus status, LocalDateTime now);
 
@@ -25,7 +21,8 @@ public interface IQueueRepository {
 
     WaitingRank countWaitingAhead(Long concertWaitingId);
 
-    List<Queue> findOngoingStatus(WaitingStatus status);
+    List<Queue> findByStatusWithPessimisticLock(WaitingStatus status);
 
     Queue findByUserIdAndStatusIn(Long userId, List<WaitingStatus> asList);
+
 }

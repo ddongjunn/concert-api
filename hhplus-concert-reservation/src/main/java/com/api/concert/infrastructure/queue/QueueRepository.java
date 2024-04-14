@@ -20,20 +20,10 @@ public class QueueRepository implements IQueueRepository {
     private final QueueJpaRepository queueJpaRepository;
 
     @Override
-    public long getCountOfOngoingStatus() {
-        return queueJpaRepository.countByStatus(WaitingStatus.ONGOING);
-    }
-
-    @Override
     public Queue save(QueueEntity queueEntity) {
         return QueueConverter.toDomain(
                 queueJpaRepository.save(queueEntity)
         );
-    }
-
-    @Override
-    public boolean existsByUserIdAndStatusIsOngoingOrWaiting(Long userId) {
-        return queueJpaRepository.existsByUserIdAndStatusIn(userId, List.of(WaitingStatus.WAIT, WaitingStatus.ONGOING));
     }
 
     @Override
@@ -72,8 +62,8 @@ public class QueueRepository implements IQueueRepository {
     }
 
     @Override
-    public List<Queue> findOngoingStatus(WaitingStatus status) {
-        return queueJpaRepository.findByStatus(status)
+    public List<Queue> findByStatusWithPessimisticLock(WaitingStatus status) {
+        return queueJpaRepository.findByStatusWithPessimisticLock(status)
                 .stream()
                 .map(QueueConverter::toDomain)
                 .toList();
@@ -83,6 +73,6 @@ public class QueueRepository implements IQueueRepository {
     public Queue findByUserIdAndStatusIn(Long userId, List<WaitingStatus> asList) {
         return queueJpaRepository.findByUserIdAndStatusIn(userId, asList)
                 .map(QueueConverter::toDomain)
-                .orElseGet(Queue.builder()::build);
+                .orElse(null);
     }
 }
