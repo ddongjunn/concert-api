@@ -14,7 +14,7 @@ public class ConcertService {
 
     private final IConcertRepository iConcertRepository;
 
-    public List<ConcertInfo> getAvailableForReservationConcerts() {
+    public List<ConcertInfo> getAvailableConcerts() {
         return iConcertRepository.availableConcerts();
     }
 }

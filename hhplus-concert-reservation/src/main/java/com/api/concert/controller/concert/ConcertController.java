@@ -1,8 +1,6 @@
 package com.api.concert.controller.concert;
 
 import com.api.concert.application.ConcertFacade;
-import com.api.concert.controller.concert.dto.ConcertResponseDto;
-import com.api.concert.global.common.model.ApiResponse;
 import com.api.concert.infrastructure.concert.projection.ConcertInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +17,7 @@ public class ConcertController {
     private final ConcertFacade concertFacade;
     @GetMapping("/concert/reservation/dates")
     public List<ConcertInfo> concerts(){
-        return concertFacade.getConcerts();
+        return concertFacade.retrieveAvailableConcerts();
     }
 
     @GetMapping("/concert/{concertId}/reservation/seats")

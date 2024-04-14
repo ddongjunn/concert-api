@@ -1,6 +1,5 @@
 package com.api.concert.application;
 
-import com.api.concert.controller.concert.dto.ConcertResponseDto;
 import com.api.concert.domain.concert.ConcertService;
 import com.api.concert.infrastructure.concert.projection.ConcertInfo;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +12,7 @@ import java.util.List;
 public class ConcertFacade {
     private final ConcertService concertService;
 
-    public List<ConcertInfo> getConcerts() {
-        return concertService.getAvailableForReservationConcerts();
+    public List<ConcertInfo> retrieveAvailableConcerts() {
+        return concertService.getAvailableConcerts();
     }
 }
