@@ -1,6 +1,7 @@
 package com.api.concert.controller.concert;
 
 import com.api.concert.application.ConcertFacade;
+import com.api.concert.controller.concert.dto.ConcertSeatResponse;
 import com.api.concert.infrastructure.concert.projection.ConcertInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,44 +21,10 @@ public class ConcertController {
         return concertFacade.retrieveAvailableConcerts();
     }
 
+    //TODO 예약 불가능한 콘서트에 대한 예외처리
     @GetMapping("/concert/{concertOptionId}/reservation/seats")
-    public String seatsForReservationList(@PathVariable Long concertOptionId){
-        return """
-                {
-                  "seats": [
-                    {
-                      "seat_id": 1,
-                      "seat_number": 1,
-                      "price": 5000
-                    },
-                    {
-                      "seat_id": 23,
-                      "seat_number": 16,
-                      "price": 5000
-                    },
-                    {
-                      "seat_id": 29,
-                      "seat_number": 17,
-                      "price": 5000
-                    },
-                    {
-                      "seat_id": 59,
-                      "seat_number": 25,
-                      "price": 7500
-                    },
-                    {
-                      "seat_id": 61,
-                      "seat_number": 48,
-                      "price": 10000
-                    },
-                    {
-                      "seat_id": 89,
-                      "seat_number": 50,
-                      "price": 10000
-                    }
-                  ]
-                }
-                """;
+    public ConcertSeatResponse seatsForReservationList(@PathVariable Long concertOptionId){
+        return concertFacade.retrieveAvailableSeats(concertOptionId);
     }
 
     @PostMapping("/concert/reservation")
