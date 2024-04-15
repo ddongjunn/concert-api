@@ -45,6 +45,4 @@ public class PointService{
                 PointHistory.toEntity(pointHistory)
         );
     }
-
-
 }
