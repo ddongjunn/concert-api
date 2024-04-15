@@ -7,13 +7,15 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.function.Consumer;
+
 @Getter
 @NoArgsConstructor
 public class Point {
 
     private Long pointId;
     private Long userId;
-    private Long point;
+    private Long point = 0L;
     private TransactionType transactionType;
 
     @Builder
@@ -21,16 +23,23 @@ public class Point {
         this.pointId = pointId;
         this.userId = userId;
         this.point = point;
-        this. transactionType = transactionType;
+        this.transactionType = transactionType;
     }
 
-    public void charge(Long chargePoint){
+    public void charge(Long chargePoint, Consumer<PointHistory> saveHistory){
         if(chargePoint < 0){
             throw new CommonException(ResponseCode.POINT_CHARGE_NEGATIVE, ResponseCode.POINT_CHARGE_NEGATIVE.getMessage());
         }
 
         this.point += chargePoint;
         this.transactionType = TransactionType.CHARGE;
+
+        saveHistory.accept(PointHistory.builder()
+                .userId(this.userId)
+                .point(chargePoint)
+                .type(this.transactionType)
+                .build()
+        );
     }
 
     public void use(Long usePoint) {

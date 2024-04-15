@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class PointService{
 
     private final IPointRepository iPointRepository;
+    private final IPointHistoryRepository iPointHistoryRepository;
 
     @Transactional
     public PointChargeResponse charge(PointChargeRequest pointChargeRequest) {
@@ -21,8 +22,7 @@ public class PointService{
         Long chargePoint = pointChargeRequest.point();
 
         Point point = findPointForService(userId);
-        log.info("findPoint {} {}", point.getUserId(), point.getPoint());
-        point.charge(chargePoint);
+        point.charge(chargePoint, this::saveHistory);
 
         return PointConverter.toChargeResponse(
                 iPointRepository.updatePoint(PointConverter.toEntity(point)),
@@ -39,5 +39,12 @@ public class PointService{
                 iPointRepository.findPointByUserId(userId)
         );
     }
+
+    public void saveHistory(PointHistory pointHistory){
+        iPointHistoryRepository.save(
+                PointHistory.toEntity(pointHistory)
+        );
+    }
+
 
 }
