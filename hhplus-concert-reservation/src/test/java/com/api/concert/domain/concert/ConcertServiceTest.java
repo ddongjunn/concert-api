@@ -22,10 +22,13 @@ class ConcertServiceTest {
     @Mock
     IConcertRepository iConcertRepository;
 
+    @Mock
+    IConcertOptionRepository iConcertOptionRepository;
+
     @InjectMocks
     ConcertService concertService;
 
-    @DisplayName("[콘서트 조회]")
+    @DisplayName("예약 가능한 콘서트 조회")
     @Test
     void test_findAvailableConcerts() {
         // Given
@@ -34,13 +37,25 @@ class ConcertServiceTest {
         List<ConcertInfo> mockConcerts = Arrays.asList(concertOne, concertTwo);
 
         // When
-        when(iConcertRepository.availableConcerts()).thenReturn(mockConcerts);
+        when(iConcertOptionRepository.availableConcerts()).thenReturn(mockConcerts);
 
         // Then
         List<ConcertInfo> result = concertService.getAvailableConcerts();
         assertThat(result).isNotEmpty();
         assertThat(result).hasSize(2);
-        verify(iConcertRepository, times(1)).availableConcerts();
+        verify(iConcertOptionRepository, times(1)).availableConcerts();
+    }
+
+    @DisplayName("예약 가능한 콘서트 좌석 조회")
+    @Test
+    void test_findAvailableConcertSeat(){
+        // Given
+        Long concertOptionId = 1L;
+
+        // When
+        concertService.findAvailableConcertSeat(concertOptionId);
+
+        // Then
     }
 
 }
