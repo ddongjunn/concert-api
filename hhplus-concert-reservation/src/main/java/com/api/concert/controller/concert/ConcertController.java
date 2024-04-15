@@ -20,8 +20,8 @@ public class ConcertController {
         return concertFacade.retrieveAvailableConcerts();
     }
 
-    @GetMapping("/concert/{concertId}/reservation/seats")
-    public String seatsForReservationList(@PathVariable Long concertId){
+    @GetMapping("/concert/{concertOptionId}/reservation/seats")
+    public String seatsForReservationList(@PathVariable Long concertOptionId){
         return """
                 {
                   "seats": [
