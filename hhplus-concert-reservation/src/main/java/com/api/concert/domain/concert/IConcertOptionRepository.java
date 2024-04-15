@@ -4,5 +4,6 @@ import com.api.concert.infrastructure.concert.projection.ConcertInfo;
 
 import java.util.List;
 
-public interface IConcertRepository {
+public interface IConcertOptionRepository {
+    List<ConcertInfo> availableConcerts();
 }

@@ -13,11 +13,5 @@ import java.util.List;
 @RequiredArgsConstructor
 @Repository
 public class ConcertRepository implements IConcertRepository {
-
     private final ConcertJpaRepository concertJpaRepository;
-
-    @Override
-    public List<ConcertInfo> availableConcerts() {
-        return concertJpaRepository.findAvailableConcerts();
-    }
 }

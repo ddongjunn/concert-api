@@ -13,8 +13,9 @@ import java.util.List;
 public class ConcertService {
 
     private final IConcertRepository iConcertRepository;
+    private final IConcertOptionRepository iConcertOptionRepository;
 
     public List<ConcertInfo> getAvailableConcerts() {
-        return iConcertRepository.availableConcerts();
+        return iConcertOptionRepository.availableConcerts();
     }
 }
