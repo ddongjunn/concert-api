@@ -48,6 +48,7 @@ class PointUnitTest {
         assertThat(point.getTransactionType()).isEqualTo(TransactionType.CHARGE);
     }
 
+
     @DisplayName("[포인트 충전] - 음수 충전")
     @Test
     void test_charge_negative(){
