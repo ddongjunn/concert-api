@@ -10,12 +10,15 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class Point {
+
+    private Long pointId;
     private Long userId;
-    private Long point = 0L;
+    private Long point;
     private TransactionType transactionType;
 
     @Builder
-    public Point(Long userId, Long point, TransactionType transactionType){
+    public Point(Long pointId, Long userId, Long point, TransactionType transactionType){
+        this.pointId = pointId;
         this.userId = userId;
         this.point = point;
         this. transactionType = transactionType;
