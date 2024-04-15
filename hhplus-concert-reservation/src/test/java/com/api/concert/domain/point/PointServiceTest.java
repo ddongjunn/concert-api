@@ -24,6 +24,9 @@ class PointServiceTest {
     @Mock
     IPointRepository iPointRepository;
 
+    @Mock
+    IPointHistoryRepository iPointHistoryRepository;
+
     @InjectMocks
     PointService pointService;
 
@@ -57,7 +60,9 @@ class PointServiceTest {
 
         Point pointCharge = Point.builder().userId(userId).point(findPoint.getPoint() + chargePoint).build();
         when(iPointRepository.updatePoint(any(PointEntity.class))).thenReturn(pointCharge);
-        findPoint.charge(chargePoint);
+        findPoint.charge(chargePoint, pointHistory -> {
+            pointService.saveHistory(pointHistory);
+        });
 
         // Then
         PointChargeResponse result = pointService.charge(pointChargeRequest);

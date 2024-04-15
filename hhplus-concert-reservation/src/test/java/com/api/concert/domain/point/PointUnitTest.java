@@ -6,10 +6,13 @@ import com.api.concert.global.common.model.ResponseCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@ExtendWith(MockitoExtension.class)
 class PointUnitTest {
 
     private Point point;
@@ -26,7 +29,9 @@ class PointUnitTest {
         Long chargePoint = 1000L;
 
         // When
-        point.charge(chargePoint);
+        point.charge(chargePoint, pointHistory -> {
+
+        });
 
         // Then
         assertThat(point.getPoint()).isEqualTo(1000L);
@@ -41,7 +46,9 @@ class PointUnitTest {
         Long chargePoint = 1000L;
 
         // When
-        point.charge(chargePoint);
+        point.charge(chargePoint, pointHistory -> {
+
+        });
 
         // Then
         assertThat(point.getPoint()).isEqualTo(1500L);
@@ -57,7 +64,9 @@ class PointUnitTest {
         Long chargePoint = -1000L;
 
         // When & Then
-        assertThatThrownBy(() -> point.charge(chargePoint))
+        assertThatThrownBy(() -> point.charge(chargePoint, pointHistory -> {
+
+        }))
                 .isInstanceOf(CommonException.class)
                 .hasFieldOrPropertyWithValue("ResponseCode", ResponseCode.POINT_CHARGE_NEGATIVE)
                 .hasMessage(ResponseCode.POINT_CHARGE_NEGATIVE.getMessage());
