@@ -61,12 +61,6 @@ class ConcertSeatServiceTest {
                 .hasMessage(ResponseCode.NO_SEATS_AVAILABLE.getMessage());
     }
 
-    List<ConcertSeat> makeReservedSeats(int size){
-        return IntStream.rangeClosed(1, size)
-                .mapToObj(i -> ConcertSeat.builder().seatNo(i).build())
-                .toList();
-    }
-
     @DisplayName("[좌석 임시 예약] - 이미 예약된 좌석인 경우 Exception")
     @Test
     void test_temporaryReservationSeat_alreadyReserved(){
@@ -144,40 +138,6 @@ class ConcertSeatServiceTest {
                 .hasMessage(ResponseCode.NOT_EXIST_SEAT.getMessage());
     }
 
-    @DisplayName("예약 가능한 좌석")
-    @Test
-    void test_checkSeatAvailability(){
-        // Given
-        Long concertOptionId = 1L;
-        int seatNo = 10;
-        ConcertSeat concertSeat = ConcertSeat.builder().concertOptionId(concertOptionId).seatNo(seatNo).status(SeatStatus.AVAILABLE).build();
-
-        // When
-        when(iConcertSeatRepository.findByConcertOptionIdAndSeatNo(concertOptionId, seatNo)).thenReturn(concertSeat);
-
-        // Then
-    }
-
-    @DisplayName("이미 예약 된 좌석인 경우 Exception")
-    @Test
-    void test_checkSeatAvailability_alreadyReservation(){
-        // Given
-        Long concertOptionId = 1L;
-        Long userId = 1L;
-        int seatNo = 10;
-        ConcertTempReservationRequest request = createRequest(concertOptionId, userId, seatNo);
-        ConcertSeat concertSeat = ConcertSeat.builder().concertOptionId(concertOptionId).userId(userId).seatNo(seatNo).status(SeatStatus.REVERSED).build();
-
-        // When
-        when(iConcertSeatRepository.findByConcertOptionIdAndSeatNo(concertOptionId, seatNo)).thenReturn(concertSeat);
-
-        // Then
-        assertThatThrownBy(() -> concertSeatService.temporaryReservationSeat(request))
-                .isInstanceOf(CommonException.class)
-                .hasFieldOrPropertyWithValue("responseCode", ResponseCode.ALREADY_RESERVED_SEAT)
-                .hasMessage(ResponseCode.ALREADY_RESERVED_SEAT.getMessage());
-    }
-
     ConcertTempReservationRequest createRequest(Long concertOptionId, Long userId, int seatNo){
         return ConcertTempReservationRequest.builder()
                 .concertOptionId(concertOptionId)
@@ -195,5 +155,11 @@ class ConcertSeatServiceTest {
                 .seatNo(10)
                 .price(1000)
                 .build();
+    }
+
+    List<ConcertSeat> makeReservedSeats(int size){
+        return IntStream.rangeClosed(1, size)
+                .mapToObj(i -> ConcertSeat.builder().seatNo(i).build())
+                .toList();
     }
 }
