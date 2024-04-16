@@ -4,11 +4,15 @@ import com.api.concert.controller.concert.dto.ConcertSeatResponse;
 import com.api.concert.controller.concert.dto.ConcertTempReservationRequest;
 import com.api.concert.controller.concert.dto.ConcertTempReservationResponse;
 import com.api.concert.domain.concert.constant.SeatStatus;
+import com.api.concert.domain.queue.Queue;
+import com.api.concert.domain.queue.constant.WaitingStatus;
 import com.api.concert.global.common.exception.CommonException;
 import com.api.concert.global.common.model.ResponseCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -57,6 +61,7 @@ public class ConcertSeatService {
                 .toList();
     }
 
+    @Transactional
     public ConcertTempReservationResponse temporaryReservationSeat(ConcertTempReservationRequest request){
         Long concertOptionId = request.concertOptionId();
         Long userId = request.userId();
@@ -65,12 +70,12 @@ public class ConcertSeatService {
 
         ConcertSeat concertSeat = findSeat(concertOptionId, seatNo);
         if(concertSeat == null){
-            ConcertSeat savedConcertSeat = createConcertSeatForTemporaryReservation(concertOptionId, userId, seatNo);
+            createConcertSeatForTemporaryReservation(concertOptionId, userId, seatNo);
             return ConcertSeat.toTempReservationResponse(LocalDateTime.now().plusMinutes(SEAT_TEMP_TIME));
         }
 
         if(concertSeat.getStatus() == SeatStatus.AVAILABLE){
-            ConcertSeat updatedConcertSeat = updateConcertSeatTemporaryReservation(concertSeat, userId);
+            updateConcertSeatTemporaryReservation(concertSeat, userId);
             return ConcertSeat.toTempReservationResponse(LocalDateTime.now().plusMinutes(SEAT_TEMP_TIME));
         }
 
@@ -78,8 +83,8 @@ public class ConcertSeatService {
         throw new CommonException(ResponseCode.ALREADY_RESERVED_SEAT, ResponseCode.ALREADY_RESERVED_SEAT.getMessage());
     }
 
-    public ConcertSeat createConcertSeatForTemporaryReservation(Long concertOptionId, Long userId, int seatNo) {
-        return iConcertSeatRepository.save(
+    public void createConcertSeatForTemporaryReservation(Long concertOptionId, Long userId, int seatNo) {
+        iConcertSeatRepository.save(
                 ConcertSeat.toEntity(
                         ConcertSeat.builder()
                                 .concertOptionId(concertOptionId)
@@ -92,13 +97,20 @@ public class ConcertSeatService {
         );
     }
 
-    public ConcertSeat updateConcertSeatTemporaryReservation(ConcertSeat concertSeat, Long userId) {
+    public void updateConcertSeatTemporaryReservation(ConcertSeat concertSeat, Long userId) {
         concertSeat.updateStatusAndUserId(SeatStatus.TEMPORARY, userId);
-        return iConcertSeatRepository.save(
+        iConcertSeatRepository.save(
                 ConcertSeat.toEntity(
                         concertSeat
                 )
         );
+    }
+
+    //TODO 테스트, 업데이트 로직 추가
+    @Transactional
+    @Scheduled(cron = "${queue.scan-time}")
+    public void expireTemporarySeats(){
+        iConcertSeatRepository.findExpiredTemporarySeats(SeatStatus.TEMPORARY, LocalDateTime.now().minusMinutes(SEAT_TEMP_TIME));
     }
 
     public ConcertSeat findSeat(Long concertOptionId, int seatNo) {

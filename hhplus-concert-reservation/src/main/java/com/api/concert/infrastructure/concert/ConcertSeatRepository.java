@@ -6,6 +6,7 @@ import com.api.concert.domain.concert.constant.SeatStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -30,9 +31,15 @@ public class ConcertSeatRepository implements IConcertSeatRepository {
     }
 
     @Override
-    public ConcertSeat save(ConcertSeatEntity concertSeatEntity) {
-        return ConcertSeatEntity.toDomain(
-                concertSeatJpaRepository.save(concertSeatEntity)
-        );
+    public void save(ConcertSeatEntity concertSeatEntity) {
+        concertSeatJpaRepository.save(concertSeatEntity);
+    }
+
+    @Override
+    public List<ConcertSeat> findExpiredTemporarySeats(SeatStatus status, LocalDateTime minusMinutes) {
+        return concertSeatJpaRepository.findByStatusAndUpdatedAtAfter(status, minusMinutes)
+                .stream()
+                .map(ConcertSeatEntity::toDomain)
+                .toList();
     }
 }

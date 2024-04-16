@@ -1,7 +1,9 @@
 package com.api.concert.domain.concert;
 
+import com.api.concert.domain.concert.constant.SeatStatus;
 import com.api.concert.infrastructure.concert.ConcertSeatEntity;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface IConcertSeatRepository {
@@ -9,5 +11,7 @@ public interface IConcertSeatRepository {
 
     ConcertSeat findByConcertOptionIdAndSeatNo(Long concertOptionId, int seatNo);
 
-    ConcertSeat save(ConcertSeatEntity concertSeatEntity);
+    void save(ConcertSeatEntity concertSeatEntity);
+
+    List<ConcertSeat> findExpiredTemporarySeats(SeatStatus status, LocalDateTime minusMinutes);
 }
