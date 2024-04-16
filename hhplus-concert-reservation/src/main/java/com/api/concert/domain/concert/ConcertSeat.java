@@ -44,9 +44,19 @@ public class ConcertSeat {
         this.updatedAt = updatedAt;
     }
 
-    public void updateStatusAndUserId(SeatStatus status, Long userId) {
-        this.status = status;
-        this.userId = userId;
+    public static List<ConcertSeat> checkAvailableSeats(List<ConcertSeat> reservedSeats) {
+        final int SEAT_LIMIT = 50;
+        Set<Integer> reservedSeatNumbers = reservedSeats.stream()
+                .map(ConcertSeat::getSeatNo)
+                .collect(Collectors.toSet());
+
+        return IntStream.rangeClosed(1, SEAT_LIMIT)
+                .filter(i -> !reservedSeatNumbers.contains(i))
+                .mapToObj(i -> ConcertSeat.builder()
+                        .seatNo(i)
+                        .price(getSeatPrice(i))
+                        .build()
+                ).toList();
     }
 
     public static ConcertSeatResponse toSeatResponse(Long concertOptionId, List<ConcertSeat> availableReservedSeats){
