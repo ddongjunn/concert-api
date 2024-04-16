@@ -14,12 +14,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.awt.print.Pageable;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -93,9 +97,7 @@ class ConcertSeatServiceTest {
         // When
         ConcertSeat concertSeat = null;
         when(iConcertSeatRepository.findByConcertOptionIdAndSeatNo(anyLong(), anyInt())).thenReturn(null);
-
-        ConcertSeat savedConcertSeat = createConcertSeatToStatus(SeatStatus.TEMPORARY);
-        when(iConcertSeatRepository.save(any(ConcertSeatEntity.class))).thenReturn(savedConcertSeat);
+        doNothing().when(iConcertSeatRepository).save(any(ConcertSeatEntity.class));
 
         //Then
         ConcertTempReservationResponse result = concertSeatService.temporaryReservationSeat(request);
@@ -115,9 +117,7 @@ class ConcertSeatServiceTest {
         // When
         ConcertSeat concertSeat = createConcertSeatToStatus(SeatStatus.AVAILABLE);
         when(iConcertSeatRepository.findByConcertOptionIdAndSeatNo(anyLong(), anyInt())).thenReturn(null);
-
-        ConcertSeat savedConcertSeat = createConcertSeatToStatus(SeatStatus.TEMPORARY);
-        when(iConcertSeatRepository.save(any(ConcertSeatEntity.class))).thenReturn(savedConcertSeat);
+        doNothing().when(iConcertSeatRepository).save(any(ConcertSeatEntity.class));
 
         //Then
         ConcertTempReservationResponse result = concertSeatService.temporaryReservationSeat(request);
