@@ -44,19 +44,9 @@ public class ConcertSeat {
         this.updatedAt = updatedAt;
     }
 
-    public static List<ConcertSeat> checkAvailableSeats(List<ConcertSeat> reservedSeats) {
-        final int SEAT_LIMIT = 50;
-        Set<Integer> reservedSeatNumbers = reservedSeats.stream()
-                .map(ConcertSeat::getSeatNo)
-                .collect(Collectors.toSet());
-
-        return IntStream.rangeClosed(1, SEAT_LIMIT)
-                .filter(i -> !reservedSeatNumbers.contains(i))
-                .mapToObj(i -> ConcertSeat.builder()
-                        .seatNo(i)
-                        .price(getSeatPrice(i))
-                        .build()
-                ).toList();
+    public void updateStatusAndUserId(SeatStatus status, Long userId) {
+        this.status = status;
+        this.userId = userId;
     }
 
     public static ConcertSeatResponse toSeatResponse(Long concertOptionId, List<ConcertSeat> availableReservedSeats){
@@ -66,9 +56,9 @@ public class ConcertSeat {
                         availableReservedSeats.stream()
                                 .map(concertSeat ->
                                         ConcertSeatDTO.builder()
-                                        .seatNo(concertSeat.seatNo)
-                                        .price(concertSeat.price)
-                                        .build()
+                                                .seatNo(concertSeat.seatNo)
+                                                .price(concertSeat.price)
+                                                .build()
                                 ).collect(Collectors.toList())
                 ).build();
     }
