@@ -1,6 +1,8 @@
 package com.api.concert.domain.concert;
 
 import com.api.concert.controller.concert.dto.ConcertSeatResponse;
+import com.api.concert.global.common.exception.CommonException;
+import com.api.concert.global.common.model.ResponseCode;
 import com.api.concert.infrastructure.concert.projection.ConcertInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,21 +14,19 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 public class ConcertService {
-
-    private final IConcertRepository iConcertRepository;
     private final IConcertOptionRepository iConcertOptionRepository;
 
-    private final IConcertSeatRepository iConcertSeatRepository;
-
     public List<ConcertInfo> findAvailableConcerts() {
-        return iConcertOptionRepository.availableConcerts();
+        List<ConcertInfo> reservedConcerts = iConcertOptionRepository.availableConcerts();
+        checkConcertAvailability(reservedConcerts);
+
+        return reservedConcerts;
     }
 
-    public ConcertSeatResponse findAvailableConcertSeat(Long concertOptionId) {
-        List<ConcertSeat> reservedSeats = iConcertSeatRepository.findReservedSeats(concertOptionId);
-        return ConcertSeat.toResponse(
-                concertOptionId,
-                ConcertSeat.checkAvailableSeats(reservedSeats)
-        );
+    public void checkConcertAvailability(List<ConcertInfo> reservedConcerts) {
+        if(reservedConcerts.isEmpty()){
+            throw new CommonException(ResponseCode.NO_CONCERT_AVAILABLE, ResponseCode.NO_CONCERT_AVAILABLE.getMessage());
+        }
     }
+
 }
