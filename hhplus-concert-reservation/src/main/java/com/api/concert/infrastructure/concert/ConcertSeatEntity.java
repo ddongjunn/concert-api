@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Getter
 @NoArgsConstructor
 @Entity
@@ -20,6 +22,8 @@ public class ConcertSeatEntity extends BaseEntity {
 
     private Long concertOptionId;
 
+    private Long userId;
+
     @Enumerated(EnumType.STRING)
     private SeatStatus status;
 
@@ -28,21 +32,25 @@ public class ConcertSeatEntity extends BaseEntity {
     private int price;
 
     @Builder
-    public ConcertSeatEntity(Long seatId, Long concertOptionId, SeatStatus status, int seatNo, int price) {
+    public ConcertSeatEntity(Long seatId, Long concertOptionId, Long userId, SeatStatus status, int seatNo, int price, LocalDateTime updatedAt) {
         this.seatId = seatId;
         this.concertOptionId = concertOptionId;
+        this.userId = userId;
         this.status = status;
         this.seatNo = seatNo;
         this.price = price;
+        this.updatedAt = updatedAt;
     }
 
     public static ConcertSeat toDomain(ConcertSeatEntity concertSeatEntity){
         return ConcertSeat.builder()
                 .seatId(concertSeatEntity.getSeatId())
                 .concertOptionId(concertSeatEntity.getConcertOptionId())
+                .userId(concertSeatEntity.getUserId())
                 .status(concertSeatEntity.getStatus())
                 .seatNo(concertSeatEntity.getSeatNo())
                 .price(concertSeatEntity.getPrice())
+                .updatedAt(concertSeatEntity.getUpdatedAt())
                 .build();
     }
 }
