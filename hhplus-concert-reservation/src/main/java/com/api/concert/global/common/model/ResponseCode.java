@@ -11,6 +11,10 @@ public enum ResponseCode {
     TICKET_NOT_ISSUED("번호표의 정보가 존재하지 않습니다."),
     POINT_CHARGE_NEGATIVE("포인트 충전은 양수만 가능합니다."),
     NOT_ENOUGH_POINT("사용가능한 포인트 부족"),
+    NO_SEATS_AVAILABLE("예약 가능한 좌석이 없습니다."),
+    NO_CONCERT_AVAILABLE("예약 가능한 콘서트가 없습니다."),
+    NOT_EXIST_SEAT("존재 하지 않는 좌석"),
+    ALREADY_RESERVED_SEAT("이미 예약된 좌석"),
     SUCCESS("성공"),
     FAIL("실패");
 
