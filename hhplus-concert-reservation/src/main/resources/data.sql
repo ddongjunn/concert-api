@@ -12,14 +12,14 @@ insert into concert_option (concert_option_id, concert_id, venue, reservation_st
 insert into concert_option (concert_option_id, concert_id, venue, reservation_start_date, start_date, created_at, updated_at) values (7, 3, '경기아트센터 대극장', '2024-04-11T00:00:00', '2024-04-14T00:00:00', now(), now());
 insert into concert_option (concert_option_id, concert_id, venue, reservation_start_date, start_date, created_at, updated_at) values (8, 4, '경북대학교 대강당', '2024-04-13T00:00:00', '2024-04-12T00:00:00', now(), now());
 
-INSERT INTO concert_seat (concert_option_id, status, price, seat_no, created_at, updated_at) VALUES (1, 'REVERSED', 1000, 1, now(), now());
-INSERT INTO concert_seat (concert_option_id, status, price, seat_no, created_at, updated_at) VALUES (1, 'AVAILABLE', 1000, 2, now(), now());
-INSERT INTO concert_seat (concert_option_id, status, price, seat_no, created_at, updated_at) VALUES (1, 'TEMPORARY', 1000, 3, now(), now());
-INSERT INTO concert_seat (concert_option_id, status, price, seat_no, created_at, updated_at) VALUES (1, 'REVERSED', 1000, 4, now(), now());
-INSERT INTO concert_seat (concert_option_id, status, price, seat_no, created_at, updated_at) VALUES (1, 'REVERSED', 1000, 5, now(), now());
-INSERT INTO concert_seat (concert_option_id, status, price, seat_no, created_at, updated_at) VALUES (1, 'REVERSED', 1000, 6, now(), now());
-INSERT INTO concert_seat (concert_option_id, status, price, seat_no, created_at, updated_at) VALUES (1, 'REVERSED', 1000, 7, now(), now());
-INSERT INTO concert_seat (concert_option_id, status, price, seat_no, created_at, updated_at) VALUES (1, 'REVERSED', 1000, 8, now(), now());
+INSERT INTO concert_seat (concert_option_id, status, price, seat_no, created_at, updated_at) VALUES (1, 'TEMPORARY', 1000, 1, now(), DATEADD(MINUTE, -2, NOW()));
+INSERT INTO concert_seat (concert_option_id, status, price, seat_no, created_at, updated_at) VALUES (1, 'TEMPORARY', 1000, 2, now(), DATEADD(MINUTE, -1, NOW()));
+INSERT INTO concert_seat (concert_option_id, status, price, seat_no, created_at, updated_at) VALUES (1, 'TEMPORARY', 1000, 3, now(), DATEADD(MINUTE, 1, NOW()));
+INSERT INTO concert_seat (concert_option_id, status, price, seat_no, created_at, updated_at) VALUES (1, 'TEMPORARY', 1000, 4, now(), DATEADD(MINUTE, 2, NOW()));
+INSERT INTO concert_seat (concert_option_id, status, price, seat_no, created_at, updated_at) VALUES (1, 'TEMPORARY', 1000, 5, now(), DATEADD(MINUTE, 3, NOW()));
+INSERT INTO concert_seat (concert_option_id, status, price, seat_no, created_at, updated_at) VALUES (1, 'TEMPORARY', 1000, 6, now(), DATEADD(MINUTE, 4, NOW()));
+INSERT INTO concert_seat (concert_option_id, status, price, seat_no, created_at, updated_at) VALUES (1, 'TEMPORARY', 1000, 7, now(), DATEADD(MINUTE, 5, NOW()));
+INSERT INTO concert_seat (concert_option_id, status, price, seat_no, created_at, updated_at) VALUES (1, 'TEMPORARY', 1000, 8, now(), DATEADD(MINUTE, 6, NOW()));
 INSERT INTO concert_seat (concert_option_id, status, price, seat_no, created_at, updated_at) VALUES (1, 'TEMPORARY', 1000, 9, now(), now());
 INSERT INTO concert_seat (concert_option_id, status, price, seat_no, created_at, updated_at) VALUES (1, 'REVERSED', 1000, 10, now(), now());
 INSERT INTO concert_seat (concert_option_id, status, price, seat_no, created_at, updated_at) VALUES (1, 'REVERSED', 1000, 11, now(), now());
