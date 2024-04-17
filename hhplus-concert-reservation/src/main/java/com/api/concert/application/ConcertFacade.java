@@ -5,7 +5,7 @@ import com.api.concert.controller.concert.dto.ConcertTempReservationRequest;
 import com.api.concert.controller.concert.dto.ConcertTempReservationResponse;
 import com.api.concert.domain.concert.ConcertSeatService;
 import com.api.concert.domain.concert.ConcertService;
-import com.api.concert.infrastructure.concert.projection.ConcertInfo;
+import com.api.concert.infrastructure.concert.projection.ConcertInfoProjection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -17,12 +17,12 @@ public class ConcertFacade {
     private final ConcertService concertService;
     private final ConcertSeatService concertSeatService;
 
-    public List<ConcertInfo> retrieveAvailableConcerts() {
+    public List<ConcertInfoProjection> retrieveAvailableConcerts() {
         return concertService.findAvailableConcerts();
     }
 
     public ConcertSeatResponse retrieveAvailableSeats(Long concertOptionId) {
-        return concertSeatService.findAvailableConcertSeat(concertOptionId);
+        return concertSeatService.findAvailableSeatsForConcert(concertOptionId);
     }
 
     public ConcertTempReservationResponse temporaryReservationSeat(ConcertTempReservationRequest request){
