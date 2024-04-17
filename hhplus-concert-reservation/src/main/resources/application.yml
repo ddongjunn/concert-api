@@ -21,13 +21,14 @@ spring:
     open-in-view: false
     defer-datasource-initialization: true
 
-queue:
-  scan-time: "0 * * * * *"
-seat:
-  scan-time: "0 * * * * *"
-
 #p6spy query logging
 decorator:
   datasource:
     p6spy:
       enable-logging: true
+
+queue:
+  scan-time: "0 * * * * *"
+
+seat:
+  scan-time: "0 * * * * *"
