@@ -9,4 +9,9 @@ import org.springframework.stereotype.Repository;
 public class ReservationRepository implements IReservationRepository {
 
     private final ReservationJpaRepository reservationJpaRepository;
+
+    @Override
+    public void save(ReservationEntity reservationEntity) {
+        reservationJpaRepository.save(reservationEntity);
+    }
 }

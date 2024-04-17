@@ -8,4 +8,10 @@ import org.springframework.stereotype.Service;
 public class ReservationService {
 
     private final IReservationRepository iReservationRepository;
+
+    public void save(Reservation reservation) {
+        iReservationRepository.save(
+                Reservation.toEntity(reservation)
+        );
+    }
 }
