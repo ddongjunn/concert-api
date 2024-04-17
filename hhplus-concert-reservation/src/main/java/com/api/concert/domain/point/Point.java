@@ -2,6 +2,7 @@ package com.api.concert.domain.point;
 
 import com.api.concert.domain.point.constant.TransactionType;
 import com.api.concert.global.common.exception.CommonException;
+import com.api.concert.global.common.exception.InsufficientPointsException;
 import com.api.concert.global.common.model.ResponseCode;
 import lombok.Builder;
 import lombok.Getter;
@@ -42,12 +43,26 @@ public class Point {
         );
     }
 
-    public void use(Long usePoint) {
+    public void use(Long usePoint, Consumer<PointHistory> saveHistory) {
+        Long currentPoint = this.point;
         this.point -= usePoint;
         this.transactionType = TransactionType.USE;
 
         if(this.point < 0){
-            throw new CommonException(ResponseCode.NOT_ENOUGH_POINT, ResponseCode.NOT_ENOUGH_POINT.getMessage());
+            long insufficientAmount = -this.point;
+            throw new InsufficientPointsException(
+                    ResponseCode.NOT_ENOUGH_POINT.getMessage(),
+                    ResponseCode.NOT_ENOUGH_POINT,
+                    insufficientAmount,
+                    currentPoint
+            );
         }
+
+        saveHistory.accept(PointHistory.builder()
+                .userId(this.userId)
+                .point(usePoint)
+                .type(this.transactionType)
+                .build()
+        );
     }
 }

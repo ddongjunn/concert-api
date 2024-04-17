@@ -3,6 +3,7 @@ package com.api.concert.domain.point;
 import com.api.concert.controller.point.dto.PointChargeRequest;
 import com.api.concert.controller.point.dto.PointChargeResponse;
 import com.api.concert.controller.point.dto.PointResponse;
+import com.api.concert.controller.point.dto.PointUseRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,20 @@ public class PointService{
 
         Point point = findPointForService(userId);
         point.charge(chargePoint, this::saveHistory);
+
+        return PointConverter.toChargeResponse(
+                iPointRepository.updatePoint(PointConverter.toEntity(point)),
+                chargePoint
+        );
+    }
+
+    @Transactional
+    public PointChargeResponse use(PointUseRequest pointUseRequest) {
+        Long userId = pointUseRequest.userId();
+        Long chargePoint = pointUseRequest.point();
+
+        Point point = findPointForService(userId);
+        point.use(chargePoint, this::saveHistory);
 
         return PointConverter.toChargeResponse(
                 iPointRepository.updatePoint(PointConverter.toEntity(point)),
