@@ -26,6 +26,7 @@ public class ConcertFacade {
     }
 
     public ConcertTempReservationResponse temporaryReservationSeat(ConcertTempReservationRequest request){
+        concertService.checkConcertOptionId(request.concertOptionId());
         return concertSeatService.temporaryReservationSeat(request);
     }
 

@@ -29,4 +29,10 @@ public class ConcertService {
         }
     }
 
+    public void checkConcertOptionId(Long concertOptionId) {
+        boolean isExist = iConcertOptionRepository.existFindById(concertOptionId);
+        if(!isExist){
+            throw new CommonException(ResponseCode.NOT_EXIST_CONCERT, ResponseCode.NOT_EXIST_CONCERT.getMessage());
+        }
+    }
 }
