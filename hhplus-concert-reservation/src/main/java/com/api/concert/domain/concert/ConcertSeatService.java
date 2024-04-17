@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -81,6 +82,7 @@ public class ConcertSeatService {
         throw new CommonException(ResponseCode.ALREADY_RESERVED_SEAT, ResponseCode.ALREADY_RESERVED_SEAT.getMessage());
     }
 
+
     public void createConcertSeatForTemporaryReservation(Long concertOptionId, Long userId, int seatNo) {
         iConcertSeatRepository.save(
                 ConcertSeat.toEntity(
@@ -134,5 +136,25 @@ public class ConcertSeatService {
         if(1 > seatNo || seatNo > SEAT_LIMIT){
             throw new CommonException(ResponseCode.NOT_EXIST_SEAT, ResponseCode.NOT_EXIST_SEAT.getMessage());
         }
+    }
+
+    public List<ConcertSeat> findSeatTemporarilyReservedByUserId(Long userId) {
+        List<ConcertSeat> temporarilyReservedSeats = iConcertSeatRepository.findTemporarilyReservedSeatsByUserId(userId);
+
+        if(temporarilyReservedSeats.isEmpty()){
+            throw new CommonException(ResponseCode.SEAT_UNAVAILABLE, ResponseCode.SEAT_UNAVAILABLE.getMessage());
+        }
+        return temporarilyReservedSeats;
+    }
+
+    public List<ConcertSeat> updateSeatToReserved(Long userId, List<ConcertSeat> temporarilyReservedSeats) {
+        temporarilyReservedSeats.forEach(ConcertSeat::reserve);
+        List<Long> updateStatusToReservedIds = temporarilyReservedSeats.stream()
+                .map(ConcertSeat::getSeatId)
+                .toList();
+
+        iConcertSeatRepository.updateStatusToReserved(userId, updateStatusToReservedIds);
+
+        return temporarilyReservedSeats;
     }
 }
