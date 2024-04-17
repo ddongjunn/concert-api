@@ -54,6 +54,10 @@ public class ConcertSeat {
         this.status = SeatStatus.AVAILABLE;
     }
 
+    public void reserve(){
+        this.status = SeatStatus.REVERSED;
+    }
+
     public static ConcertSeatResponse toSeatResponse(Long concertOptionId, List<ConcertSeat> availableReservedSeats){
         return ConcertSeatResponse.builder()
                 .concertOptionId(concertOptionId)
