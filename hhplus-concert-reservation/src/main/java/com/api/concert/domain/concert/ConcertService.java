@@ -4,6 +4,7 @@ import com.api.concert.controller.concert.dto.ConcertSeatResponse;
 import com.api.concert.global.common.exception.CommonException;
 import com.api.concert.global.common.model.ResponseCode;
 import com.api.concert.infrastructure.concert.projection.ConcertInfo;
+import com.api.concert.infrastructure.concert.projection.ReservationInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,5 +35,9 @@ public class ConcertService {
         if(!isExist){
             throw new CommonException(ResponseCode.NOT_EXIST_CONCERT, ResponseCode.NOT_EXIST_CONCERT.getMessage());
         }
+    }
+
+    public ReservationInfo findConcertInformation(Long concertOptionId) {
+        return iConcertOptionRepository.findConcertInformation(concertOptionId);
     }
 }
