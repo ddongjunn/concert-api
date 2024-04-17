@@ -2,7 +2,7 @@ package com.api.concert.domain.concert;
 
 import com.api.concert.global.common.exception.CommonException;
 import com.api.concert.global.common.model.ResponseCode;
-import com.api.concert.infrastructure.concert.projection.ConcertInfo;
+import com.api.concert.infrastructure.concert.projection.ConcertInfoProjection;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,13 +31,13 @@ class ConcertServiceTest {
     @Test
     void test_findAvailableConcerts() {
         // Given
-        List<ConcertInfo> mockConcerts = makeReservedConcerts(5);
+        List<ConcertInfoProjection> mockConcerts = makeReservedConcerts(5);
 
         // When
         when(iConcertOptionRepository.availableConcerts()).thenReturn(mockConcerts);
 
         // Then
-        List<ConcertInfo> result = concertService.findAvailableConcerts();
+        List<ConcertInfoProjection> result = concertService.findAvailableConcerts();
         assertThat(result).isNotEmpty();
         assertThat(result).hasSize(5);
         verify(iConcertOptionRepository, times(1)).availableConcerts();
@@ -47,7 +47,7 @@ class ConcertServiceTest {
     @Test
     void test_findAvailableConcerts_notExist() {
         // Given
-        List<ConcertInfo> mockConcerts = Collections.emptyList();
+        List<ConcertInfoProjection> mockConcerts = Collections.emptyList();
 
         // When & Then
         when(iConcertOptionRepository.availableConcerts()).thenReturn(mockConcerts);
@@ -58,9 +58,9 @@ class ConcertServiceTest {
                 .hasMessage(ResponseCode.NO_CONCERT_AVAILABLE.getMessage());
     }
 
-    List<ConcertInfo> makeReservedConcerts(int size){
+    List<ConcertInfoProjection> makeReservedConcerts(int size){
         return IntStream.rangeClosed(1, size)
-                .mapToObj(i -> mock(ConcertInfo.class))
+                .mapToObj(i -> mock(ConcertInfoProjection.class))
                 .toList();
     }
 

@@ -1,8 +1,8 @@
 package com.api.concert.infrastructure.concert;
 
 import com.api.concert.domain.concert.IConcertOptionRepository;
-import com.api.concert.infrastructure.concert.projection.ConcertInfo;
-import com.api.concert.infrastructure.concert.projection.ReservationInfo;
+import com.api.concert.infrastructure.concert.projection.ConcertInfoProjection;
+import com.api.concert.infrastructure.concert.projection.ReservationInfoProjection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -14,7 +14,7 @@ public class ConcertOptionRepository implements IConcertOptionRepository {
 
     private final ConcertOptionJpaRepository concertOptionJpaRepository;
     @Override
-    public List<ConcertInfo> availableConcerts() {
+    public List<ConcertInfoProjection> availableConcerts() {
         return concertOptionJpaRepository.findAvailableConcerts();
     }
 
@@ -24,7 +24,7 @@ public class ConcertOptionRepository implements IConcertOptionRepository {
     }
 
     @Override
-    public ReservationInfo findConcertInformation(Long concertOptionId) {
+    public ReservationInfoProjection findConcertInformation(Long concertOptionId) {
         return concertOptionJpaRepository.findConcertInformationById(concertOptionId);
     }
 }

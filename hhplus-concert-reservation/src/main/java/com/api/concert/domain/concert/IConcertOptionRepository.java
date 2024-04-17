@@ -1,14 +1,14 @@
 package com.api.concert.domain.concert;
 
-import com.api.concert.infrastructure.concert.projection.ConcertInfo;
-import com.api.concert.infrastructure.concert.projection.ReservationInfo;
+import com.api.concert.infrastructure.concert.projection.ConcertInfoProjection;
+import com.api.concert.infrastructure.concert.projection.ReservationInfoProjection;
 
 import java.util.List;
 
 public interface IConcertOptionRepository {
-    List<ConcertInfo> availableConcerts();
+    List<ConcertInfoProjection> availableConcerts();
 
     boolean existFindById(Long id);
 
-    ReservationInfo findConcertInformation(Long concertOptionId);
+    ReservationInfoProjection findConcertInformation(Long concertOptionId);
 }

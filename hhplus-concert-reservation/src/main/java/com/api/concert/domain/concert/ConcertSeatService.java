@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -28,12 +27,12 @@ public class ConcertSeatService {
     private final int SEAT_TEMP_TIME = 1;
     private final IConcertSeatRepository iConcertSeatRepository;
 
-    public ConcertSeatResponse findAvailableConcertSeat(Long concertOptionId) {
+    public ConcertSeatResponse findAvailableSeatsForConcert(Long concertOptionId) {
         //status available 제외 하고 불러옴
         List<ConcertSeat> reservedSeats = iConcertSeatRepository.findReservedSeats(concertOptionId);
         assertSeatsAvailable(reservedSeats);
 
-        List<ConcertSeat> concertSeats = findAvailableSeats(reservedSeats, SEAT_LIMIT);
+        List<ConcertSeat> concertSeats = calculateAvailableSeats(reservedSeats, SEAT_LIMIT);
         return ConcertSeat.toSeatResponse(
                 concertOptionId,
                 concertSeats
@@ -46,7 +45,7 @@ public class ConcertSeatService {
         }
     }
 
-    public List<ConcertSeat> findAvailableSeats(List<ConcertSeat> reservedSeats, int SEAT_LIMIT) {
+    public List<ConcertSeat> calculateAvailableSeats(List<ConcertSeat> reservedSeats, int SEAT_LIMIT) {
         Set<Integer> reservedSeatNumbers = reservedSeats.stream()
                 .map(ConcertSeat::getSeatNo)
                 .collect(Collectors.toSet());
@@ -147,6 +146,7 @@ public class ConcertSeatService {
         return temporarilyReservedSeats;
     }
 
+    @Transactional
     public List<ConcertSeat> updateSeatToReserved(Long userId, List<ConcertSeat> temporarilyReservedSeats) {
         temporarilyReservedSeats.forEach(ConcertSeat::reserve);
         List<Long> updateStatusToReservedIds = temporarilyReservedSeats.stream()
