@@ -2,6 +2,7 @@ package com.api.concert.domain.point;
 
 import com.api.concert.domain.point.constant.TransactionType;
 import com.api.concert.global.common.exception.CommonException;
+import com.api.concert.global.common.exception.InsufficientPointsException;
 import com.api.concert.global.common.model.ResponseCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -80,7 +81,9 @@ class PointUnitTest {
         Long usePoint = 500L;
 
         //When
-        point.use(usePoint);
+        point.use(usePoint, pointHistory -> {
+
+        });
 
         //Then
         assertThat(point.getPoint()).isEqualTo(500L);
@@ -95,9 +98,11 @@ class PointUnitTest {
         Long usePoint = 1500L;
 
         //When & Then
-        assertThatThrownBy(() -> point.use(usePoint))
-                .isInstanceOf(CommonException.class)
-                .hasFieldOrPropertyWithValue("responseCode", ResponseCode.NOT_ENOUGH_POINT)
+        assertThatThrownBy(() -> point.use(usePoint, pointHistory -> {}))
+                .isInstanceOf(InsufficientPointsException.class)
+                .hasFieldOrPropertyWithValue("code", ResponseCode.NOT_ENOUGH_POINT)
+                .hasFieldOrPropertyWithValue("insufficientPoint", 500L)
+                .hasFieldOrPropertyWithValue("currentPoint", 1000L)
                 .hasMessage(ResponseCode.NOT_ENOUGH_POINT.getMessage());
     }
 
