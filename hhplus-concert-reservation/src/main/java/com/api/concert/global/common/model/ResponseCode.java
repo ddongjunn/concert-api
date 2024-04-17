@@ -14,7 +14,9 @@ public enum ResponseCode {
     NO_SEATS_AVAILABLE("예약 가능한 좌석이 없습니다."),
     NO_CONCERT_AVAILABLE("예약 가능한 콘서트가 없습니다."),
     NOT_EXIST_SEAT("존재 하지 않는 좌석"),
+    NOT_EXIST_CONCERT("존재 하지 않는 콘서트"),
     ALREADY_RESERVED_SEAT("이미 예약된 좌석"),
+    SEAT_UNAVAILABLE("예약된 좌석이 없습니다."),
     SUCCESS("성공"),
     FAIL("실패");
 
