@@ -34,14 +34,14 @@ public class PointService{
     @Transactional
     public PointChargeResponse use(PointUseRequest pointUseRequest) {
         Long userId = pointUseRequest.userId();
-        Long chargePoint = pointUseRequest.point();
+        Long usePoint = pointUseRequest.point();
 
         Point point = findPointForService(userId);
-        point.use(chargePoint, this::saveHistory);
+        point.use(usePoint, this::saveHistory);
 
         return PointConverter.toChargeResponse(
                 iPointRepository.updatePoint(PointConverter.toEntity(point)),
-                chargePoint
+                usePoint
         );
     }
 
