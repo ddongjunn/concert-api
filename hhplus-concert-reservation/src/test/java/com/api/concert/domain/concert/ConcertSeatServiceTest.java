@@ -17,17 +17,22 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.awt.print.Pageable;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.BDDAssertions.then;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ConcertSeatServiceTest {
+
+    private final int SEAT_TEMP_TIME = 1;
 
     @Mock
     IConcertSeatRepository iConcertSeatRepository;
@@ -138,6 +143,22 @@ class ConcertSeatServiceTest {
                 .hasMessage(ResponseCode.NOT_EXIST_SEAT.getMessage());
     }
 
+    @DisplayName("[임시 좌석 만료] update_at가 만료시간이 지난 경우 상태 업데이트")
+    @Test
+    void test_expiredTemporarySeats(){
+        // Given
+        List<ConcertSeat> expiredTemporarySeats = getExpiredTemporarySeats(10);
+        when(iConcertSeatRepository.findExpiredTemporarySeats(any(SeatStatus.class), any(LocalDateTime.class)))
+                .thenReturn(expiredTemporarySeats);
+
+        // When
+        List<Long> expiredTemporarySeatIds = expiredTemporarySeats.stream().map(ConcertSeat::getSeatId).toList();
+        concertSeatService.expireTemporarySeats();
+
+        // Then
+        verify(iConcertSeatRepository, times(1)).updateStatusToExpiredBySeatIds(expiredTemporarySeatIds);
+    }
+
     ConcertTempReservationRequest createRequest(Long concertOptionId, Long userId, int seatNo){
         return ConcertTempReservationRequest.builder()
                 .concertOptionId(concertOptionId)
@@ -160,6 +181,21 @@ class ConcertSeatServiceTest {
     List<ConcertSeat> makeReservedSeats(int size){
         return IntStream.rangeClosed(1, size)
                 .mapToObj(i -> ConcertSeat.builder().seatNo(i).build())
+                .toList();
+    }
+
+    public List<ConcertSeat> getExpiredTemporarySeats(int size) {
+        return LongStream.rangeClosed(1, size)
+                .mapToObj(i -> ConcertSeat.builder()
+                        .seatId(i)
+                        .seatNo((int) i)
+                        .concertOptionId(i)
+                        .userId(i)
+                        .status(SeatStatus.TEMPORARY)
+                        .price(5000)
+                        .updatedAt(LocalDateTime.now().minusMinutes(10))
+                        .build()
+                )
                 .toList();
     }
 }
