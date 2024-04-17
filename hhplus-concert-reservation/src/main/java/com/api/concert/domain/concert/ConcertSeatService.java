@@ -4,8 +4,6 @@ import com.api.concert.controller.concert.dto.ConcertSeatResponse;
 import com.api.concert.controller.concert.dto.ConcertTempReservationRequest;
 import com.api.concert.controller.concert.dto.ConcertTempReservationResponse;
 import com.api.concert.domain.concert.constant.SeatStatus;
-import com.api.concert.domain.queue.Queue;
-import com.api.concert.domain.queue.constant.WaitingStatus;
 import com.api.concert.global.common.exception.CommonException;
 import com.api.concert.global.common.model.ResponseCode;
 import lombok.RequiredArgsConstructor;
@@ -106,11 +104,22 @@ public class ConcertSeatService {
         );
     }
 
-    //TODO 테스트, 업데이트 로직 추가
+    /**
+     * 만료 updated_at < LocalDateTime.now().minusMinute(SEAT_TEMP_TIME)
+     */
     @Transactional
-    @Scheduled(cron = "${queue.scan-time}")
+    @Scheduled(cron = "${seat.scan-time}")
     public void expireTemporarySeats(){
-        iConcertSeatRepository.findExpiredTemporarySeats(SeatStatus.TEMPORARY, LocalDateTime.now().minusMinutes(SEAT_TEMP_TIME));
+        List<ConcertSeat> expiredTemporarySeats = findExpiredTemporarySeats();
+        List<Long> expiredTemporarySeatIds = expiredTemporarySeats.stream()
+                .map(ConcertSeat::getSeatId)
+                .toList();
+        iConcertSeatRepository.updateStatusToExpiredBySeatIds(expiredTemporarySeatIds);
+    }
+
+    public List<ConcertSeat> findExpiredTemporarySeats() {
+        LocalDateTime expirationTime = LocalDateTime.now().minusMinutes(SEAT_TEMP_TIME);
+        return iConcertSeatRepository.findExpiredTemporarySeats(SeatStatus.TEMPORARY, expirationTime);
     }
 
     public ConcertSeat findSeat(Long concertOptionId, int seatNo) {

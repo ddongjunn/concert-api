@@ -49,6 +49,11 @@ public class ConcertSeat {
         this.userId = userId;
     }
 
+    public void expiry() {
+        this.userId = null;
+        this.status = SeatStatus.AVAILABLE;
+    }
+
     public static ConcertSeatResponse toSeatResponse(Long concertOptionId, List<ConcertSeat> availableReservedSeats){
         return ConcertSeatResponse.builder()
                 .concertOptionId(concertOptionId)

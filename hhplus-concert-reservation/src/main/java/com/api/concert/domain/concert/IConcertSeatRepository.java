@@ -14,4 +14,6 @@ public interface IConcertSeatRepository {
     void save(ConcertSeatEntity concertSeatEntity);
 
     List<ConcertSeat> findExpiredTemporarySeats(SeatStatus status, LocalDateTime minusMinutes);
+
+    void updateStatusToExpiredBySeatIds(List<Long> expiredTemporarySeatIds);
 }
