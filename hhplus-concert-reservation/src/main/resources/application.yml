@@ -23,7 +23,8 @@ spring:
 
 queue:
   scan-time: "0 * * * * *"
-  expired-time: "1"
+seat:
+  scan-time: "0 * * * * *"
 
 #p6spy query logging
 decorator:
