@@ -1,5 +1,6 @@
 package com.api.concert.infrastructure.concert;
 
+import com.api.concert.domain.concert.ConcertSeat;
 import com.api.concert.domain.concert.constant.SeatStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -14,8 +15,8 @@ import java.util.Optional;
 public interface ConcertSeatJpaRepository extends JpaRepository <ConcertSeatEntity, Long> {
 
     @Modifying
-    @Query("UPDATE ConcertSeatEntity c set c.status = ?1, c.userId = ?2 where c.seatId IN ?3")
-    void updateStatusAndUserIdByUserIdAndStatus(SeatStatus status, Long userId, List<Long> ids);
+    @Query("UPDATE ConcertSeatEntity c set c.status = :status, c.userId = :userId WHERE c.seatId IN :ids")
+    void updateStatusAndUserIdByStatus(@Param("status")SeatStatus status, @Param("userId")Long userId, @Param("ids")List<Long> ids);
 
     @Query("SELECT c FROM ConcertSeatEntity c where c.concertOptionId = :id AND c.status != :status")
     List<ConcertSeatEntity> findByConcertOptionIdAndStatusNot(@Param("id") Long concertOptionId, @Param("status") SeatStatus status);
@@ -23,4 +24,6 @@ public interface ConcertSeatJpaRepository extends JpaRepository <ConcertSeatEnti
     Optional<ConcertSeatEntity> findByConcertOptionIdAndSeatNo(Long concertOptionId, int seatNo);
 
     List<ConcertSeatEntity> findByStatusAndUpdatedAtLessThanEqual(SeatStatus status, LocalDateTime time);
+
+    List<ConcertSeatEntity> findByUserIdAndStatus(Long userId, SeatStatus seatStatus);
 }

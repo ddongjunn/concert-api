@@ -45,6 +45,18 @@ public class ConcertSeatRepository implements IConcertSeatRepository {
 
     @Override
     public void updateStatusToExpiredBySeatIds(List<Long> expiredTemporarySeatIds) {
-        concertSeatJpaRepository.updateStatusAndUserIdByUserIdAndStatus(SeatStatus.AVAILABLE, null, expiredTemporarySeatIds);
+        concertSeatJpaRepository.updateStatusAndUserIdByStatus(SeatStatus.AVAILABLE, null, expiredTemporarySeatIds);
+    }
+
+    @Override
+    public List<ConcertSeat> findTemporarilyReservedSeatsByUserId(Long userId) {
+        return concertSeatJpaRepository.findByUserIdAndStatus(userId, SeatStatus.TEMPORARY)
+                .stream()
+                .map(ConcertSeatEntity::toDomain)
+                .toList();
+    }
+
+    public void updateStatusToReserved(Long userId, List<Long> updateStatusToReservedIds) {
+        concertSeatJpaRepository.updateStatusAndUserIdByStatus(SeatStatus.REVERSED, userId, updateStatusToReservedIds);
     }
 }
