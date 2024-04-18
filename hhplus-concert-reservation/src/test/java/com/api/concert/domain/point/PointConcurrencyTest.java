@@ -6,6 +6,7 @@ import com.api.concert.infrastructure.point.PointJpaRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +37,8 @@ public class PointConcurrencyTest {
     @DisplayName("한명의 사용자가 포인트를 동시에 충전 하는 경우")
     @Test
     void test() throws InterruptedException {
+        proxyCheck();
+
         //Given
         PointChargeRequest pointChargeRequest = createPointChargeRequest(1L, 500L);
 
@@ -49,7 +52,7 @@ public class PointConcurrencyTest {
                 try {
                     pointService.charge(pointChargeRequest);
                 } catch (Exception e) {
-                    log.error(e.getMessage());
+                    log.error("exception {}",e.getMessage());
                 } finally {
                     latch.countDown();
                 }
@@ -64,6 +67,13 @@ public class PointConcurrencyTest {
 
         Point result = iPointRepository.findPointByUserId(1L);
         assertThat(result.getPoint()).isEqualTo(5500L);
+    }
+
+    @Test
+    void proxyCheck() {
+        //proxy 체크
+        log.info("aop class={}", pointService.getClass());
+        assertThat(AopUtils.isAopProxy(pointService)).isTrue();
     }
 
     PointChargeRequest createPointChargeRequest(Long userId, Long point){

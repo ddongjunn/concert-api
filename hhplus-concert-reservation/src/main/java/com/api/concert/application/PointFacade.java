@@ -6,6 +6,7 @@ import com.api.concert.controller.point.dto.PointResponse;
 import com.api.concert.domain.point.PointService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Component
