@@ -32,3 +32,9 @@ queue:
 
 seat:
   scan-time: "0 * * * * *"
+
+logging:
+  level:
+    org:
+      springframework:
+        transaction: DEBUG

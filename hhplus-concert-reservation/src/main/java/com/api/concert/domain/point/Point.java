@@ -19,7 +19,7 @@ public class Point {
 
     private Long pointId;
     private Long userId;
-    private Long point = 0L;
+    private Long point;
     private TransactionType transactionType;
 
     public void charge(Long chargePoint, Consumer<PointHistory> saveHistory){

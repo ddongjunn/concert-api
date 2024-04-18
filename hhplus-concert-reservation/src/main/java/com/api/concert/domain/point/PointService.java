@@ -45,6 +45,7 @@ public class PointService{
         );
     }
 
+    @Transactional
     public Point findPointForService(Long userId) {
         return iPointRepository.findPointByUserId(userId);
     }
