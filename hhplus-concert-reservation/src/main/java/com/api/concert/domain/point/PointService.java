@@ -6,7 +6,9 @@ import com.api.concert.controller.point.dto.PointResponse;
 import com.api.concert.controller.point.dto.PointUseRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -20,11 +22,6 @@ public class PointService{
 
     @Transactional
     public PointChargeResponse charge(PointChargeRequest pointChargeRequest) {
-        log.info("call tx");
-        //현재 트랜잭션이 작동하는 지 확인 - true
-        boolean txActive = TransactionSynchronizationManager.isActualTransactionActive();
-        log.info("tx active={}", txActive);
-
         Long userId = pointChargeRequest.userId();
         Long chargePoint = pointChargeRequest.point();
 
