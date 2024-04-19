@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -111,5 +112,11 @@ public class QueueService {
     public void updateQueueByWaitingRank(Queue queue, Long concertWaitingId) {
         WaitingRank waitingRank = iQueueRepository.countWaitingAhead(concertWaitingId);
         queue.updateWaitingNumber(waitingRank.getRanking());
+    }
+
+    public boolean isQueueOngoing(Long concertWaitingId) {
+        Queue queue = Optional.ofNullable(iQueueRepository.findById(concertWaitingId))
+                .orElseThrow(() -> new CommonException(ResponseCode.TICKET_NOT_ISSUED, ResponseCode.TICKET_NOT_ISSUED.getMessage()));
+        return queue.getStatus() == WaitingStatus.ONGOING;
     }
 }
