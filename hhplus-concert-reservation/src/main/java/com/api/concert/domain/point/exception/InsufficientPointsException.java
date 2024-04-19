@@ -1,4 +1,4 @@
-package com.api.concert.global.common.exception;
+package com.api.concert.domain.point.exception;
 
 import com.api.concert.global.common.model.ResponseCode;
 import lombok.Getter;

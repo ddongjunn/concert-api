@@ -1,4 +1,4 @@
-package com.api.concert.global.common.exception;
+package com.api.concert.domain.queue.exception;
 
 import lombok.NoArgsConstructor;
 
