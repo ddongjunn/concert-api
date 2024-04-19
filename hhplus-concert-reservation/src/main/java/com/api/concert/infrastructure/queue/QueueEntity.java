@@ -14,9 +14,9 @@ import java.time.LocalDateTime;
         uniqueConstraints = {
             @UniqueConstraint(name= "userId_status",
             columnNames={"userId", "status"}
-        )
-    }
-)
+            )
+        }
+    )
 @Entity
 public class QueueEntity extends BaseEntity {
 
