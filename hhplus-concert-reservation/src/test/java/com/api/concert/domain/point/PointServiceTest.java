@@ -4,7 +4,7 @@ import com.api.concert.controller.point.dto.PointChargeRequest;
 import com.api.concert.controller.point.dto.PointChargeResponse;
 import com.api.concert.controller.point.dto.PointUseRequest;
 import com.api.concert.global.common.exception.CommonException;
-import com.api.concert.global.common.exception.InsufficientPointsException;
+import com.api.concert.domain.point.exception.InsufficientPointsException;
 import com.api.concert.global.common.model.ResponseCode;
 import com.api.concert.infrastructure.point.PointEntity;
 import org.junit.jupiter.api.DisplayName;
