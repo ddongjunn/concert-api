@@ -6,8 +6,6 @@ import com.api.concert.domain.point.PointConverter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -18,7 +16,7 @@ public class PointRepository implements IPointRepository {
 
     @Override
     public Point findPointByUserId(Long userId) {
-        return pointJpaRepository.findByUserId(userId)
+        return pointJpaRepository.findByUserIdWithPessimisticLock(userId)
                 .map(PointConverter::toDomain)
                 .orElseGet(() -> Point.builder()
                         .userId(userId)
@@ -28,9 +26,6 @@ public class PointRepository implements IPointRepository {
 
     @Override
     public Point updatePoint(PointEntity pointEntity) {
-        boolean txActive = TransactionSynchronizationManager.isActualTransactionActive();
-        log.info("repository tx active={}", txActive);
-
         return PointConverter.toDomain(
                 pointJpaRepository.save(pointEntity)
         );
