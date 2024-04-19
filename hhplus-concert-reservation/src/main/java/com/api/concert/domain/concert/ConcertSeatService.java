@@ -8,10 +8,12 @@ import com.api.concert.global.common.exception.CommonException;
 import com.api.concert.global.common.model.ResponseCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -66,19 +68,28 @@ public class ConcertSeatService {
         int seatNo = request.seatNo();
         checkSeatNo(seatNo);
 
-        ConcertSeat concertSeat = findSeat(concertOptionId, seatNo);
-        if(concertSeat == null){
-            createConcertSeatForTemporaryReservation(concertOptionId, userId, seatNo);
-            return ConcertSeat.toTempReservationResponse(LocalDateTime.now().plusMinutes(SEAT_TEMP_TIME));
+        try {
+            ConcertSeat concertSeat = findSeat(concertOptionId, seatNo);
+            if (concertSeat == null) {
+                createConcertSeatForTemporaryReservation(concertOptionId, userId, seatNo);
+                return ConcertSeat.toTempReservationResponse(LocalDateTime.now().plusMinutes(SEAT_TEMP_TIME));
+            }
+
+            if (concertSeat.getStatus() == SeatStatus.AVAILABLE) {
+                updateConcertSeatTemporaryReservation(concertSeat, userId);
+                return ConcertSeat.toTempReservationResponse(LocalDateTime.now().plusMinutes(SEAT_TEMP_TIME));
+            }
+
+            //ConcertStatus == RESERVED, TEMPORARY 인 경우
+            throw new CommonException(ResponseCode.ALREADY_RESERVED_SEAT, ResponseCode.ALREADY_RESERVED_SEAT.getMessage());
+
+        } catch (DataIntegrityViolationException e) {
+            if(e.getRootCause() instanceof SQLException) {
+                throw new CommonException(ResponseCode.ALREADY_RESERVED_SEAT, ResponseCode.ALREADY_RESERVED_SEAT.getMessage());
+            }
         }
 
-        if(concertSeat.getStatus() == SeatStatus.AVAILABLE){
-            updateConcertSeatTemporaryReservation(concertSeat, userId);
-            return ConcertSeat.toTempReservationResponse(LocalDateTime.now().plusMinutes(SEAT_TEMP_TIME));
-        }
-
-        //ConcertStatus == RESERVED 인 경우
-        throw new CommonException(ResponseCode.ALREADY_RESERVED_SEAT, ResponseCode.ALREADY_RESERVED_SEAT.getMessage());
+        return ConcertTempReservationResponse.builder().build();
     }
 
 

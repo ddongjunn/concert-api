@@ -2,7 +2,9 @@ package com.api.concert.infrastructure.concert;
 
 import com.api.concert.domain.concert.ConcertSeat;
 import com.api.concert.domain.concert.constant.SeatStatus;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,9 +23,13 @@ public interface ConcertSeatJpaRepository extends JpaRepository <ConcertSeatEnti
     @Query("SELECT c FROM ConcertSeatEntity c where c.concertOptionId = :id AND c.status != :status")
     List<ConcertSeatEntity> findByConcertOptionIdAndStatusNot(@Param("id") Long concertOptionId, @Param("status") SeatStatus status);
 
-    Optional<ConcertSeatEntity> findByConcertOptionIdAndSeatNo(Long concertOptionId, int seatNo);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT c FROM ConcertSeatEntity c Where c.concertOptionId = :id AND c.seatNo = :seatNo")
+    Optional<ConcertSeatEntity> findByConcertOptionIdAndSeatNoWithPessimisticLock(@Param("id") Long concertOptionId, @Param("seatNo") int seatNo);
 
     List<ConcertSeatEntity> findByStatusAndUpdatedAtLessThanEqual(SeatStatus status, LocalDateTime time);
 
     List<ConcertSeatEntity> findByUserIdAndStatus(Long userId, SeatStatus seatStatus);
+
+    ConcertSeatEntity findByConcertOptionIdAndSeatNo(Long concertOptionId, int seatNo);
 }

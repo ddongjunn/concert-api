@@ -25,7 +25,7 @@ public class ConcertSeatRepository implements IConcertSeatRepository {
 
     @Override
     public ConcertSeat findByConcertOptionIdAndSeatNo(Long concertOptionId, int seatNo) {
-        return concertSeatJpaRepository.findByConcertOptionIdAndSeatNo(concertOptionId, seatNo)
+        return concertSeatJpaRepository.findByConcertOptionIdAndSeatNoWithPessimisticLock(concertOptionId, seatNo)
                 .map(ConcertSeatEntity::toDomain)
                 .orElse(null);
     }

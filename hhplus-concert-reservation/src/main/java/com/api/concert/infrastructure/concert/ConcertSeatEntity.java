@@ -13,7 +13,13 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @Entity
-@Table(name = "concert_seat")
+@Table(name = "concert_seat",
+        uniqueConstraints = {
+            @UniqueConstraint(name = "concertOptionId_seatNo",
+            columnNames = {"concertOptionId", "seatNo"}
+            )
+        }
+    )
 public class ConcertSeatEntity extends BaseEntity {
 
     @Id
