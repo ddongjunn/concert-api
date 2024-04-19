@@ -84,6 +84,12 @@ status - WAIT(대기), ONGOING(진행), DONE(만료)
 }
 ```
 ```json
+{
+  "code": "NO_CONCERT_AVAILABLE",
+  "message": "예약 가능한 콘서트가 없습니다."
+}
+```
+```json
 [
   {
     "concert_id": 1,
@@ -130,6 +136,19 @@ status - WAIT(대기), ONGOING(진행), DONE(만료)
 ```
 ```json
 {
+  "code": "NO_CONCERT_AVAILABLE",
+  "message": "예약 가능한 콘서트가 없습니다."
+}
+```
+```json
+{
+  "code": "NO_SEATS_AVAILABLE",
+  "message": "예약 가능한 좌석이 없습니다."
+}
+```
+```json
+{
+  "concertOptionId" : 1,
   "seats": [
     {
       "seat_id": 1,
@@ -178,7 +197,8 @@ status - WAIT(대기), ONGOING(진행), DONE(만료)
   -H "Content-Type: application/json" \
   -d '{ \
         "userId": {userId}, \
-        "seatId": {seatId} 
+        "concertOptionId": {concertOptionId}, \
+        "seatNo": {seatNo} 
       }'
 ```
 <b>Response</b>
@@ -186,6 +206,12 @@ status - WAIT(대기), ONGOING(진행), DONE(만료)
 {
   "code": "INVALID_WAIT_INFORMATION",
   "message": "대기열 만료"
+}
+```
+```json
+{
+  "code": "NOT_EXIST_SEAT",
+  "message": "존재 하지 않는 좌석"
 }
 ```
 ```json
@@ -213,8 +239,7 @@ status - WAIT(대기), ONGOING(진행), DONE(만료)
   curl -X PATCH https://{SERVER_URL}/concert/payment \
   -H "Content-Type: application/json" \
   -d '{ \
-        "userId": "{userId}", \ 
-        "seatId": {seatId} \
+        "userId": "{userId}"
       }'
 ```
 <b>Response</b>
