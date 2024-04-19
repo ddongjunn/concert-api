@@ -2,7 +2,7 @@ package com.api.concert.domain.point;
 
 import com.api.concert.domain.point.constant.TransactionType;
 import com.api.concert.global.common.exception.CommonException;
-import com.api.concert.global.common.exception.InsufficientPointsException;
+import com.api.concert.domain.point.exception.InsufficientPointsException;
 import com.api.concert.global.common.model.ResponseCode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,6 +25,10 @@ public class Point {
     public void charge(Long chargePoint, Consumer<PointHistory> saveHistory){
         if(chargePoint < 0){
             throw new CommonException(ResponseCode.POINT_CHARGE_NEGATIVE, ResponseCode.POINT_CHARGE_NEGATIVE.getMessage());
+        }
+
+        if(this.point == null){
+            this.point = 0L;
         }
 
         this.point += chargePoint;
