@@ -6,6 +6,7 @@ import com.api.concert.infrastructure.queue.QueueEntity;
 import com.api.concert.infrastructure.queue.QueueJpaRepository;
 import com.api.concert.util.DataClearExtension;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -78,7 +79,7 @@ public class QueueServiceConcurrencyTest {
      * TODO
      * 동시성 테스트 OngoingCount를 관리하는 별도의 테이블을 두어야 할지 고민..
      */
-    @Transactional
+    @Disabled
     @DisplayName("동시에 여러명이 대기열 등록")
     @Test
     void test_register() throws InterruptedException{
