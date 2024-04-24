@@ -2,9 +2,7 @@ name: PullRequest CI
 
 on:
   push:
-    branches:
-      - develop
-      - 'release-*'
+    branches: [master, develop]
 
 jobs:
   build:
