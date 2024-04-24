@@ -1,7 +1,8 @@
 name: PullRequest CI
 
 on:
-  pull_request:
+  push:
+  #pull_request:
     branches:
       - develop
       - 'release-*'
