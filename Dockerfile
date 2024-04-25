@@ -1,9 +1,13 @@
 FROM openjdk:17-alpine
-COPY build/libs/*.jar app.jar
+
+WORKDIR /app
+
+ARG JAR_FILE_PATH=build/libs/*.jar
+COPY ${JAR_FILE_PATH} app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-Dspring.profiles.active=${PROFILE}", "-jar", "/app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
 
 #image 생성
 #docker build --platform linux/x86_64 -t concert-img .
