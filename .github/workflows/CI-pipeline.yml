@@ -19,7 +19,7 @@ env:
   # ECR 리포지토리명
   ECR_REPOSITORY: ${{ github.ref == 'refs/heads/master' && 'concert-api-prd' || 'concert-api-dev' }}
   # ECS 클러스터명
-  ECS_CLUSTER: ${{ github.ref == 'refs/heads/master' && 'concert-api-prd' || 'concert-api-dev' }}
+  ECS_CLUSTER: ${{ github.ref == 'refs/heads/master' && 'concert-api-prd' || 'concert-api-dev-cluster' }}
   # ECS 서비스명
   ECS_SERVICE: ${{ github.ref == 'refs/heads/master' && 'concert-api-prd' || 'concert-api-dev' }}
   # ECS Task definition 파일명
