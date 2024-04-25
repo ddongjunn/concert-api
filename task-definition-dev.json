@@ -1,13 +1,20 @@
 {
-    "taskDefinitionArn": "arn:aws:ecs:ap-northeast-2:572831786756:task-definition/concert-api-dev-task:1",
+    "taskDefinitionArn": "arn:aws:ecs:ap-northeast-2:572831786756:task-definition/concert-api-dev-task:8",
     "containerDefinitions": [
         {
-            "name": "concert-api",
+            "name": "concert-api-dev",
             "image": "572831786756.dkr.ecr.ap-northeast-2.amazonaws.com/concert-api-dev",
             "cpu": 0,
             "portMappings": [
                 {
                     "name": "concert-api-8080-tcp",
+                    "containerPort": 80,
+                    "hostPort": 80,
+                    "protocol": "tcp",
+                    "appProtocol": "http"
+                },
+                {
+                    "name": "concert-api-80-tcp",
                     "containerPort": 8080,
                     "hostPort": 8080,
                     "protocol": "tcp",
@@ -34,9 +41,10 @@
         }
     ],
     "family": "concert-api-dev-task",
+    "taskRoleArn": "arn:aws:iam::572831786756:role/ecsTaskExecutionRole",
     "executionRoleArn": "arn:aws:iam::572831786756:role/ecsTaskExecutionRole",
     "networkMode": "awsvpc",
-    "revision": 1,
+    "revision": 8,
     "volumes": [],
     "status": "ACTIVE",
     "requiresAttributes": [
@@ -51,6 +59,9 @@
         },
         {
             "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.task-iam-role"
         },
         {
             "name": "ecs.capability.execution-role-ecr-pull"
@@ -73,13 +84,13 @@
     "requiresCompatibilities": [
         "FARGATE"
     ],
-    "cpu": "1024",
-    "memory": "3072",
+    "cpu": "512",
+    "memory": "1024",
     "runtimePlatform": {
         "cpuArchitecture": "X86_64",
         "operatingSystemFamily": "LINUX"
     },
-    "registeredAt": "2024-04-25T06:12:07.695Z",
+    "registeredAt": "2024-04-25T14:11:44.974Z",
     "registeredBy": "arn:aws:iam::572831786756:root",
     "tags": []
 }
