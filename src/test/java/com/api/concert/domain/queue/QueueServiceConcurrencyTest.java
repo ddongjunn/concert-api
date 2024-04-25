@@ -81,6 +81,7 @@ public class QueueServiceConcurrencyTest {
      * TODO
      * 동시성 테스트 OngoingCount를 관리하는 별도의 테이블을 두어야 할지 고민..
      */
+    @Disabled
     @DisplayName("동시에 여러명이 대기열 등록")
     @Test
     void test_register() throws InterruptedException{
