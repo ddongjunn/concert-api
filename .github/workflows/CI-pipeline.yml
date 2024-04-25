@@ -15,7 +15,7 @@ env:
   # AWS Region
   AWS_REGION: ap-northeast-2
   # 도커 컨테이너명
-  CONTAINER_NAME: example-application
+  CONTAINER_NAME: concert-api
   # ECR 리포지토리명
   ECR_REPOSITORY: ${{ github.ref == 'refs/heads/master' && 'concert-api-prd' || 'concert-api-dev' }}
   # ECS 클러스터명
