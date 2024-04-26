@@ -1,8 +1,8 @@
-ARG JAR_FILE_PATH=build/libs/*.jar
-ARG SPRING_PROFILE=default
-
 FROM openjdk:17-alpine
 WORKDIR /app
+
+ARG JAR_FILE_PATH=build/libs/*.jar
+ARG SPRING_PROFILE=default
 
 COPY ${JAR_FILE_PATH} app.jar
 RUN ls -al /app
