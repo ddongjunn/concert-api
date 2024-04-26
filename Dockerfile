@@ -1,8 +1,11 @@
-FROM openjdk:17-alpine
+ARG JAR_FILE_PATH=build/libs/*.jar
+ARG SPRING_PROFILES_ACTIVE=default
 
+ENV SPRING_PROFILES_ACTIVE=$SPRING_PROFILE
+
+FROM openjdk:17-alpine
 WORKDIR /app
 
-ARG JAR_FILE_PATH=build/libs/*.jar
 COPY ${JAR_FILE_PATH} app.jar
 
 EXPOSE 8080
