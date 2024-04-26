@@ -1,13 +1,13 @@
 {
-    "taskDefinitionArn": "arn:aws:ecs:ap-northeast-2:572831786756:task-definition/concert-api-dev-task:1",
+    "taskDefinitionArn": "arn:aws:ecs:ap-northeast-2:572831786756:task-definition/concert-dev:1",
     "containerDefinitions": [
         {
-            "name": "concert-api",
-            "image": "572831786756.dkr.ecr.ap-northeast-2.amazonaws.com/concert-api-dev",
+            "name": "concert-dev",
+            "image": "572831786756.dkr.ecr.ap-northeast-2.amazonaws.com/concert-dev",
             "cpu": 0,
             "portMappings": [
                 {
-                    "name": "concert-api-8080-tcp",
+                    "name": "concert-dev-8080-tcp",
                     "containerPort": 8080,
                     "hostPort": 8080,
                     "protocol": "tcp",
@@ -24,7 +24,7 @@
                 "logDriver": "awslogs",
                 "options": {
                     "awslogs-create-group": "true",
-                    "awslogs-group": "/ecs/concert-api-dev-task",
+                    "awslogs-group": "/ecs/concert-dev",
                     "awslogs-region": "ap-northeast-2",
                     "awslogs-stream-prefix": "ecs"
                 },
@@ -33,7 +33,8 @@
             "systemControls": []
         }
     ],
-    "family": "concert-api-dev-task",
+    "family": "concert-dev",
+    "taskRoleArn": "arn:aws:iam::572831786756:role/ecsTaskExecutionRole",
     "executionRoleArn": "arn:aws:iam::572831786756:role/ecsTaskExecutionRole",
     "networkMode": "awsvpc",
     "revision": 1,
@@ -51,6 +52,9 @@
         },
         {
             "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.task-iam-role"
         },
         {
             "name": "ecs.capability.execution-role-ecr-pull"
@@ -73,13 +77,13 @@
     "requiresCompatibilities": [
         "FARGATE"
     ],
-    "cpu": "1024",
-    "memory": "3072",
+    "cpu": "256",
+    "memory": "512",
     "runtimePlatform": {
         "cpuArchitecture": "X86_64",
         "operatingSystemFamily": "LINUX"
     },
-    "registeredAt": "2024-04-25T06:12:07.695Z",
+    "registeredAt": "2024-04-26T02:44:25.366Z",
     "registeredBy": "arn:aws:iam::572831786756:root",
     "tags": []
-}
+}z

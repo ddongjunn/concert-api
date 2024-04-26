@@ -15,13 +15,13 @@ env:
   # AWS Region
   AWS_REGION: ap-northeast-2
   # 도커 컨테이너명
-  CONTAINER_NAME: concert-api
+  CONTAINER_NAME: concert-dev
   # ECR 리포지토리명
-  ECR_REPOSITORY: ${{ github.ref == 'refs/heads/master' && 'concert-api-prd' || 'concert-api-dev' }}
+  ECR_REPOSITORY: ${{ github.ref == 'refs/heads/master' && 'concert-api-prd' || 'concert-dev' }}
   # ECS 클러스터명
-  ECS_CLUSTER: ${{ github.ref == 'refs/heads/master' && 'concert-api-prd' || 'cluster-concert-api' }}
+  ECS_CLUSTER: ${{ github.ref == 'refs/heads/master' && 'concert-api-prd' || 'cluster-concert-dev' }}
   # ECS 서비스명
-  ECS_SERVICE: ${{ github.ref == 'refs/heads/master' && 'concert-api-prd' || 'concert-api-dev' }}
+  ECS_SERVICE: ${{ github.ref == 'refs/heads/master' && 'concert-api-prd' || 'concert-dev' }}
   # ECS Task definition 파일명
   ECS_TASK_DEFINITION: ${{ github.ref == 'refs/heads/master' && 'task-definition-prd.json' || 'task-definition-dev.json' }}
 
