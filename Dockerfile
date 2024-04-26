@@ -1,7 +1,7 @@
 ARG SPRING_PROFILES_ACTIVE=default
-ENV SPRING_PROFILES_ACTIVE=$SPRING_PROFILE
-
 ARG JAR_FILE_PATH=build/libs/*.jar
+
+ENV SPRING_PROFILES_ACTIVE=$SPRING_PROFILE
 
 FROM openjdk:17-alpine
 WORKDIR /app
@@ -10,7 +10,7 @@ COPY ${JAR_FILE_PATH} app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=${SPRING_PROFILES_ACTIVE}"]
 
 #image 생성
 #docker build --platform linux/x86_64 -t concert-img .
