@@ -1,16 +1,11 @@
-FROM openjdk:17-alpine
-
-WORKDIR /app
-
 ARG SPRING_PROFILE=default
-ENV SPRING_PROFILES_ACTIVE=$SPRING_PROFILE
-
 ARG JAR_FILE_PATH=build/libs/*.jar
 
+FROM openjdk:17-alpine
+WORKDIR /app
+ENV SPRING_PROFILES_ACTIVE=$SPRING_PROFILE
 COPY ${JAR_FILE_PATH} app.jar
-
 EXPOSE 8080
-
 ENTRYPOINT ["java", "-jar", "app.jar", "-Dspring.profiles.active=${SPRING_PROFILES_ACTIVE}"]
 
 #image 생성
