@@ -1,38 +1,4 @@
 {
-    "taskDefinitionArn": "arn:aws:ecs:ap-northeast-2:572831786756:task-definition/concert-dev:1",
-    "containerDefinitions": [
-        {
-            "name": "concert-dev",
-            "image": "572831786756.dkr.ecr.ap-northeast-2.amazonaws.com/concert-dev",
-            "cpu": 0,
-            "portMappings": [
-                {
-                    "name": "concert-dev-8080-tcp",
-                    "containerPort": 8080,
-                    "hostPort": 8080,
-                    "protocol": "tcp",
-                    "appProtocol": "http"
-                }
-            ],
-            "essential": true,
-            "environment": [],
-            "environmentFiles": [],
-            "mountPoints": [],
-            "volumesFrom": [],
-            "ulimits": [],
-            "logConfiguration": {
-                "logDriver": "awslogs",
-                "options": {
-                    "awslogs-create-group": "true",
-                    "awslogs-group": "/ecs/concert-dev",
-                    "awslogs-region": "ap-northeast-2",
-                    "awslogs-stream-prefix": "ecs"
-                },
-                "secretOptions": []
-            },
-            "systemControls": []
-        }
-    ],
     "family": "concert-dev",
     "taskRoleArn": "arn:aws:iam::572831786756:role/ecsTaskExecutionRole",
     "executionRoleArn": "arn:aws:iam::572831786756:role/ecsTaskExecutionRole",
