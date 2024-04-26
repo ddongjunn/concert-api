@@ -1,7 +1,7 @@
-ARG JAR_FILE_PATH=build/libs/*.jar
 ARG SPRING_PROFILES_ACTIVE=default
-
 ENV SPRING_PROFILES_ACTIVE=$SPRING_PROFILE
+
+ARG JAR_FILE_PATH=build/libs/*.jar
 
 FROM openjdk:17-alpine
 WORKDIR /app
