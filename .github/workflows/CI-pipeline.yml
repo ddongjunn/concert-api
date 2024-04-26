@@ -74,7 +74,7 @@ jobs:
 
       # ECS Task 정의
       - name: Fill in the new image ID in the Amazon ECS task definition
-        id: task-def
+        id: render-task-definition
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: .taskdefinition/${{ env.ECS_TASK_DEFINITION }}
