@@ -1,10 +1,11 @@
-ARG SPRING_PROFILE=default
-ARG JAR_FILE_PATH=build/libs/*.jar
+FROM openjdk:17-alpine
 
+WORKDIR /app
+
+ARG SPRING_PROFILE=default
 ENV SPRING_PROFILES_ACTIVE=$SPRING_PROFILE
 
-FROM openjdk:17-alpine
-WORKDIR /app
+ARG JAR_FILE_PATH=build/libs/*.jar
 
 COPY ${JAR_FILE_PATH} app.jar
 
