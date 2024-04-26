@@ -1,9 +1,9 @@
 {
-    "taskDefinitionArn": "arn:aws:ecs:ap-northeast-2:572831786756:task-definition/task-concert-dev:3",
+    "taskDefinitionArn": "arn:aws:ecs:ap-northeast-2:572831786756:task-definition/task-concert-dev:10",
     "containerDefinitions": [
         {
             "name": "concert-dev",
-            "image": "572831786756.dkr.ecr.ap-northeast-2.amazonaws.com/concert-dev",
+            "image": "572831786756.dkr.ecr.ap-northeast-2.amazonaws.com/concert-api-dev",
             "cpu": 0,
             "portMappings": [
                 {
@@ -37,7 +37,7 @@
     "taskRoleArn": "arn:aws:iam::572831786756:role/ecsTaskExecutionRole",
     "executionRoleArn": "arn:aws:iam::572831786756:role/ecsTaskExecutionRole",
     "networkMode": "awsvpc",
-    "revision": 1,
+    "revision": 10,
     "volumes": [],
     "status": "ACTIVE",
     "requiresAttributes": [
@@ -77,13 +77,13 @@
     "requiresCompatibilities": [
         "FARGATE"
     ],
-    "cpu": "256",
-    "memory": "512",
+    "cpu": "1024",
+    "memory": "2048",
     "runtimePlatform": {
         "cpuArchitecture": "X86_64",
         "operatingSystemFamily": "LINUX"
     },
-    "registeredAt": "2024-04-26T06:43:32.194Z",
+    "registeredAt": "2024-04-26T13:31:12.264Z",
     "registeredBy": "arn:aws:iam::572831786756:root",
     "tags": []
 }
