@@ -1,10 +1,13 @@
-ARG SPRING_PROFILE=default
 ARG JAR_FILE_PATH=build/libs/*.jar
+ARG SPRING_PROFILE=default
 
 FROM openjdk:17-alpine
 WORKDIR /app
-ENV SPRING_PROFILES_ACTIVE=$SPRING_PROFILE
+
 COPY ${JAR_FILE_PATH} app.jar
+RUN ls -al /app
+
+ENV SPRING_PROFILES_ACTIVE=$SPRING_PROFILE
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=${SPRING_PROFILES_ACTIVE}", "app.jar"]
 
