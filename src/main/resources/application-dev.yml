@@ -41,3 +41,9 @@ logging:
     org:
       springframework:
         transaction: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
