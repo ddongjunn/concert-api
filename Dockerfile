@@ -10,7 +10,7 @@ COPY ${JAR_FILE_PATH} app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=${SPRING_PROFILES_ACTIVE}"]
+ENTRYPOINT ["java", "-jar", "app.jar", "-Dspring.profiles.active=${SPRING_PROFILES_ACTIVE}"]
 
 #image 생성
 #docker build --platform linux/x86_64 -t concert-img .
