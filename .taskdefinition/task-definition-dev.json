@@ -1,5 +1,5 @@
 {
-    "taskDefinitionArn": "arn:aws:ecs:ap-northeast-2:572831786756:task-definition/task-concert-dev:1",
+    "taskDefinitionArn": "arn:aws:ecs:ap-northeast-2:572831786756:task-definition/task-concert-dev:3",
     "containerDefinitions": [
         {
             "name": "concert-dev",
