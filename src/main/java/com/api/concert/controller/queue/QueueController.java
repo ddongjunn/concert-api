@@ -22,7 +22,7 @@ public class QueueController {
 
     @GetMapping("/concert/waiting/status/{userId}")
     public ResponseEntity<QueueStatusResponse> queueDetail(@PathVariable Long userId){
-        return ResponseEntity.status(HttpStatus.OK).body(queueService.detail(userId));
+        return ResponseEntity.status(HttpStatus.OK).body(queueService.getQueueStatus(userId));
     }
 
 }
