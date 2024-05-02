@@ -28,7 +28,6 @@ public class QueueService {
 
     private final IQueueRedisRepository iQueueRedisRepository;
 
-    // 대기열 등록
     @Transactional
     public QueueRegisterResponse register(QueueRegisterRequest queueRegisterRequest){
         Long userId = queueRegisterRequest.getUserId();
@@ -38,7 +37,8 @@ public class QueueService {
                 .build();
     }
 
-    public QueueStatusResponse detail(Long userId) {
+    @Transactional(readOnly = true)
+    public QueueStatusResponse getQueueStatus(Long userId) {
         String ttl = iQueueRedisRepository.findExpirationTimeForUser(userId)
                 .orElseThrow(() -> new CommonException(ResponseCode.NOT_EXIST_WAITING_USER, ResponseCode.NOT_EXIST_WAITING_USER.getMessage()));
 

@@ -22,9 +22,11 @@ import org.redisson.api.RedissonClient;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -36,257 +38,60 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class QueueServiceTest {
 
-    private int QUEUE_LIMIT;
-    private int QUEUE_EXPIRED_TIME;
-
-    @Mock
-    IQueueRepository iQueueRepository;
-
     @Mock
     IQueueRedisRepository iQueueRedisRepository;
-
-    @Mock
-    WaitingRank waitingRank;
 
     @InjectMocks
     QueueService queueService;
 
-    @BeforeEach
-    void setUp() throws Exception {
-        Field seatLimitField = QueueService.class.getDeclaredField("QUEUE_LIMIT");
-        seatLimitField.setAccessible(true);
-        this.QUEUE_LIMIT = (int) seatLimitField.get(queueService);
-
-        Field seatTempTimeField = QueueService.class.getDeclaredField("QUEUE_EXPIRED_TIME");
-        seatTempTimeField.setAccessible(true);
-        this.QUEUE_EXPIRED_TIME = (int) seatTempTimeField.get(queueService);
-    }
-
-
-    /*@DisplayName("[대기열 신청] - 대기열이 가득 차지 않은 경우 ONGOING")
     @Test
-    void test_register_ongoing(){
+    @DisplayName("대기열 등록하면 순번을(index + 1) 반환")
+    void test_register(){
         // Given
         QueueRegisterRequest queueRegisterRequest = createTestQueueRegisterRequestByUserId(1L);
-        Long userId = queueRegisterRequest.getUserId();
-        Queue queue = Queue.builder().userId(userId).build();
 
         // When
-        when(iQueueRepository.findByUserIdAndStatusIn(anyLong(), anyList())).thenReturn(null);
-        queueService.validateUserNotRegisteredOrThrow(userId);
-
-        List<Queue> ongoingStatus = getOngoingQueueListBySize(QUEUE_LIMIT - 1);
-        when(iQueueRepository.findByStatusWithPessimisticLock(any(WaitingStatus.class))).thenReturn(ongoingStatus);
-        queueService.assignQueueStatusByAvailability(queue);
-
-        Queue savedQueue = Queue.builder().queueId(6L).userId(6L).status(WaitingStatus.ONGOING).build();
-        when(iQueueRepository.save(any(QueueEntity.class))).thenReturn(savedQueue);
-
-        QueueRegisterResponse expected = QueueConverter.toRegisterResponse(savedQueue);
-        QueueRegisterResponse result = queueService.register(queueRegisterRequest);
+        when(iQueueRedisRepository.register(anyLong())).thenReturn(1);
 
         // Then
-        assertThat(result.getWaitNumber()).isEqualTo(expected.getWaitNumber());
-        assertThat(result.getExpiredAt()).isEqualTo(expected.getExpiredAt());
-        assertThat(result.getMessage()).isEqualTo(expected.getMessage());
+        QueueRegisterResponse register = queueService.register(queueRegisterRequest);
+        assertThat(register.getRank()).isEqualTo(2);
     }
 
-    @DisplayName("[대기열 신청] - 대기열이 가득 찬 경우 WAIT")
     @Test
-    void test_register_wait(){
+    @DisplayName("userId로 대기열 조회 시 대기열에 존재하지 않는 경우 Exception")
+    void test_getQueueStatus(){
         // Given
-        QueueRegisterRequest queueRegisterRequest = createTestQueueRegisterRequestByUserId(1L);
-        Long userId = queueRegisterRequest.getUserId();
-        Queue queue = Queue.builder().userId(userId).build();
+        Long userId = 1L;
 
         // When
-        when(iQueueRepository.findByUserIdAndStatusIn(anyLong(), anyList())).thenReturn(null);
-        queueService.validateUserNotRegisteredOrThrow(userId);
-
-        List<Queue> ongoingStatus = getOngoingQueueListBySize(QUEUE_LIMIT);
-        when(iQueueRepository.findByStatusWithPessimisticLock(any(WaitingStatus.class))).thenReturn(ongoingStatus);
-        queueService.assignQueueStatusByAvailability(queue);
-
-        Queue savedQueue = Queue.builder().queueId(6L).userId(6L).status(WaitingStatus.WAIT).build();
-        when(iQueueRepository.save(any(QueueEntity.class))).thenReturn(savedQueue);
-
-        QueueRegisterResponse expected = QueueConverter.toRegisterResponse(savedQueue);
-        QueueRegisterResponse result = queueService.register(queueRegisterRequest);
+        when(iQueueRedisRepository.findExpirationTimeForUser(anyLong()))
+                .thenReturn(Optional.empty());
 
         // Then
-        assertThat(result.getWaitNumber()).isEqualTo(expected.getWaitNumber());
-        assertThat(result.getExpiredAt()).isEqualTo(expected.getExpiredAt());
-        assertThat(result.getMessage()).isEqualTo(expected.getMessage());
-    }
-
-    @DisplayName("[대기열 중복 신청] - 대기열에 이미 등록된 경우 WAIT")
-    @Test
-    void test_register_alreadyWait(){
-        // Given
-        QueueRegisterRequest queueRegisterRequest = createTestQueueRegisterRequestByUserId(1L);
-        Long userId = queueRegisterRequest.getUserId();
-        Queue queue = createTestQueueByUserIdAndStatus(1L ,WaitingStatus.WAIT);
-
-        // When & Then
-        when(iQueueRepository.findByUserIdAndStatusIn(anyLong(), anyList())).thenReturn(queue);
-        assertThatThrownBy(() -> queueService.validateUserNotRegisteredOrThrow(userId))
+        assertThatThrownBy(() -> queueService.getQueueStatus(userId))
                 .isInstanceOf(CommonException.class)
-                .hasFieldOrPropertyWithValue("ResponseCode", ResponseCode.ALREADY_WAITING_USER)
-                .hasMessage(ResponseCode.ALREADY_WAITING_USER.getMessage());
-
+                .hasFieldOrPropertyWithValue("ResponseCode", ResponseCode.NOT_EXIST_WAITING_USER)
+                .hasMessage(ResponseCode.NOT_EXIST_WAITING_USER.getMessage());
     }
 
-    @DisplayName("[대기열 중복 신청] - 대기열에 이미 등록된 경우 ONGOING")
     @Test
-    void test_register_alreadyOngoing(){
+    @DisplayName("userId로 대기열 조회 시 대기열에 존재하는 경우 대기열 만료 시간 반환")
+    void test_getQueueStatus1(){
         // Given
-        QueueRegisterRequest queueRegisterRequest = createTestQueueRegisterRequestByUserId(1L);
-        Long userId = queueRegisterRequest.getUserId();
-        Queue queue = createTestQueueByUserIdAndStatus(1L ,WaitingStatus.ONGOING);
-        String message = String.format("대기열 만료 시간 [%s]", queue.getExpiredAt());
-
-        // When & Then
-        when(iQueueRepository.findByUserIdAndStatusIn(anyLong(), anyList())).thenReturn(queue);
-        assertThatThrownBy(() -> queueService.validateUserNotRegisteredOrThrow(userId))
-                .isInstanceOf(CommonException.class)
-                .hasFieldOrPropertyWithValue("ResponseCode", ResponseCode.ALREADY_ONGOING_USER)
-                .hasMessage(message);
-
-    }
-
-
-    *//**
-     * 1. 대기열 만료시간이 지난 리스트 status update : ONGOING -> null, isExpired -> true
-     * 3. 대기열 만료시간이 지난 리스트 수 만큼 WAIT 상태 리스트(created_at ASC) WAIT -> ONGOING
-     *//*
-    @DisplayName("[대기열 상태 갱신] 만료된 대기열 리스트 개수 만큼 WAIT 상태 대기열 활성화")
-    @Test
-    void test_updateExpiredQueuesAndActivateNewOnes(){
-        // Given
-        LocalDateTime currentDateTimeMinusOneMinutes = LocalDateTime.now().minusMinutes(1);
-        List<Queue> expiredQueues = createOngoingListBySizeAndExpiredAt(5, currentDateTimeMinusOneMinutes);
-        List<Queue> waitQueues = createWaitListBySize(5);
+        Long userId = 1L;
+        String expiredTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now());
 
         // When
-        when(iQueueRepository.findExpiredOngoingStatus(any(WaitingStatus.class), any(LocalDateTime.class))).thenReturn(expiredQueues);
-
-        queueService.expireQueues(expiredQueues);
-        doNothing().when(iQueueRepository).updateStatusFromWaitToOngoingOrExpired(anyList());
-
-        queueService.activateQueuesByExpireQueuesSize(expiredQueues.size());
-        when(iQueueRepository.findQueuesInWaitStatus(any(WaitingStatus.class), anyInt())).thenReturn(waitQueues);
-        doNothing().when(iQueueRepository).updateStatusFromWaitToOngoingOrExpired(anyList());
+        when(iQueueRedisRepository.findExpirationTimeForUser(anyLong()))
+                .thenReturn(Optional.of(expiredTime));
 
         // Then
-        queueService.updateExpiredQueuesAndActivateNewOnes();
-        assertThat(expiredQueues)
-                .allSatisfy(queue -> {
-                    assertThat(queue.getStatus()).isNull();
-                    assertThat(queue.isExpired()).isEqualTo(true);
-                });
-
-        assertThat(waitQueues)
-            .allSatisfy(queue -> {
-                assertThat(queue.getStatus()).isEqualTo(WaitingStatus.ONGOING);
-                assertThat(queue.getExpiredAt().truncatedTo(ChronoUnit.SECONDS))
-                        .isEqualTo(LocalDateTime.now().plusMinutes(QUEUE_EXPIRED_TIME).truncatedTo(ChronoUnit.SECONDS));
-            });
+        QueueStatusResponse result = queueService.getQueueStatus(1L);
+        assertThat(result.getExpiredTime()).isEqualTo(expiredTime);
     }
 
-    @DisplayName("[대기열 만료된 토큰 상태값 변경] ONGOING -> DONE")
-    @Test
-    void test_expireQueues(){
-        // Given
-        LocalDateTime currentDateTimeMinusOneMinutes = LocalDateTime.now().minusMinutes(1);
-        List<Queue> expiredQueues = createOngoingListBySizeAndExpiredAt(5, currentDateTimeMinusOneMinutes);
 
-        // When
-        doNothing().when(iQueueRepository).updateStatusFromWaitToOngoingOrExpired(anyList());
-        queueService.expireQueues(expiredQueues);
-
-        // Then
-        verify(iQueueRepository).updateStatusFromWaitToOngoingOrExpired(anyList());
-        assertThat(expiredQueues)
-                .allSatisfy(queue -> {
-                    assertThat(queue.getStatus()).isNull();
-                    assertThat(queue.isExpired()).isEqualTo(true);
-                });
-    }
-
-    @DisplayName("[대기열 대기중인 토큰 갱신] WAIT -> ONGOING")
-    @Test
-    void test_activateQueuesByExpireQueuesSize(){
-        // Given
-        int availableQueueSpace = 3;
-        List<Queue> waitQueues = createWaitListBySize(availableQueueSpace);
-
-        // When
-        when(iQueueRepository.findQueuesInWaitStatus(any(WaitingStatus.class), anyInt())).thenReturn(waitQueues);
-        doNothing().when(iQueueRepository).updateStatusFromWaitToOngoingOrExpired(anyList());
-
-        // Then
-        queueService.activateQueuesByExpireQueuesSize(availableQueueSpace);
-        verify(iQueueRepository).updateStatusFromWaitToOngoingOrExpired(anyList());
-        assertThat(waitQueues)
-                .allSatisfy(queue -> {
-                    assertThat(queue.getStatus()).isEqualTo(WaitingStatus.ONGOING);
-                    assertThat(queue.getExpiredAt().truncatedTo(ChronoUnit.SECONDS))
-                            .isEqualTo(LocalDateTime.now().plusMinutes(QUEUE_EXPIRED_TIME).truncatedTo(ChronoUnit.SECONDS));
-                });
-    }
-
-    @DisplayName("[대기열 상태 조회] - 존재하지 않는 번호표")
-    @Test
-    void test_detail_notExist(){
-        // Given
-        Long concertWaitingId = 1L;
-
-        // When
-        when(iQueueRepository.findById(anyLong())).thenThrow(new CommonException(ResponseCode.TICKET_NOT_ISSUED, ResponseCode.TICKET_NOT_ISSUED.getMessage()));
-
-        // Then
-        assertThatThrownBy(() -> queueService.detail(concertWaitingId))
-                .isInstanceOf(CommonException.class)
-                .hasMessage(ResponseCode.TICKET_NOT_ISSUED.getMessage());
-    }
-
-    @DisplayName("[대기열 상태 조회] - WAIT")
-    @Test
-    void test_detail_statusWait(){
-        // Given
-        Long concertWaitingId = 1L;
-        Queue queue = Queue.builder().queueId(1L).waitingNumber(1).status(WaitingStatus.WAIT).build();
-
-        // When
-        when(iQueueRepository.findById(anyLong())).thenReturn(queue);
-        when(waitingRank.getRanking()).thenReturn(1);
-        when(iQueueRepository.countWaitingAhead(concertWaitingId)).thenReturn(waitingRank);
-
-        // Then
-        QueueStatusResponse result = queueService.detail(concertWaitingId);
-        assertThat(result.getWaitNumber()).isEqualTo(1);
-        assertThat(result.getStatus()).isEqualTo(WaitingStatus.WAIT);
-        assertThat(result.getMessage()).isEqualTo("대기열 순번 : %s", queue.getWaitingNumber());
-    }
-
-    @DisplayName("[대기열 상태 조회] - ONGOING")
-    @Test
-    void test_detail_statusOngoing(){
-        // Given
-        Long concertWaitingId = 1L;
-        Queue queue = Queue.builder().queueId(1L).expiredAt(LocalDateTime.now()).status(WaitingStatus.ONGOING).build();
-        String message = String.format("대기열 만료 시간 [%s]", queue.getExpiredAt());
-
-        // When
-        when(iQueueRepository.findById(anyLong())).thenReturn(queue);
-
-        // Then
-        assertThatThrownBy(() -> queueService.detail(concertWaitingId))
-                .isInstanceOf(CommonException.class)
-                .hasFieldOrPropertyWithValue("responseCode", ResponseCode.ALREADY_ONGOING_USER)
-                .hasMessage(message);
-    }
-*/
     public QueueRegisterRequest createTestQueueRegisterRequestByUserId(Long userId){
         return QueueRegisterRequest
                 .builder()
@@ -326,7 +131,7 @@ class QueueServiceTest {
 
     public List<Queue> createWaitListBySize(int size) {
         List<Queue> ongoingStatus = new ArrayList<>();
-        for(int i = 1; i <= size; i++) {
+        for (int i = 1; i <= size; i++) {
             ongoingStatus.add(
                     Queue.builder()
                             .queueId((long) i + 10)
@@ -336,20 +141,6 @@ class QueueServiceTest {
             );
         }
         return ongoingStatus;
-    }
-
-    @Test
-    @DisplayName("대기열 등록")
-    void test_register(){
-        // Given
-        QueueRegisterRequest queueRegisterRequest = createTestQueueRegisterRequestByUserId(1L);
-
-        // When
-        when(iQueueRedisRepository.register(anyLong())).thenReturn(1);
-        QueueRegisterResponse register = queueService.register(queueRegisterRequest);
-
-        // Then
-        assertThat(register.getRank()).isEqualTo(1);
     }
 
 }
