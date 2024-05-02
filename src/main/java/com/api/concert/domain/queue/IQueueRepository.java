@@ -25,4 +25,5 @@ public interface IQueueRepository {
 
     Queue findByUserIdAndStatusIn(Long userId, List<WaitingStatus> asList);
 
+    Long findOngoingCount();
 }

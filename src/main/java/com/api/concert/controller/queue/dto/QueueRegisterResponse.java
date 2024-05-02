@@ -14,18 +14,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class QueueRegisterResponse {
 
-    private Long waitNumber;
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime expiredAt;
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String message;
+    private int rank;
 
     @Builder
-    private QueueRegisterResponse(Long waitNumber, LocalDateTime expiredAt, String message){
-        this.waitNumber = waitNumber;
-        this.expiredAt = expiredAt;
-        this.message = message;
+    private QueueRegisterResponse(int rank){
+        this.rank = rank + 1;
     }
 }

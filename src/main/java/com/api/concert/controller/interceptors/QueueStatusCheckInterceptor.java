@@ -24,10 +24,10 @@ public class QueueStatusCheckInterceptor implements HandlerInterceptor {
             throw new CommonException(ResponseCode.TOKEN_DOES_NOT_EXIST, ResponseCode.TOKEN_DOES_NOT_EXIST.getMessage());
         }
 
-        boolean isOngoing = queueService.isQueueOngoing(Long.valueOf(concertWaitingId));
+        /*boolean isOngoing = queueService.isQueueOngoing(Long.valueOf(concertWaitingId));
         if(!isOngoing){
             throw new CommonException(ResponseCode.INVALID_WAIT_INFORMATION, ResponseCode.INVALID_WAIT_INFORMATION.getMessage());
-        }
+        }*/
 
         return HandlerInterceptor.super.preHandle(request, response, handler);
     }

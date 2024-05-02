@@ -75,4 +75,9 @@ public class QueueRepository implements IQueueRepository {
                 .map(QueueConverter::toDomain)
                 .orElse(null);
     }
+
+    @Override
+    public Long findOngoingCount() {
+        return queueJpaRepository.countByStatus(WaitingStatus.ONGOING);
+    }
 }

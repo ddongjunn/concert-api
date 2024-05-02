@@ -26,24 +26,4 @@ public class QueueConverter {
                 .isExpired(queueEntity.isExpired())
                 .build();
     }
-
-    public static QueueRegisterResponse toRegisterResponse(Queue queue){
-        String ONGOING_MESSAGE = "대기열 활성화 상태";
-
-        return QueueRegisterResponse.builder()
-                .waitNumber(queue.getQueueId())
-                .expiredAt(queue.getExpiredAt())
-                .message(queue.getStatus() == WaitingStatus.ONGOING ? ONGOING_MESSAGE : null)
-                .build();
-    }
-
-    public static QueueStatusResponse toStatusResponse(Queue queue) {
-        String message = String.format("대기열 순번 : %s", queue.getWaitingNumber());
-
-        return QueueStatusResponse.builder()
-                .waitNumber(queue.getWaitingNumber())
-                .status(queue.getStatus())
-                .message(message)
-                .build();
-    }
 }
