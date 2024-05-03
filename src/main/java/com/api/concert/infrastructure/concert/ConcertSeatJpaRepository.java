@@ -23,13 +23,9 @@ public interface ConcertSeatJpaRepository extends JpaRepository <ConcertSeatEnti
     @Query("SELECT c FROM ConcertSeatEntity c where c.concertOptionId = :id AND c.status != :status")
     List<ConcertSeatEntity> findByConcertOptionIdAndStatusNot(@Param("id") Long concertOptionId, @Param("status") SeatStatus status);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT c FROM ConcertSeatEntity c Where c.concertOptionId = :id AND c.seatNo = :seatNo")
-    Optional<ConcertSeatEntity> findByConcertOptionIdAndSeatNoWithPessimisticLock(@Param("id") Long concertOptionId, @Param("seatNo") int seatNo);
+    Optional<ConcertSeatEntity> findByConcertOptionIdAndSeatNo(Long concertOptionId, int seatNo);
 
     List<ConcertSeatEntity> findByStatusAndUpdatedAtLessThanEqual(SeatStatus status, LocalDateTime time);
 
     List<ConcertSeatEntity> findByUserIdAndStatus(Long userId, SeatStatus seatStatus);
-
-    ConcertSeatEntity findByConcertOptionIdAndSeatNo(Long concertOptionId, int seatNo);
 }
