@@ -15,7 +15,7 @@ branches[ "master", develop", "feature-*"]
 - 새로운 기능이나 버그 수정 작업을 수행하기 위한 브랜치
 - 이 브랜치는 작업의 컨텍스트를 제공하고, 기능의 독립성을 보장
 ---
-## 동시성 문제 유즈케이스
+# 동시성 문제 유즈케이스
 
 ### Redisson 라이브러리를 이용하여 분산락 적용
 
@@ -25,6 +25,7 @@ Redisson을 이용한 PUB/SUB 방식의 분산 lock 사용
 Lettuce을 이용하여 분산락 구현 시 `setnx`,`setex`과 같은 명령어를 이용해 지속적으로 Redis에게 요청을 보내는 스핀락 방식으로 동작
 요청이 많을수록 Redis가 받는 부하가 커지게 되지만 `Redisson`은 Pub/Sub 방식을 이용하기 때문에 락이 해제되면 락을 subcribe하는
 클라이언트는 락이 해제되었다는 신호를 받고 락 획득을 시도
+
 ----
 ### 대기열
 동시성 케이스
@@ -78,7 +79,3 @@ Redisson 라이브러리를 사용하여 분산락(PUB/SUB) 사용
 LOCK Key = LOCK : SEAT + seatId : CONCERT + concertOptionId
 
 ---
-
-
-
-
