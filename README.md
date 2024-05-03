@@ -20,6 +20,20 @@ branches[ "master", develop", "feature-*"]
 - 한 명의 사용자가 대기열을 여러번 신청 하는 케이스
 - 여러명의 사용자가 대기열을 동시에 신청 하는 케이스 (QUEUE_LIMIT)
 
+RDB 
+
+대기열의 경우 토큰이 없는 경우에는 토큰에 대한 ROW가 존재 하지 않기 때문에 DB LOCK을 통한 제어가 불가능.
+위 문제점을 해결 하기 위한 방안으로 대기열 테이블을 2개로 구성 하여 해결이 가능 (ONGOING TABLE, WAIT TABLE로 나누어서 구성)
+1) 대기열에 신청 API를 호출하는 경우 WAIT TABLE에 등록
+2) WAIT TABLE -> ONGOING TABLE 서버에서 스케쥴러를 통한 작업
+
+-> RDB를 사용해서 대기열 동시성 문제를 처리하기 위해서는 테이블을 분리해야 하므로 관리 포인트가 늘어나기 때문에 Redis을 사용하여 대기열 로직 리팩토링
+
+REDIS
+1) 대기열 신청시 Redis SortedSet을 사용한 Wait Queue에 순차적으로 넣음
+2) 스케쥴러를 통해서 Wait Queue에 쌓인 유저들을 Redis Map 자료 구조를 사용한 Ongoing Queue로 이동
+3) Ongoing Queue는 대기열 만료 시간 TTL을 사용하여 대기열 관리
+
 [좌석 예약]
 - 여러명의 사용자가 같은 좌석 예약 신청 하는 케이스
 
@@ -27,16 +41,6 @@ branches[ "master", develop", "feature-*"]
 - 포인트를 동시에 충전 하는 케이스
 - 포인트를 동시에 사용 하는 케이스
 
-기존의 구현은 REDIS가 아닌 RDB로 구현
-
-대기열의 경우 토큰이 없는 경우에는 토큰에 대한 ROW가 존재 하지 않기 때문에 DB LOCK을 통한 제어가 불가능.
-
-이러한 문제점을 개선하기 위해서는 대기열 테이블을 2개로 구성 하여 해결이 가능
-ONGOING TABLE, WAIT TABLE로 나누어서 구성
-1) 대기열에 신청 API를 호출하는 경우 WAIT TABLE에 등록
-2) WAIT TABLE -> ONGOING TABLE 서버에서 스케쥴러를 통한 작업
-
-RDB를 사용해서 대기열 동시성 문제를 처리하기 위해서는 테이블을 분리해야 하므로 관리 포인트가 늘어나기 때문에 Redis 분산락을 고려
 
 
 
