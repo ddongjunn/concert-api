@@ -4,6 +4,7 @@ import com.api.concert.controller.concert.dto.ConcertSeatResponse;
 import com.api.concert.controller.concert.dto.ConcertTempReservationRequest;
 import com.api.concert.controller.concert.dto.ConcertTempReservationResponse;
 import com.api.concert.domain.concert.constant.SeatStatus;
+import com.api.concert.global.common.annotation.DistributedLock;
 import com.api.concert.global.common.exception.CommonException;
 import com.api.concert.global.common.model.ResponseCode;
 import lombok.RequiredArgsConstructor;
@@ -62,6 +63,7 @@ public class ConcertSeatService {
     }
 
     @Transactional
+    @DistributedLock(key = "'SEAT'.concat(#request.seatNo).concat(':CONCERT').concat(#request.concertOptionId)")
     public ConcertTempReservationResponse temporaryReservationSeat(ConcertTempReservationRequest request){
         Long concertOptionId = request.concertOptionId();
         Long userId = request.userId();

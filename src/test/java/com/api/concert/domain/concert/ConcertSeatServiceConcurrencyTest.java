@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayDeque;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -64,7 +65,7 @@ public class ConcertSeatServiceConcurrencyTest {
         latch.await();
 
         // Then
-        ConcertSeatEntity result = concertSeatJpaRepository.findByConcertOptionIdAndSeatNo(concertOptionId, seatNo);
+        ConcertSeatEntity result = concertSeatJpaRepository.findByConcertOptionIdAndSeatNo(concertOptionId, seatNo).get();
         assertThat(result.getStatus()).isEqualTo(SeatStatus.TEMPORARY);
     }
 
@@ -100,7 +101,7 @@ public class ConcertSeatServiceConcurrencyTest {
         latch.await();
 
         // Then
-        ConcertSeatEntity result = concertSeatJpaRepository.findByConcertOptionIdAndSeatNo(concertOptionId, seatNo);
+        ConcertSeatEntity result = concertSeatJpaRepository.findByConcertOptionIdAndSeatNo(concertOptionId, seatNo).get();
         assertThat(result.getUserId()).isEqualTo(reservationOrderQueue.poll());
         assertThat(result.getStatus()).isEqualTo(SeatStatus.TEMPORARY);
     }
