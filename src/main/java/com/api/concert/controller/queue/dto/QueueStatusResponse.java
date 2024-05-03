@@ -12,14 +12,10 @@ import java.time.LocalDateTime;
 
 @Data
 public class QueueStatusResponse {
-    private int waitNumber;
-    private WaitingStatus status;
-    private String message;
+    private String expiredTime;
 
     @Builder
-    private QueueStatusResponse(int waitNumber, WaitingStatus status, String message){
-        this.waitNumber = waitNumber;
-        this.status = status;
-        this.message = message;
+    private QueueStatusResponse(String expiredTime){
+        this.expiredTime = expiredTime;
     }
 }

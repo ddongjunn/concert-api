@@ -36,7 +36,7 @@ public interface QueueJpaRepository extends JpaRepository<QueueEntity, Long> {
                 "WHERE queue_id = :id", nativeQuery = true)
     WaitingRank findWaitingRankById(@Param("id") Long id, @Param("status") String status);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    //@Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT q FROM QueueEntity q WHERE q.status = :status")
     List<QueueEntity> findByStatusWithPessimisticLock(@Param("status") WaitingStatus status);
 
