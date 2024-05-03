@@ -16,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -45,9 +46,6 @@ public class PointServiceConcurrencyTest {
     @Test
     void test_charge() throws InterruptedException {
         //Given
-        PointChargeRequest initPointChargeRequest = createPointChargeRequest(1L, 0L);
-        pointService.charge(initPointChargeRequest);
-
         PointChargeRequest pointChargeRequest = createPointChargeRequest(1L, 500L);
 
         //When
@@ -69,11 +67,11 @@ public class PointServiceConcurrencyTest {
         latch.await();
 
         //Then
-        PointEntity result = pointJpaRepository.findByUserId(1L);
+        PointEntity result = pointJpaRepository.findByUserId(1L).get();
         assertThat(result.getPoint()).isEqualTo(5000L);
 
         List<PointHistoryEntity> histories = pointHistoryJpaRepository.findAll();
-        assertThat(histories).hasSize(11);
+        assertThat(histories).hasSize(10);
     }
 
     @DisplayName("포인트를 동시에 사용 하는 경우 모두 사용되어야 한다.")
@@ -104,7 +102,7 @@ public class PointServiceConcurrencyTest {
         latch.await();
 
         //Then
-        PointEntity result = pointJpaRepository.findByUserId(1L);
+        PointEntity result = pointJpaRepository.findByUserId(1L).get();
         assertThat(result.getPoint()).isEqualTo(0L);
 
         List<PointHistoryEntity> histories = pointHistoryJpaRepository.findAll();

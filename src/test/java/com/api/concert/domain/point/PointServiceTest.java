@@ -41,7 +41,7 @@ class PointServiceTest {
 
         // When
         when(iPointRepository.findPointByUserId(anyLong())).thenReturn(point);
-        Point result = pointService.findPointForService(userId);
+        Point result = pointService.getPoint(userId);
 
         // Then
         assertThat(result.getUserId()).isEqualTo(point.getUserId());

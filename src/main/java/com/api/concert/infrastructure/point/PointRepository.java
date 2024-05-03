@@ -16,7 +16,7 @@ public class PointRepository implements IPointRepository {
 
     @Override
     public Point findPointByUserId(Long userId) {
-        return pointJpaRepository.findByUserIdWithPessimisticLock(userId)
+        return pointJpaRepository.findByUserId(userId)
                 .map(PointConverter::toDomain)
                 .orElseGet(() -> Point.builder()
                         .userId(userId)
