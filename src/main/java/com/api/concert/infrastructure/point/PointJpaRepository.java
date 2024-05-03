@@ -13,11 +13,8 @@ import java.util.Optional;
 
 public interface PointJpaRepository extends JpaRepository<PointEntity, Long> {
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT p FROM PointEntity p WHERE p.userId = :userId")
-    Optional<PointEntity> findByUserIdWithPessimisticLock(@Param("userId") Long userId);
 
-    PointEntity findByUserId(Long userId);
+    Optional<PointEntity> findByUserId(Long userId);
 
     boolean existsByUserId(Long userId);
 }
