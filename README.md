@@ -16,6 +16,16 @@ branches[ "master", develop", "feature-*"]
 - 이 브랜치는 작업의 컨텍스트를 제공하고, 기능의 독립성을 보장
 ---
 ## 동시성 문제 유즈케이스
+
+### Redisson 라이브러리를 이용하여 분산락 적용
+
+Simple Lock의 경우 key 선점에 의한 lock 획득 실패 시, 비즈니스 로직을 수행하지 않기 때문에 포인트 로직에 맞지 않다고 판단하였고, Spin Lock의 경우 Lock을 획득하기 위해 지속적인 재시도로 인한 성능적인 부분을 고려하여
+Redisson을 이용한 PUB/SUB 방식의 분산 lock 사용
+
+Lettuce을 이용하여 분산락 구현 시 `setnx`,`setex`과 같은 명령어를 이용해 지속적으로 Redis에게 요청을 보내는 스핀락 방식으로 동작
+요청이 많을수록 Redis가 받는 부하가 커지게 되지만 `Redisson`은 Pub/Sub 방식을 이용하기 때문에 락이 해제되면 락을 subcribe하는
+클라이언트는 락이 해제되었다는 신호를 받고 락 획득을 시도
+
 ### 대기열
 동시성 케이스
 - 한 명의 사용자가 대기열을 여러번 신청 하는 케이스
@@ -50,6 +60,7 @@ Database Lock, 비관적 락을 사용하여 동시성 제어
 Redisson 라이브러리를 사용하여 분산락(PUB/SUB) 사용
 
 LOCK Key = LOCK : POINT : CHARGE : userId
+
 LOCK Key = LOCK : POINT : USE : userId
 
 ---
@@ -67,15 +78,6 @@ Redisson 라이브러리를 사용하여 분산락(PUB/SUB) 사용
 LOCK Key = LOCK : SEAT + seatId : CONCERT + concertOptionId
 
 ---
-
-### Redis의 Redisson
-
-Simple Lock의 경우 key 선점에 의한 lock 획득 실패 시, 비즈니스 로직을 수행하지 않기 때문에 포인트 로직에 맞지 않다고 판단하였고, Spin Lock의 경우 Lock을 획득하기 위해 지속적인 재시도로 인한 성능적인 부분을 고려하여
-Redisson을 이용한 PUB/SUB 방식의 분산 lock 사용
-
-Lettuce을 이용하여 분산락 구현 시 `setnx`,`setex`과 같은 명령어를 이용해 지속적으로 Redis에게 요청을 보내는 스핀락 방식으로 동작
-요청이 많을수록 Redis가 받는 부하가 커지게 되지만 `Redisson`은 Pub/Sub 방식을 이용하기 때문에 락이 해제되면 락을 subcribe하는
-클라이언트는 락이 해제되었다는 신호를 받고 락 획득을 시도
 
 
 
