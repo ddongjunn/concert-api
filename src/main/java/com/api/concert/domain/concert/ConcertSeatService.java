@@ -62,7 +62,6 @@ public class ConcertSeatService {
                 .toList();
     }
 
-    @Transactional
     @DistributedLock(key = "'SEAT'.concat(#request.seatNo).concat(':CONCERT').concat(#request.concertOptionId)")
     public ConcertTempReservationResponse temporaryReservationSeat(ConcertTempReservationRequest request){
         Long concertOptionId = request.concertOptionId();
