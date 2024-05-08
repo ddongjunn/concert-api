@@ -46,7 +46,7 @@ Lettuce을 이용하여 분산락 구현 시 `setnx`,`setex`과 같은 명령어
 2) 스케쥴러를 통해서 Wait Queue에 쌓인 유저들을 Redis Map 자료 구조를 사용한 Ongoing Queue로 이동
 3) Ongoing Queue는 대기열 만료 시간 TTL을 사용하여 대기열 관리
 4) 대기열 신청 API를 재호출 하는 경우 순번이 뒤로 밀려남
----
+
 ### 포인트 충전/사용
 - 포인트를 동시에 충전 하는 케이스
 - 포인트를 동시에 사용 하는 케이스
@@ -63,7 +63,6 @@ LOCK Key = LOCK : POINT : CHARGE : userId
 
 LOCK Key = LOCK : POINT : USE : userId
 
----
 ### 좌석 예약
 - 여러명의 사용자가 같은 좌석 예약 신청 하는 케이스
 
@@ -78,7 +77,101 @@ Redisson 라이브러리를 사용하여 분산락(PUB/SUB) 사용
 LOCK Key = LOCK : SEAT + seatId : CONCERT + concertOptionId
 
 ---
+## Query 분석 및 DB Index 설계
+성능 조회를 위해서 conert table은 1,000개의 데이터 concert_option table은 13,000개 더미데이터 삽입
+
+예약 가능한 콘서트 조회 쿼리
+
+```mysql
+select
+    coe1_0.concert_option_id,
+    ce1_0.name,
+    ce1_0.singer,
+    coe1_0.venue,
+    coe1_0.start_date
+from
+    concert ce1_0
+join
+    concert_option coe1_0
+        on ce1_0.concert_id=coe1_0.concert_id
+where
+    coe1_0.reservation_start_date<now()
+    and coe1_0.start_date>now()
+```
+where 조건 ( 콘서트 예약 시작일은 지났지만 아직 시작하지 않은 콘서트 조회 )
+1. 현재 날짜가 콘서트 예매 시작일(coe1_0.reservation_start_date < now())보다 이후 날짜
+2. 현재 날짜가 콘서트 시작일(coe1_0.start_date > now()) 이전 날짜
+
+Index를 적용하여 실제 쿼리 성능을 분석
+
+### Index 적용 전 실행계획
+```json
+[
+   {
+      "id": 1,
+      "select_type": "SIMPLE",
+      "table": "coe1_0",
+      "partitions": null,
+      "type": "ALL",
+      "possible_keys": null,
+      "key": null,
+      "key_len": null,
+      "ref": null,
+      "rows": 12072,
+      "filtered": 11.11,
+      "Extra": "Using where"
+   },
+   {
+      "id": 1,
+      "select_type": "SIMPLE",
+      "table": "ce1_0",
+      "partitions": null,
+      "type": "eq_ref",
+      "possible_keys": "PRIMARY",
+      "key": "PRIMARY",
+      "key_len": "8",
+      "ref": "mysql.coe1_0.concert_id",
+      "rows": 1,
+      "filtered": 100,
+      "Extra": null
+   }
+]
+```
+
+### Index 적용 후 실행계획
+```json
+[
+   {
+      "id": 1,
+      "select_type": "SIMPLE",
+      "table": "coe1_0",
+      "partitions": null,
+      "type": "range",
+      "possible_keys": "idx_test",
+      "key": "idx_test",
+      "key_len": "9",
+      "ref": null,
+      "rows": 2000,
+      "filtered": 33.33,
+      "Extra": "Using where"
+   },
+   {
+      "id": 1,
+      "select_type": "SIMPLE",
+      "table": "ce1_0",
+      "partitions": null,
+      "type": "eq_ref",
+      "possible_keys": "PRIMARY",
+      "key": "PRIMARY",
+      "key_len": "8",
+      "ref": "mysql.coe1_0.concert_id",
+      "rows": 1,
+      "filtered": 100,
+      "Extra": null
+   }
+]
+```
 
 
-
+정확한 실행시간은 아니지만 평균적인 실행시간 실행시간 69ms -> 실행시간 40ms, 약 42% 감소
 
