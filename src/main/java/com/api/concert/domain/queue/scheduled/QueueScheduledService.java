@@ -20,12 +20,12 @@ public class QueueScheduledService {
 
     @Scheduled(cron = "0/30 * * * * ?")
     public void activateQueues() {
-        int ongoingCount = availableQueueSpace();
-        if(ongoingCount < 0){
+        int availableQueueCount = availableQueueSpace();
+        if(availableQueueCount <= 0){
             return;
         }
 
-        List<Long> userIds = iQueueRedisRepository.getUserToActivate(ongoingCount);
+        List<Long> userIds = iQueueRedisRepository.pollUsersFromWaitQueue(availableQueueCount);
         iQueueRedisRepository.activate(userIds, QUEUE_EXPIRED_TIME);
     }
 
