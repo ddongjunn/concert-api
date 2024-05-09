@@ -36,8 +36,8 @@ public class QueueRedisRepository implements IQueueRedisRepository {
     }
 
     @Override
-    public List<Long> getUserToActivate(int ongoingCount) {
-        return waitQueue.pollFirst(ongoingCount)
+    public List<Long> pollUsersFromWaitQueue(int availableQueueCount) {
+        return waitQueue.pollFirst(availableQueueCount)
                 .stream()
                 .toList();
     }

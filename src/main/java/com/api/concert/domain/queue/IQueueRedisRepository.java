@@ -8,7 +8,7 @@ public interface IQueueRedisRepository {
 
     int getOngoingCount();
 
-    List<Long> getUserToActivate(int ongoingCount);
+    List<Long> pollUsersFromWaitQueue(int availableQueueCount);
 
     void activate(List<Long> userIds, int queueExpiredTime);
 
