@@ -51,17 +51,13 @@ public class QueueRedisRepository implements IQueueRedisRepository {
     }
 
     @Override
-    public Optional<String> findExpirationTimeForUser(Long userId) {
-        Long expiredTime = ongoingQueue.get(userId);
-        if (expiredTime != null) {
-            String formattedDate = Instant.ofEpochSecond(expiredTime)
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDateTime()
-                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    public Optional<Long> findUserExpiredTimeInOngoingQueue(Long userId) {
+        return Optional.ofNullable(ongoingQueue.get(userId));
+    }
 
-            return Optional.of(formattedDate);
-        }
-        return Optional.empty();
+    @Override
+    public Optional<Integer> findUserRankInWaitQueue(Long userId) {
+        return Optional.ofNullable(waitQueue.rank(userId));
     }
 
 }
