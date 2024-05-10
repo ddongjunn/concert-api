@@ -11,8 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @Entity
 @Table(name = "concert_option", indexes = {
-        @Index(name = "idx_reservation_start_date", columnList = "reservation_start_date"),
-        @Index(name = "idx_start_date", columnList = "start_date")
+        @Index(name = "idx_reservation_start_date", columnList = "reservation_start_date")
 })
 
 public class ConcertOptionEntity extends BaseEntity {
