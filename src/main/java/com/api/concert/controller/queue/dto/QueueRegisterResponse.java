@@ -18,6 +18,6 @@ public class QueueRegisterResponse {
 
     @Builder
     private QueueRegisterResponse(int rank){
-        this.rank = rank + 1;
+        this.rank = rank;
     }
 }

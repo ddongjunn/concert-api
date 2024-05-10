@@ -3,22 +3,16 @@ package com.api.concert.domain.queue;
 import com.api.concert.controller.queue.dto.QueueRegisterRequest;
 import com.api.concert.controller.queue.dto.QueueRegisterResponse;
 import com.api.concert.controller.queue.dto.QueueStatusResponse;
-import com.api.concert.domain.queue.constant.WaitingStatus;
-import com.api.concert.global.common.annotation.DistributedLock;
 import com.api.concert.global.common.exception.CommonException;
 import com.api.concert.global.common.model.ResponseCode;
-import com.api.concert.infrastructure.queue.projection.WaitingRank;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RAtomicLong;
-import org.redisson.api.RedissonClient;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 @Slf4j
@@ -26,6 +20,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class QueueService {
 
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final IQueueRedisRepository iQueueRedisRepository;
 
     @Transactional
@@ -33,17 +28,32 @@ public class QueueService {
         Long userId = queueRegisterRequest.getUserId();
         int rank = iQueueRedisRepository.register(userId);
         return QueueRegisterResponse.builder()
-                .rank(rank)
+                .rank(rank + 1)
                 .build();
     }
 
     @Transactional(readOnly = true)
     public QueueStatusResponse getQueueStatus(Long userId) {
-        String ttl = iQueueRedisRepository.findExpirationTimeForUser(userId)
+        Optional<Integer> rank = iQueueRedisRepository.findUserRankInWaitQueue(userId);
+        if(rank.isPresent()){
+            return QueueStatusResponse.builder()
+                    .rank(rank.get() + 1)
+                    .build();
+        }
+
+        String ttl = iQueueRedisRepository.findUserExpiredTimeInOngoingQueue(userId)
+                .map(this::convertEpochToFormattedDate)
                 .orElseThrow(() -> new CommonException(ResponseCode.NOT_EXIST_WAITING_USER, ResponseCode.NOT_EXIST_WAITING_USER.getMessage()));
 
         return QueueStatusResponse.builder()
                 .expiredTime(ttl)
                 .build();
+    }
+
+    public String convertEpochToFormattedDate (Long expiredTime) {
+        return Instant.ofEpochSecond(expiredTime)
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime()
+                .format(DATE_TIME_FORMATTER);
     }
 }

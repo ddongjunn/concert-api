@@ -12,5 +12,7 @@ public interface IQueueRedisRepository {
 
     void activate(List<Long> userIds, int queueExpiredTime);
 
-    Optional<String> findExpirationTimeForUser(Long userId);
+    Optional<Long> findUserExpiredTimeInOngoingQueue(Long userId);
+
+    Optional<Integer> findUserRankInWaitQueue(Long userId);
 }
