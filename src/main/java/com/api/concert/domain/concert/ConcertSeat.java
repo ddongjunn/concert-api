@@ -4,7 +4,7 @@ import com.api.concert.controller.concert.dto.ConcertSeatDTO;
 import com.api.concert.controller.concert.dto.ConcertSeatResponse;
 import com.api.concert.controller.concert.dto.ConcertTempReservationResponse;
 import com.api.concert.domain.concert.constant.SeatStatus;
-import com.api.concert.global.common.model.ResponseCode;
+import com.api.concert.common.model.ResponseCode;
 import com.api.concert.infrastructure.concert.ConcertSeatEntity;
 import lombok.Builder;
 import lombok.Getter;

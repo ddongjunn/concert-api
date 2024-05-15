@@ -1,4 +1,4 @@
-package com.api.concert.global.common.annotation;
+package com.api.concert.common.annotation;
 
 
 import java.lang.annotation.ElementType;

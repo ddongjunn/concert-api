@@ -1,9 +1,11 @@
 package com.api.concert.domain.point;
 
+import com.api.concert.common.event.Events;
 import com.api.concert.domain.point.constant.TransactionType;
-import com.api.concert.global.common.exception.CommonException;
+import com.api.concert.common.exception.CommonException;
+import com.api.concert.domain.point.event.PointHistoryLoggedEvent;
 import com.api.concert.domain.point.exception.InsufficientPointsException;
-import com.api.concert.global.common.model.ResponseCode;
+import com.api.concert.common.model.ResponseCode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,7 +24,7 @@ public class Point {
     private Long point;
     private TransactionType transactionType;
 
-    public void charge(Long chargePoint, Consumer<PointHistory> saveHistory){
+    public void charge(Long chargePoint){
         if(chargePoint < 0){
             throw new CommonException(ResponseCode.POINT_CHARGE_NEGATIVE, ResponseCode.POINT_CHARGE_NEGATIVE.getMessage());
         }
@@ -33,35 +35,36 @@ public class Point {
 
         this.point += chargePoint;
         this.transactionType = TransactionType.CHARGE;
-
-        saveHistory.accept(PointHistory.builder()
-                .userId(this.userId)
-                .point(chargePoint)
-                .type(this.transactionType)
-                .build()
-        );
+        saveHistory();
     }
 
-    public void use(Long usePoint, Consumer<PointHistory> saveHistory) {
-        Long currentPoint = this.point;
-        this.point -= usePoint;
-        this.transactionType = TransactionType.USE;
+    public void use(Long usePoint) {
+        if(this.point == null){
+            this.point = 0L;
+        }
 
-        if(this.point < 0){
-            long insufficientAmount = -this.point;
+        if(this.point < usePoint) {
+            long insufficientAmount = usePoint - this.point;
             throw new InsufficientPointsException(
                     ResponseCode.NOT_ENOUGH_POINT.getMessage(),
                     ResponseCode.NOT_ENOUGH_POINT,
                     insufficientAmount,
-                    currentPoint
+                    this.point
             );
         }
 
-        saveHistory.accept(PointHistory.builder()
-                .userId(this.userId)
-                .point(usePoint)
-                .type(this.transactionType)
-                .build()
+        this.point -= usePoint;
+        this.transactionType = TransactionType.USE;
+        saveHistory();
+    }
+
+    public void saveHistory() {
+        Events.raise(
+                PointHistoryLoggedEvent.builder()
+                        .userId(this.userId)
+                        .point(this.point)
+                        .type(this.transactionType)
+                        .build()
         );
     }
 }

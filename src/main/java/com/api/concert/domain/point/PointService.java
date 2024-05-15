@@ -1,17 +1,13 @@
 package com.api.concert.domain.point;
 
+import com.api.concert.common.annotation.DistributedLock;
 import com.api.concert.controller.point.dto.PointChargeRequest;
 import com.api.concert.controller.point.dto.PointChargeResponse;
 import com.api.concert.controller.point.dto.PointResponse;
 import com.api.concert.controller.point.dto.PointUseRequest;
-import com.api.concert.global.common.annotation.DistributedLock;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -19,7 +15,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 public class PointService{
 
     private final IPointRepository iPointRepository;
-    private final IPointHistoryRepository iPointHistoryRepository;
 
     @DistributedLock(key = "'POINT:'.concat('CHARGE:').concat(#pointChargeRequest.userId)")
     public PointChargeResponse charge(PointChargeRequest pointChargeRequest) {
@@ -27,7 +22,7 @@ public class PointService{
         Long chargePoint = pointChargeRequest.point();
 
         Point point = getPoint(userId);
-        point.charge(chargePoint, this::saveHistory);
+        point.charge(chargePoint);
 
         return PointConverter.toChargeResponse(
                 iPointRepository.updatePoint(PointConverter.toEntity(point)),
@@ -41,7 +36,7 @@ public class PointService{
         Long usePoint = pointUseRequest.point();
 
         Point point = getPoint(userId);
-        point.use(usePoint, this::saveHistory);
+        point.use(usePoint);
 
         return PointConverter.toChargeResponse(
                 iPointRepository.updatePoint(PointConverter.toEntity(point)),
@@ -56,12 +51,6 @@ public class PointService{
     public PointResponse findPoint(Long userId){
         return PointConverter.toResponse(
                 iPointRepository.findPointByUserId(userId)
-        );
-    }
-
-    public void saveHistory(PointHistory pointHistory){
-        iPointHistoryRepository.save(
-                PointHistory.toEntity(pointHistory)
         );
     }
 }

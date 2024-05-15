@@ -1,4 +1,4 @@
-package com.api.concert.global.entity;
+package com.api.concert.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

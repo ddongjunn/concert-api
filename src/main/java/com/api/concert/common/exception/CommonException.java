@@ -1,6 +1,6 @@
-package com.api.concert.global.common.exception;
+package com.api.concert.common.exception;
 
-import com.api.concert.global.common.model.ResponseCode;
+import com.api.concert.common.model.ResponseCode;
 import lombok.Getter;
 
 public class CommonException extends RuntimeException {

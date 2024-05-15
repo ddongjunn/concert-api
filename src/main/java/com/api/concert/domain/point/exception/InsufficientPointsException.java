@@ -1,6 +1,6 @@
 package com.api.concert.domain.point.exception;
 
-import com.api.concert.global.common.model.ResponseCode;
+import com.api.concert.common.model.ResponseCode;
 import lombok.Getter;
 
 @Getter

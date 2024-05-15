@@ -3,6 +3,7 @@ package com.api.concert.infrastructure.point;
 import com.api.concert.domain.point.IPointRepository;
 import com.api.concert.domain.point.Point;
 import com.api.concert.domain.point.PointConverter;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;

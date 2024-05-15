@@ -1,4 +1,4 @@
-package com.api.concert.global.common.component;
+package com.api.concert.common.component;
 
 import com.p6spy.engine.common.ConnectionInformation;
 import com.p6spy.engine.event.JdbcEventListener;

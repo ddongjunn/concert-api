@@ -1,8 +1,8 @@
 package com.api.concert.domain.queue;
 
 import com.api.concert.domain.queue.constant.WaitingStatus;
-import com.api.concert.global.common.exception.CommonException;
-import com.api.concert.global.common.model.ResponseCode;
+import com.api.concert.common.exception.CommonException;
+import com.api.concert.common.model.ResponseCode;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
