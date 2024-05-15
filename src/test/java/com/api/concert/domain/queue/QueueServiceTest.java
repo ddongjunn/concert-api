@@ -21,7 +21,9 @@ import org.redisson.api.RSortedSet;
 import org.redisson.api.RedissonClient;
 
 import java.lang.reflect.Field;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -45,7 +47,7 @@ class QueueServiceTest {
     QueueService queueService;
 
     @Test
-    @DisplayName("대기열 등록하면 순번을(index + 1) 반환")
+    @DisplayName("[대기열 등록] - 순번(rank)을 rank + 1 반환")
     void test_register(){
         // Given
         QueueRegisterRequest queueRegisterRequest = createTestQueueRegisterRequestByUserId(1L);
@@ -59,13 +61,13 @@ class QueueServiceTest {
     }
 
     @Test
-    @DisplayName("userId로 대기열 조회 시 대기열에 존재하지 않는 경우 Exception")
+    @DisplayName("[대기열 조회] - ongoingQueue에 존재하지 않는 경우 Exception")
     void test_getQueueStatus(){
         // Given
         Long userId = 1L;
 
         // When
-        when(iQueueRedisRepository.findExpirationTimeForUser(anyLong()))
+        when(iQueueRedisRepository.findUserExpiredTimeInOngoingQueue(userId))
                 .thenReturn(Optional.empty());
 
         // Then
@@ -76,19 +78,37 @@ class QueueServiceTest {
     }
 
     @Test
-    @DisplayName("userId로 대기열 조회 시 대기열에 존재하는 경우 대기열 만료 시간 반환")
+    @DisplayName("[대기열 조회] - ongoingQueue에 존재하는 경우 대기열 만료 시간 반환")
     void test_getQueueStatus1(){
         // Given
         Long userId = 1L;
-        String expiredTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now());
+        long expiredTime = System.currentTimeMillis();
 
         // When
-        when(iQueueRedisRepository.findExpirationTimeForUser(anyLong()))
+        when(iQueueRedisRepository.findUserExpiredTimeInOngoingQueue(userId))
                 .thenReturn(Optional.of(expiredTime));
+        String expiredTimeToString = queueService.convertEpochToFormattedDate(expiredTime);
 
         // Then
         QueueStatusResponse result = queueService.getQueueStatus(1L);
-        assertThat(result.getExpiredTime()).isEqualTo(expiredTime);
+        assertThat(result.getExpiredTime()).isEqualTo(expiredTimeToString);
+        assertThat(result.getRank()).isNull();
+    }
+
+    @Test
+    @DisplayName("[대기열 조회] - waitingQueue에 등록되어 있는 경우 대기열 순번 반환")
+    void test_getQueueStatus2(){
+        // Given
+        Long userId = 1L;
+
+        // When
+        when(iQueueRedisRepository.findUserRankInWaitQueue(userId))
+                .thenReturn(Optional.of(0));
+
+        // Then
+        QueueStatusResponse result = queueService.getQueueStatus(1L);
+        assertThat(result.getRank()).isEqualTo(1);
+        assertThat(result.getExpiredTime()).isNull();
     }
 
 
