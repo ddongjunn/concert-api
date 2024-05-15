@@ -5,7 +5,7 @@ import com.api.concert.controller.payment.dto.PaymentResponse;
 import com.api.concert.controller.point.dto.PointUseRequest;
 import com.api.concert.domain.concert.*;
 import com.api.concert.domain.point.PointService;
-import com.api.concert.global.common.model.ResponseCode;
+import com.api.concert.common.model.ResponseCode;
 import com.api.concert.infrastructure.concert.projection.ReservationInfoProjection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

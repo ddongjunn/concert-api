@@ -2,7 +2,7 @@ package com.api.concert.infrastructure.concert;
 
 import com.api.concert.domain.concert.ConcertSeat;
 import com.api.concert.domain.concert.constant.SeatStatus;
-import com.api.concert.global.entity.BaseEntity;
+import com.api.concert.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;

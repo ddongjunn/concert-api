@@ -1,4 +1,4 @@
-package com.api.concert.global.common.component;
+package com.api.concert.common.component;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.stereotype.Component;

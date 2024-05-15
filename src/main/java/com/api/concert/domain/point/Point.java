@@ -1,9 +1,9 @@
 package com.api.concert.domain.point;
 
 import com.api.concert.domain.point.constant.TransactionType;
-import com.api.concert.global.common.exception.CommonException;
+import com.api.concert.common.exception.CommonException;
 import com.api.concert.domain.point.exception.InsufficientPointsException;
-import com.api.concert.global.common.model.ResponseCode;
+import com.api.concert.common.model.ResponseCode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

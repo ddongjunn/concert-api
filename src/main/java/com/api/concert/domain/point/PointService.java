@@ -4,14 +4,10 @@ import com.api.concert.controller.point.dto.PointChargeRequest;
 import com.api.concert.controller.point.dto.PointChargeResponse;
 import com.api.concert.controller.point.dto.PointResponse;
 import com.api.concert.controller.point.dto.PointUseRequest;
-import com.api.concert.global.common.annotation.DistributedLock;
+import com.api.concert.common.annotation.DistributedLock;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Slf4j
 @RequiredArgsConstructor

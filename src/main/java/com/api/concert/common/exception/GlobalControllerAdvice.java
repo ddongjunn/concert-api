@@ -1,9 +1,9 @@
-package com.api.concert.global.common.exception;
+package com.api.concert.common.exception;
 
+import com.api.concert.common.model.CommonResponse;
 import com.api.concert.domain.point.exception.InsufficientPointsException;
 import com.api.concert.domain.queue.exception.AlreadyWaitingUserException;
-import com.api.concert.global.common.model.CommonResponse;
-import com.api.concert.global.common.model.ResponseCode;
+import com.api.concert.common.model.ResponseCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

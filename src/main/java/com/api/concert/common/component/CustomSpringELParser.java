@@ -1,4 +1,4 @@
-package com.api.concert.global.common.component;
+package com.api.concert.common.component;
 
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;

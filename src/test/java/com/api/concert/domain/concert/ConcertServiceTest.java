@@ -1,7 +1,7 @@
 package com.api.concert.domain.concert;
 
-import com.api.concert.global.common.exception.CommonException;
-import com.api.concert.global.common.model.ResponseCode;
+import com.api.concert.common.exception.CommonException;
+import com.api.concert.common.model.ResponseCode;
 import com.api.concert.infrastructure.concert.projection.ConcertInfoProjection;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

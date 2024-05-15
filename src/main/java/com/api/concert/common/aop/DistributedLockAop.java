@@ -1,8 +1,8 @@
-package com.api.concert.global.common.aop;
+package com.api.concert.common.aop;
 
-import com.api.concert.global.common.annotation.DistributedLock;
-import com.api.concert.global.common.component.AopForTransaction;
-import com.api.concert.global.common.component.CustomSpringELParser;
+import com.api.concert.common.annotation.DistributedLock;
+import com.api.concert.common.component.AopForTransaction;
+import com.api.concert.common.component.CustomSpringELParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -14,7 +14,6 @@ import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 
 @Aspect
 @Component
@@ -26,7 +25,7 @@ public class DistributedLockAop {
     private final RedissonClient redissonClient;
     private final AopForTransaction aopForTransaction;
 
-    @Around("@annotation(com.api.concert.global.common.annotation.DistributedLock)")
+    @Around("@annotation(com.api.concert.common.annotation.DistributedLock)")
     public Object lock(final ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();

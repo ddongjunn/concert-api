@@ -2,7 +2,7 @@ package com.api.concert.domain.point;
 
 import com.api.concert.controller.point.dto.PointChargeResponse;
 import com.api.concert.controller.point.dto.PointResponse;
-import com.api.concert.global.common.model.ResponseCode;
+import com.api.concert.common.model.ResponseCode;
 import com.api.concert.infrastructure.point.PointEntity;
 
 public class PointConverter {

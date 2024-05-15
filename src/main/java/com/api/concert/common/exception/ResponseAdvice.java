@@ -1,6 +1,6 @@
-package com.api.concert.global.common.exception;
+package com.api.concert.common.exception;
 
-import com.api.concert.global.common.model.ApiResponse;
+import com.api.concert.common.model.ApiResponse;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;

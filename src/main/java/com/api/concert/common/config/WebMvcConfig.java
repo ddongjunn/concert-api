@@ -1,4 +1,4 @@
-package com.api.concert.global.common.config;
+package com.api.concert.common.config;
 
 import com.api.concert.controller.interceptors.QueueStatusCheckInterceptor;
 import com.api.concert.domain.queue.QueueService;

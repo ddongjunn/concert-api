@@ -1,4 +1,4 @@
-package com.api.concert.global.common.model;
+package com.api.concert.common.model;
 
 public record CommonResponse(ResponseCode code, String message) {
 }
