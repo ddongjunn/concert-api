@@ -3,6 +3,7 @@ package com.api.concert.infrastructure.concert;
 import com.api.concert.domain.concert.ConcertSeat;
 import com.api.concert.domain.concert.IConcertSeatRepository;
 import com.api.concert.domain.concert.constant.SeatStatus;
+import com.api.concert.infrastructure.concert.projection.ReservationInfoProjection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -58,5 +59,10 @@ public class ConcertSeatRepository implements IConcertSeatRepository {
 
     public void updateStatusToReserved(Long userId, List<Long> updateStatusToReservedIds) {
         concertSeatJpaRepository.updateStatusAndUserIdByStatus(SeatStatus.REVERSED, userId, updateStatusToReservedIds);
+    }
+
+    @Override
+    public List<ReservationInfoProjection> findReservationInformationByIds(List<Long> seatIds) {
+        return concertSeatJpaRepository.findReservationInformationByIds(seatIds);
     }
 }

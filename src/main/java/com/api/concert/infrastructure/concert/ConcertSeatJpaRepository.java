@@ -2,6 +2,7 @@ package com.api.concert.infrastructure.concert;
 
 import com.api.concert.domain.concert.ConcertSeat;
 import com.api.concert.domain.concert.constant.SeatStatus;
+import com.api.concert.infrastructure.concert.projection.ReservationInfoProjection;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -22,6 +23,15 @@ public interface ConcertSeatJpaRepository extends JpaRepository <ConcertSeatEnti
 
     @Query("SELECT c FROM ConcertSeatEntity c where c.concertOptionId = :id AND c.status != :status")
     List<ConcertSeatEntity> findByConcertOptionIdAndStatusNot(@Param("id") Long concertOptionId, @Param("status") SeatStatus status);
+
+    @Query(value =
+            "SELECT cs.userId AS userId, c.name AS name, c.singer AS singer, cs.seatNo AS seatNo, cs.price AS price, co.startDate AS startDate " +
+            "FROM ConcertEntity c JOIN ConcertOptionEntity co " +
+            "ON c.concertId = co.concertOptionId " +
+            "JOIN ConcertSeatEntity cs " +
+            "ON co.concertOptionId = cs.concertOptionId " +
+            "WHERE cs.seatId IN :ids")
+    List<ReservationInfoProjection> findReservationInformationByIds(@Param("ids") List<Long> ids);
 
     Optional<ConcertSeatEntity> findByConcertOptionIdAndSeatNo(Long concertOptionId, int seatNo);
 
