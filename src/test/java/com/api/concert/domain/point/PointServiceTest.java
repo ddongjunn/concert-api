@@ -62,9 +62,6 @@ class PointServiceTest {
 
         Point pointCharge = Point.builder().userId(userId).point(findPoint.getPoint() + chargePoint).build();
         when(iPointRepository.updatePoint(any(PointEntity.class))).thenReturn(pointCharge);
-        findPoint.charge(chargePoint, pointHistory -> {
-
-        });
 
         // Then
         PointChargeResponse result = pointService.charge(pointChargeRequest);
@@ -126,7 +123,6 @@ class PointServiceTest {
 
         Point updatePoint = Point.builder().pointId(1L).userId(1L).point(1000L).build();
         when(iPointRepository.updatePoint(any(PointEntity.class))).thenReturn(updatePoint);
-        findPoint.use(usePoint, pointHistory -> {});
 
         PointChargeResponse result = pointService.use(pointUseRequest);
 
