@@ -23,8 +23,4 @@ public class ConcertOptionRepository implements IConcertOptionRepository {
         return concertOptionJpaRepository.existsById(id);
     }
 
-    @Override
-    public ReservationInfoProjection findConcertInformation(Long concertOptionId) {
-        return concertOptionJpaRepository.findConcertInformationById(concertOptionId);
-    }
 }

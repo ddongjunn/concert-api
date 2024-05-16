@@ -19,7 +19,6 @@ public class ConcertService {
     public List<ConcertInfoProjection> findAvailableConcerts() {
         List<ConcertInfoProjection> reservedConcerts = iConcertOptionRepository.availableConcerts();
         checkConcertAvailability(reservedConcerts);
-
         return reservedConcerts;
     }
 
@@ -34,9 +33,5 @@ public class ConcertService {
         if(!isExist){
             throw new CommonException(ResponseCode.NOT_EXIST_CONCERT, ResponseCode.NOT_EXIST_CONCERT.getMessage());
         }
-    }
-
-    public ReservationInfoProjection findConcertInformation(Long concertOptionId) {
-        return iConcertOptionRepository.findConcertInformation(concertOptionId);
     }
 }

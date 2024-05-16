@@ -1,12 +1,14 @@
 package com.api.concert.application;
 
+import com.api.concert.common.model.ResponseCode;
 import com.api.concert.controller.payment.dto.PaymentRequest;
 import com.api.concert.controller.payment.dto.PaymentResponse;
 import com.api.concert.controller.point.dto.PointUseRequest;
-import com.api.concert.domain.concert.*;
+import com.api.concert.domain.concert.ConcertSeat;
+import com.api.concert.domain.concert.ConcertSeatService;
+import com.api.concert.domain.concert.Reservation;
 import com.api.concert.domain.point.PointService;
-import com.api.concert.common.model.ResponseCode;
-import com.api.concert.infrastructure.concert.projection.ReservationInfoProjection;
+import com.api.concert.domain.queue.QueueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -16,10 +18,9 @@ import java.util.List;
 @Component
 public class PaymentFacade {
 
-    private final ConcertService concertService;
+    private final QueueService queueService;
     private final ConcertSeatService concertSeatService;
     private final PointService pointService;
-    private final ReservationService reservationService;
 
     public PaymentResponse payment(PaymentRequest paymentRequest) {
         Long userId = paymentRequest.userId();
@@ -32,28 +33,13 @@ public class PaymentFacade {
         PointUseRequest pointUseRequest = PointUseRequest.builder().userId(userId).point(paymentAmount).build();
         pointService.use(pointUseRequest);
 
-        //예약된 좌석들 상태 업데이트
-        List<ConcertSeat> concertSeats = concertSeatService.updateSeatToReserved(userId, temporarilyReservedSeats);
+        //좌석 예약처리 -> 예약 내역 반환
+        List<Reservation> reservations = concertSeatService.updateSeatToReserved(userId, temporarilyReservedSeats);
 
-         /***
-         * ConcertOptionId 로 Concert 메타 데이터 가져오기
-         * reservation_history 저장
-         */
-        concertSeats.forEach(
-                concertSeat ->
-                {
-                    ReservationInfoProjection concertInformation = concertService.findConcertInformation(concertSeat.getConcertOptionId());
-                    reservationService.save(Reservation.builder()
-                                    .userId(concertSeat.getUserId())
-                                    .name(concertInformation.getName())
-                                    .singer(concertInformation.getSinger())
-                                    .seatNo(concertSeat.getSeatNo())
-                                    .price(concertSeat.getPrice())
-                                    .StartAt(concertInformation.getStartDate())
-                                    .build()
-                    );
-                }
-        );
+        //대기열 삭제
+        queueService.expire(userId);
+
+        //TODO 외부 플랫폼 API 호출
 
         return PaymentResponse.builder()
                 .code(ResponseCode.SUCCESS)
