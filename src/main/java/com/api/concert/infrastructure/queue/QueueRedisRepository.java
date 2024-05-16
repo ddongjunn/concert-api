@@ -60,4 +60,8 @@ public class QueueRedisRepository implements IQueueRedisRepository {
         return Optional.ofNullable(waitQueue.rank(userId));
     }
 
+    @Override
+    public void expireOngoingQueue(Long userId) {
+        ongoingQueue.remove(userId);
+    }
 }

@@ -15,4 +15,6 @@ public interface IQueueRedisRepository {
     Optional<Long> findUserExpiredTimeInOngoingQueue(Long userId);
 
     Optional<Integer> findUserRankInWaitQueue(Long userId);
+
+    void expireOngoingQueue(Long userId);
 }
