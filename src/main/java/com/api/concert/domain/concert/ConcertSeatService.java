@@ -162,7 +162,6 @@ public class ConcertSeatService {
         return temporarilyReservedSeats;
     }
 
-    @Transactional
     public List<Reservation> updateSeatToReserved(Long userId, List<ConcertSeat> temporarilyReservedSeats) {
         temporarilyReservedSeats.forEach(ConcertSeat::reserve);
         List<Long> seatIds = temporarilyReservedSeats.stream()

@@ -11,6 +11,7 @@ import com.api.concert.domain.point.PointService;
 import com.api.concert.domain.queue.QueueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -22,6 +23,7 @@ public class PaymentFacade {
     private final ConcertSeatService concertSeatService;
     private final PointService pointService;
 
+    @Transactional
     public PaymentResponse payment(PaymentRequest paymentRequest) {
         Long userId = paymentRequest.userId();
 
