@@ -7,10 +7,13 @@ import com.api.concert.controller.point.dto.PointUseRequest;
 import com.api.concert.domain.concert.ConcertSeat;
 import com.api.concert.domain.concert.ConcertSeatService;
 import com.api.concert.domain.concert.Reservation;
+import com.api.concert.domain.payment.event.PaymentCompletedEvent;
 import com.api.concert.domain.point.PointService;
 import com.api.concert.domain.queue.QueueService;
+import com.api.concert.modules.event.Events;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -22,6 +25,7 @@ public class PaymentFacade {
     private final ConcertSeatService concertSeatService;
     private final PointService pointService;
 
+    @Transactional
     public PaymentResponse payment(PaymentRequest paymentRequest) {
         Long userId = paymentRequest.userId();
 
@@ -40,6 +44,7 @@ public class PaymentFacade {
         queueService.expire(userId);
 
         //TODO 외부 플랫폼 API 호출
+        Events.raise(PaymentCompletedEvent.builder().reservations(reservations).build());
 
         return PaymentResponse.builder()
                 .code(ResponseCode.SUCCESS)

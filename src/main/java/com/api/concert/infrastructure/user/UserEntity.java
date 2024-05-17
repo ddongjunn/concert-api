@@ -1,6 +1,6 @@
 package com.api.concert.infrastructure.user;
 
-import com.api.concert.common.entity.BaseEntity;
+import com.api.concert.modules.jpa.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;

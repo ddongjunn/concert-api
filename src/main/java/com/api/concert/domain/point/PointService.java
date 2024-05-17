@@ -30,7 +30,7 @@ public class PointService{
         );
     }
 
-    @DistributedLock(key = "'POINT:'.concat('USE:').concat(#pointUseRequest.userId)")
+    //@DistributedLock(key = "'POINT:'.concat('USE:').concat(#pointUseRequest.userId)")
     public PointChargeResponse use(PointUseRequest pointUseRequest) {
         Long userId = pointUseRequest.userId();
         Long usePoint = pointUseRequest.point();

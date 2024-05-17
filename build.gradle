@@ -28,6 +28,8 @@ dependencies {
 	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.redisson:redisson-spring-boot-starter:3.21.0'
+	implementation 'org.springframework.kafka:spring-kafka'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
 	runtimeOnly 'com.h2database:h2'
 

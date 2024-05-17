@@ -1,6 +1,6 @@
 package com.api.concert.domain.point;
 
-import com.api.concert.common.event.Events;
+import com.api.concert.modules.event.Events;
 import com.api.concert.domain.point.constant.TransactionType;
 import com.api.concert.common.exception.CommonException;
 import com.api.concert.domain.point.event.PointHistoryLoggedEvent;
@@ -10,8 +10,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.function.Consumer;
 
 @Getter
 @Builder

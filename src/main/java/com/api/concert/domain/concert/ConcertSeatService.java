@@ -1,6 +1,6 @@
 package com.api.concert.domain.concert;
 
-import com.api.concert.common.event.Events;
+import com.api.concert.modules.event.Events;
 import com.api.concert.controller.concert.dto.ConcertSeatResponse;
 import com.api.concert.controller.concert.dto.ConcertTempReservationRequest;
 import com.api.concert.controller.concert.dto.ConcertTempReservationResponse;
@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -162,7 +161,6 @@ public class ConcertSeatService {
         return temporarilyReservedSeats;
     }
 
-    @Transactional
     public List<Reservation> updateSeatToReserved(Long userId, List<ConcertSeat> temporarilyReservedSeats) {
         temporarilyReservedSeats.forEach(ConcertSeat::reserve);
         List<Long> seatIds = temporarilyReservedSeats.stream()

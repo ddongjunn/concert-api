@@ -1,4 +1,4 @@
-package com.api.concert.common.config;
+package com.api.concert.modules.redisson;
 
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.Redisson;
