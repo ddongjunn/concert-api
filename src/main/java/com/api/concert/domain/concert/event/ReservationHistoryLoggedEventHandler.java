@@ -1,6 +1,6 @@
-package com.api.concert.domain.point.event;
+package com.api.concert.domain.concert.event;
 
-import com.api.concert.domain.point.IPointHistoryRepository;
+import com.api.concert.domain.concert.ReservationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -11,16 +11,17 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 @RequiredArgsConstructor
 @Component
-public class PointHistoryLoggedEventHandler {
-    private final IPointHistoryRepository iPointHistoryRepository;
+public class ReservationHistoryLoggedEventHandler {
+
+    private final ReservationService reservationService;
 
     @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(
-            classes = PointHistoryLoggedEvent.class,
+            classes = ReservationHistoryLoggedEvent.class,
             phase = TransactionPhase.AFTER_COMMIT
     )
-    public void handle(PointHistoryLoggedEvent event) {
-        iPointHistoryRepository.save(PointHistoryLoggedEvent.toEntity(event));
+    public void handle(ReservationHistoryLoggedEvent event) {
+        event.getReservations().forEach(reservationService::save);
     }
 }

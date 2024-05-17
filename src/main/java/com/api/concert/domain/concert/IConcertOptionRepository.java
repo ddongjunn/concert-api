@@ -9,6 +9,4 @@ public interface IConcertOptionRepository {
     List<ConcertInfoProjection> availableConcerts();
 
     boolean existFindById(Long id);
-
-    ReservationInfoProjection findConcertInformation(Long concertOptionId);
 }

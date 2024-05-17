@@ -56,4 +56,8 @@ public class QueueService {
                 .toLocalDateTime()
                 .format(DATE_TIME_FORMATTER);
     }
+
+    public void expire(Long userId) {
+        iQueueRedisRepository.expireOngoingQueue(userId);
+    }
 }

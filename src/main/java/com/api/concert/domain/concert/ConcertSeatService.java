@@ -1,5 +1,6 @@
 package com.api.concert.domain.concert;
 
+import com.api.concert.common.event.Events;
 import com.api.concert.controller.concert.dto.ConcertSeatResponse;
 import com.api.concert.controller.concert.dto.ConcertTempReservationRequest;
 import com.api.concert.controller.concert.dto.ConcertTempReservationResponse;
@@ -7,6 +8,8 @@ import com.api.concert.domain.concert.constant.SeatStatus;
 import com.api.concert.common.annotation.DistributedLock;
 import com.api.concert.common.exception.CommonException;
 import com.api.concert.common.model.ResponseCode;
+import com.api.concert.domain.concert.event.ReservationHistoryLoggedEvent;
+import com.api.concert.infrastructure.concert.projection.ReservationInfoProjection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -20,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -159,14 +163,29 @@ public class ConcertSeatService {
     }
 
     @Transactional
-    public List<ConcertSeat> updateSeatToReserved(Long userId, List<ConcertSeat> temporarilyReservedSeats) {
+    public List<Reservation> updateSeatToReserved(Long userId, List<ConcertSeat> temporarilyReservedSeats) {
         temporarilyReservedSeats.forEach(ConcertSeat::reserve);
-        List<Long> updateStatusToReservedIds = temporarilyReservedSeats.stream()
+        List<Long> seatIds = temporarilyReservedSeats.stream()
                 .map(ConcertSeat::getSeatId)
                 .toList();
+        iConcertSeatRepository.updateStatusToReserved(userId, seatIds);
 
-        iConcertSeatRepository.updateStatusToReserved(userId, updateStatusToReservedIds);
+        List<Reservation> reservations = findReservationInformationByIds(seatIds)
+                .stream()
+                .map(Reservation::fromProjection)
+                .toList();
+        saveHistories(reservations);
 
-        return temporarilyReservedSeats;
+        return reservations;
+    }
+
+    public List<ReservationInfoProjection> findReservationInformationByIds(List<Long> concertSeatIds) {
+        return iConcertSeatRepository.findReservationInformationByIds(concertSeatIds);
+    }
+
+    public void saveHistories(List<Reservation> reservations) {
+        Events.raise(ReservationHistoryLoggedEvent.builder()
+                .reservations(reservations)
+                .build());
     }
 }

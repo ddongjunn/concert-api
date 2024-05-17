@@ -16,9 +16,4 @@ public interface ConcertOptionJpaRepository extends JpaRepository<ConcertOptionE
             "WHERE co.reservationStartDate < now() AND co.startDate > now()")
     List<ConcertInfoProjection> findAvailableConcerts();
 
-    @Query(value =
-            "SELECT c.name AS name, c.singer AS singer, co.startDate AS startDate " +
-            "FROM ConcertEntity c JOIN ConcertOptionEntity co ON c.concertId = co.concertOptionId " +
-            "WHERE co.concertOptionId = :id")
-    ReservationInfoProjection findConcertInformationById(@Param("id") Long concertOptionId);
 }

@@ -31,5 +31,5 @@ public class ReservationEntity extends BaseEntity {
 
     int price;
 
-    LocalDateTime StartDate;
+    LocalDateTime startDate;
 }
