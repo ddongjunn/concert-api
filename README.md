@@ -285,6 +285,154 @@ where 조건으로 조회시 사용되는 concert_option 테이블의 reservatio
 - 메시징 시스템을 이용한 비동기 구현
 - 이벤트 저장소를 이용한 비동기 처리 (API 방식, 포워더 방식)
 
+**비동기 이벤트 구현**
 
+```java
+@RequiredArgsConstructor
+@Component
+public class PaymentFacade {
 
+   private final QueueService queueService;
+   private final ConcertSeatService concertSeatService;
+   private final PointService pointService;
+
+   @Transactional
+   public PaymentResponse payment(PaymentRequest paymentRequest) {
+      Long userId = paymentRequest.userId();
+
+      //임시 예약된 좌석들 가져오기
+      List<ConcertSeat> temporarilyReservedSeats = concertSeatService.findSeatTemporarilyReservedByUserId(userId);
+      Long paymentAmount = temporarilyReservedSeats.stream().mapToLong(ConcertSeat::getPrice).sum();
+
+      //예약된 좌석들의 총 금액 결제
+      PointUseRequest pointUseRequest = PointUseRequest.builder().userId(userId).point(paymentAmount).build();
+      pointService.use(pointUseRequest);
+
+      //좌석 예약처리 -> 예약 내역 반환
+      List<Reservation> reservations = concertSeatService.updateSeatToReserved(userId, temporarilyReservedSeats);
+
+      //대기열 삭제
+      queueService.expire(userId);
+
+      //외부 플랫폼 API 호출
+      Events.raise(PaymentCompletedEvent.builder().reservations(reservations).build());
+
+      return PaymentResponse.builder()
+              .code(ResponseCode.SUCCESS)
+              .build();
+   }
+}
+```
+
+```java
+@RequiredArgsConstructor
+@Component
+public class PaymentCompletedEventHandler {
+
+    private final ExternalPaymentProducer externalPaymentProducer;
+
+    @EventListener(PaymentCompletedEvent.class)
+    public void handle(PaymentCompletedEvent event) {
+        externalPaymentProducer.sendPayment(event.getReservations());
+    }
+}
+```
+
+```java
+@Component
+@RequiredArgsConstructor
+public class ExternalPaymentProducer {
+
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+
+    public void sendPayment(List<Reservation> message) {
+        kafkaTemplate.send("payment_topic", message);
+    }
+}
+```
+
+```java
+public class ExternalPaymentConsumer {
+
+    private final WebClient.Builder webClientBuilder;
+
+    @KafkaListener(topics = "payment_topic", groupId = "payment_group")
+    public void consume(Object obj) {
+        ConsumerRecord<String, List<Reservation>> result = (ConsumerRecord<String, List<Reservation>>) obj;
+        sendToExternalDataPlatform(result.value());
+    }
+
+    public void sendToExternalDataPlatform(List<Reservation> reservations) {
+        WebClient webClient = webClientBuilder.baseUrl("http://localhost:8080").build();
+
+        webClient.post()
+                .uri("/api/data")
+                .bodyValue(reservations)
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+    }
+}
+```
+
+최종결제가 정상적으로 성공한다면 `Events.raise(PaymentCompletedEvent.builder().reservations(reservations).build());`
+
+외부 API 호출에 대한 event를 발행하게 됩니다.
+
+Facede를 통해서 payment()전체가 Transactional로 동작하기 때문에 결제 로직 진행중 롤백이 되면 외부 API에 대한 호출 event는 동작이 되지 않습니다.
+
+그럼 PaymentCompletedEvent가 동작후 카프카의 메시지 발행이 실패하는 경우엔?
+
+위 상태라면 메시지가 정상적으로 발행되지 않은 경우 확인이 불가능
+
+카프카 메시지 발행에 대해 보장을 하기 위해서는 Transactional Outbox Pattern를 사용해서 해결할 수 있습니다.
+
+**Transactional Outbox Pattern**
+![img.png](img.png)
+```mysql
+CREATE TABLE outbox (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    aggregate_id VARCHAR(255) NOT NULL,
+    aggregate_type VARCHAR(255) NOT NULL,
+    event_type VARCHAR(255) NOT NULL,
+    payload TEXT NOT NULL,
+    fail_count INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    processed_at TIMESTAMP NULL                    
+);
+```
+
+```java
+@RequiredArgsConstructor
+@Component
+public class PaymentExternalEventRecordListener {
+
+    private final OutboxRepository outboxRepository;
+    
+    //outbox 테이블에 이벤트 기록 (TransactionPhase.BEFORE_COMMIT)
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+    public void handle(PaymentCompletedEvent event) {
+       outboxRepository.save(event.toEntity());
+    }
+}
+```
+```java
+public class PaymentExternalEventMessageListener {
+    private final InventoryExternalEventSendService sendService;
+
+    //카프카에 메시지 전송 (TransactionPhase.AFTER_COMMIT) 
+    @Async(EVENT_ASYNC_TASK_EXECUTOR)
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handle(PaymentCompletedEvent event) {
+        sendService.send(PaymentCompletedEvent.from(event));
+    }
+}
+```
+- 도메인 로직(payment())가 성공적으로 수행되었다면, 이에 해당하는 이벤트 메세지를 Outbox Table에 저장하여 함께 Commit
+- 동일한 트랜잭션 내에서 이벤트 발행을 위한 Outbox Table에 데이터 적재까지 진행해 이벤트 발행에 대해 보장할 수 있습니다.
+- 이벤트 발행 상태 또한 Outbox 데이터에 존재하므로, 배치 프로세스 등을 이용해서 미발행된 데이터에 대해서 추적할 수 있습니다.
+
+메세지 발행에 실패하는 경우
+- Outbox Table에 fail_count 필드를 통해서 내부 정책에 따른 rate_limit 동안 실행 
+- rate_limit까지 지속적으로 실패하는경우 Outbox_error Table에 적재 하여 실패한 이벤트에 대한 분석 및 모니터링
 
