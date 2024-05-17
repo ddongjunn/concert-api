@@ -1,4 +1,4 @@
-package com.api.concert.common.event;
+package com.api.concert.modules.event;
 
 import org.springframework.context.ApplicationEventPublisher;
 

@@ -1,6 +1,6 @@
 package com.api.concert.infrastructure.queue;
 
-import com.api.concert.common.entity.BaseEntity;
+import com.api.concert.modules.jpa.entity.BaseEntity;
 import com.api.concert.domain.queue.constant.WaitingStatus;
 import jakarta.persistence.*;
 import lombok.*;

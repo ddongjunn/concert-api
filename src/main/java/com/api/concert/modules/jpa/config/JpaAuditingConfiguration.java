@@ -1,4 +1,4 @@
-package com.api.concert.common.config;
+package com.api.concert.modules.jpa.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
