@@ -15,8 +15,8 @@ public class QueueScheduledService {
 
     private final IQueueRedisRepository iQueueRedisRepository;
 
-    public final static int QUEUE_LIMIT = 5;
-    public final static int QUEUE_EXPIRED_TIME = 60;
+    public final static int QUEUE_LIMIT = 1000;
+    public final static int QUEUE_EXPIRED_TIME = 300;
 
     @Scheduled(cron = "0/30 * * * * ?")
     public void activateQueues() {
