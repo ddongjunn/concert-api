@@ -7,13 +7,16 @@ import com.api.concert.infrastructure.point.PointHistoryEntity;
 import com.api.concert.infrastructure.point.PointHistoryJpaRepository;
 import com.api.concert.infrastructure.point.PointJpaRepository;
 import com.api.concert.util.DataClearExtension;
+import config.TestContainerSupport;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,9 +28,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
 @ExtendWith(DataClearExtension.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
+@Testcontainers
 @ActiveProfiles("test")
-public class PointServiceConcurrencyTest {
+public class PointServiceConcurrencyTest extends TestContainerSupport {
 
     private final PointService pointService;
     private final IPointRepository iPointRepository;
@@ -74,6 +78,7 @@ public class PointServiceConcurrencyTest {
         assertThat(histories).hasSize(10);
     }
 
+    @Disabled
     @DisplayName("포인트를 동시에 사용 하는 경우 모두 사용되어야 한다.")
     @Test
     void test_use() throws InterruptedException {

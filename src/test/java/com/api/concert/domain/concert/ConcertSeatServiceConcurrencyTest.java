@@ -4,7 +4,9 @@ import com.api.concert.controller.concert.dto.ConcertTempReservationRequest;
 import com.api.concert.domain.concert.constant.SeatStatus;
 import com.api.concert.infrastructure.concert.ConcertSeatEntity;
 import com.api.concert.infrastructure.concert.ConcertSeatJpaRepository;
+import config.TestContainerSupport;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayDeque;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -23,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-public class ConcertSeatServiceConcurrencyTest {
+public class ConcertSeatServiceConcurrencyTest extends TestContainerSupport {
 
     private final ConcertSeatService concertSeatService;
     private final ConcertSeatJpaRepository concertSeatJpaRepository;

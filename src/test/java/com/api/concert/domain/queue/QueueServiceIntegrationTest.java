@@ -6,8 +6,10 @@ import com.api.concert.controller.queue.dto.QueueStatusResponse;
 import com.api.concert.common.exception.CommonException;
 import com.api.concert.common.model.ResponseCode;
 import com.api.concert.infrastructure.queue.QueueJpaRepository;
+import config.TestContainerSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.redisson.api.RMapCache;
@@ -16,6 +18,7 @@ import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -31,9 +34,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Slf4j
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
+@Testcontainers
 @ActiveProfiles("test")
-public class QueueServiceIntegrationTest {
+public class QueueServiceIntegrationTest extends TestContainerSupport {
 
     private final QueueService queueService;
     private final RScoredSortedSet<Long> waitQueue;
