@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: '512M'
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: '256M'
+
+networks:
+  default:
+    driver: bridge
