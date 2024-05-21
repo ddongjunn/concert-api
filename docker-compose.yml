@@ -2,7 +2,10 @@ version: '3.8'
 
 services:
   app:
+    platform: linux/amd64
     build: .
+    ports:
+      - "8080:8080"
     deploy:
       resources:
         limits:
@@ -21,7 +24,3 @@ services:
         limits:
           cpus: '0.2'
           memory: '256M'
-
-networks:
-  default:
-    driver: bridge

@@ -1,8 +1,8 @@
 spring:
   data:
     redis:
-      host: 127.0.0.1
-      port: 6370
+      host: redis
+      port: 6379
 
   h2:
     console:
@@ -19,7 +19,6 @@ spring:
     password:
 
   jpa:
-    database: mysql
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       ddl-auto: create
