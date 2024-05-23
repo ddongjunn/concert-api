@@ -53,19 +53,16 @@ decorator:
       enable-logging: true
 
 queue:
-  scan-time: "0 * * * * *"
+  scan-time: "* * * * * *"
 
 seat:
   scan-time: "0 * * * * *"
-
-logging:
-  level:
-    org:
-      springframework:
-        transaction: DEBUG
 
 management:
   endpoints:
     web:
       exposure:
         include: health
+
+logging:
+  config: classpath:logback-dev.xml
