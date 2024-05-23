@@ -16,16 +16,20 @@ public class QueueScheduledService {
     private final IQueueRedisRepository iQueueRedisRepository;
 
     public final static int QUEUE_LIMIT = 1000;
-    public final static int QUEUE_EXPIRED_TIME = 300;
+    public final static long QUEUE_EXPIRED_TIME = 20;
 
-    @Scheduled(cron = "0/30 * * * * ?")
+    @Scheduled(cron = "${queue.scan-time}")
     public void activateQueues() {
         int availableQueueCount = availableQueueSpace();
-        if(availableQueueCount <= 0){
+        if(availableQueueCount <= 0) {
             return;
         }
 
         List<Long> userIds = iQueueRedisRepository.pollUsersFromWaitQueue(availableQueueCount);
+        if(userIds.isEmpty()) {
+            return;
+        }
+
         iQueueRedisRepository.activate(userIds, QUEUE_EXPIRED_TIME);
     }
 
