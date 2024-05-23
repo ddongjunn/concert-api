@@ -10,9 +10,9 @@ public interface IQueueRedisRepository {
 
     List<Long> pollUsersFromWaitQueue(int availableQueueCount);
 
-    void activate(List<Long> userIds, int queueExpiredTime);
+    void activate(List<Long> userIds, long ttl);
 
-    Optional<Long> findUserExpiredTimeInOngoingQueue(Long userId);
+    Optional<String> findUserExpiredTimeInOngoingQueue(Long userId);
 
     Optional<Integer> findUserRankInWaitQueue(Long userId);
 

@@ -32,12 +32,12 @@ public class RedissonConfig {
     }
 
     @Bean
-    public RScoredSortedSet<Long> waitQueue(RedissonClient redissonClient) {
+    public RScoredSortedSet<String> waitQueue(RedissonClient redissonClient) {
         return redissonClient.getScoredSortedSet("waitQueue");
     }
 
     @Bean
-    public RMapCache<Long, Long> ongoingQueue(RedissonClient redissonClient) {
+    public RMapCache<String, String> ongoingQueue(RedissonClient redissonClient) {
         return redissonClient.getMapCache("ongoingQueue");
     }
 }

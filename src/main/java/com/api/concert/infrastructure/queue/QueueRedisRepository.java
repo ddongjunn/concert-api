@@ -21,13 +21,13 @@ import java.util.concurrent.TimeUnit;
 @Repository
 public class QueueRedisRepository implements IQueueRedisRepository {
 
-    private final RScoredSortedSet<Long> waitQueue;
-    private final RMapCache<Long, Long> ongoingQueue;
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final RScoredSortedSet<String> waitQueue;
+    private final RMapCache<String, String> ongoingQueue;
 
     @Override
     public int register(Long userId) {
-        waitQueue.add(System.currentTimeMillis(), userId);
-        return waitQueue.rank(userId);
+        return waitQueue.addAndGetRank(System.currentTimeMillis(), userId.toString());
     }
 
     @Override
@@ -39,29 +39,34 @@ public class QueueRedisRepository implements IQueueRedisRepository {
     public List<Long> pollUsersFromWaitQueue(int availableQueueCount) {
         return waitQueue.pollFirst(availableQueueCount)
                 .stream()
+                .mapToLong(Long::parseLong)
+                .boxed()
                 .toList();
     }
 
     @Override
-    public void activate(List<Long> userIds, int ttl) {
-        long deadTime = Instant.now().plusSeconds(ttl).getEpochSecond();
+    public void activate(List<Long> userIds, long ttl) {
+        String expiryTime = LocalDateTime.now().plusSeconds(ttl).format(DATE_TIME_FORMATTER);
+        log.info("[queue activate] userIds {}, expiryTime {}", userIds, expiryTime);
         userIds.forEach(userId -> {
-                ongoingQueue.put(userId, deadTime, ttl, TimeUnit.SECONDS);
+                String strUserId = String.valueOf(userId);
+                ongoingQueue.put(strUserId, expiryTime, ttl, TimeUnit.SECONDS);
         });
     }
 
     @Override
-    public Optional<Long> findUserExpiredTimeInOngoingQueue(Long userId) {
-        return Optional.ofNullable(ongoingQueue.get(userId));
+    public Optional<String> findUserExpiredTimeInOngoingQueue(Long userId) {
+        String expiryTime = ongoingQueue.get(userId.toString());
+        return Optional.ofNullable(expiryTime);
     }
 
     @Override
     public Optional<Integer> findUserRankInWaitQueue(Long userId) {
-        return Optional.ofNullable(waitQueue.rank(userId));
+        return Optional.ofNullable(waitQueue.rank(userId.toString()));
     }
 
     @Override
     public void expireOngoingQueue(Long userId) {
-        ongoingQueue.remove(userId);
+        ongoingQueue.remove(userId.toString());
     }
 }
