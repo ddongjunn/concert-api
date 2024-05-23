@@ -10,12 +10,10 @@ public class ApiResponse<T> {
     private final LocalDateTime timestamp = LocalDateTime.now();
     private String path;
     private T data;
-    private String message;
 
     @Builder
-    private ApiResponse(String path, T data, String message) {
+    private ApiResponse(String path, T data) {
         this.path = path;
         this.data = data;
-        this.message = message;
     }
 }
