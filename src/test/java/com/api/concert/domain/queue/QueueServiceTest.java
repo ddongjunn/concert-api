@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -71,16 +72,16 @@ class QueueServiceTest {
     void test_getQueueStatus1(){
         // Given
         Long userId = 1L;
-        long expiredTime = System.currentTimeMillis();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String expiryTime = LocalDateTime.now().format(dateTimeFormatter);
 
         // When
         when(iQueueRedisRepository.findUserExpiredTimeInOngoingQueue(userId))
-                .thenReturn(Optional.of(expiredTime));
-        String expiredTimeToString = queueService.convertEpochToFormattedDate(expiredTime);
+                .thenReturn(Optional.of(expiryTime));
 
         // Then
         QueueStatusResponse result = queueService.getQueueStatus(1L);
-        assertThat(result.getExpiredTime()).isEqualTo(expiredTimeToString);
+        assertThat(result.getExpiredTime()).isEqualTo(expiryTime);
         assertThat(result.getRank()).isNull();
     }
 

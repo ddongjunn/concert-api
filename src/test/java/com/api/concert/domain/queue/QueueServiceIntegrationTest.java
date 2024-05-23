@@ -24,6 +24,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -40,11 +41,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 public class QueueServiceIntegrationTest extends TestContainerSupport {
 
     private final QueueService queueService;
-    private final RScoredSortedSet<Long> waitQueue;
-    private final RMapCache<Long, Long> ongoingQueue;
+    private final RScoredSortedSet<String> waitQueue;
+    private final RMapCache<String, String> ongoingQueue;
 
     @Autowired
-    public QueueServiceIntegrationTest(QueueService queueService, IQueueRepository iQueueRepository, QueueJpaRepository queueJpaRepository, RScoredSortedSet<Long> waitQueue, RedissonClient redissonClient, RMapCache<Long, Long> ongoingQueue) {
+    public QueueServiceIntegrationTest(QueueService queueService, IQueueRepository iQueueRepository, QueueJpaRepository queueJpaRepository, RScoredSortedSet<String> waitQueue, RedissonClient redissonClient, RMapCache<String, String> ongoingQueue) {
         this.queueService = queueService;
         this.waitQueue = waitQueue;
         this.ongoingQueue = ongoingQueue;
@@ -92,18 +93,14 @@ public class QueueServiceIntegrationTest extends TestContainerSupport {
     void test_getQueueStatus(){
         // Given
         Long userId = 1L;
-        String expiredTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now().plusSeconds(QUEUE_EXPIRED_TIME));
-
-        long deadTime = Instant.now().plusSeconds(QUEUE_EXPIRED_TIME).getEpochSecond();
-        ongoingQueue.put(userId, deadTime, QUEUE_EXPIRED_TIME, TimeUnit.SECONDS);
+        String expiryTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now().plusSeconds(QUEUE_EXPIRED_TIME));
+        ongoingQueue.put(String.valueOf(userId), expiryTime, QUEUE_EXPIRED_TIME, TimeUnit.SECONDS);
 
         // When
         QueueStatusResponse result = queueService.getQueueStatus(userId);
 
         // Then
-        LocalDateTime resultDateTime = LocalDateTime.parse(result.getExpiredTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        LocalDateTime expectedDateTime = LocalDateTime.parse(expiredTime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        assertThat(resultDateTime.truncatedTo(ChronoUnit.MINUTES)).isEqualTo(expectedDateTime.truncatedTo(ChronoUnit.MINUTES));
+        assertThat(result.getExpiredTime()).isEqualTo(expiryTime);
     }
 
     @DisplayName("대기열 조회 시 대기열에 존재하지 않는 경우 Exception")
@@ -152,7 +149,7 @@ public class QueueServiceIntegrationTest extends TestContainerSupport {
     @Test
     void test_register_concurrency() throws InterruptedException{
         //Given & When
-        int numberOfRequests = 10;
+        int numberOfRequests = 100;
         CountDownLatch latch = new CountDownLatch(numberOfRequests);
         ExecutorService executorService = Executors.newFixedThreadPool(numberOfRequests);
 
