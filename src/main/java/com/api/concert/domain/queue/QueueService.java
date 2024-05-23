@@ -20,7 +20,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class QueueService {
 
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final IQueueRedisRepository iQueueRedisRepository;
 
     @Transactional
@@ -42,19 +41,11 @@ public class QueueService {
         }
 
         String ttl = iQueueRedisRepository.findUserExpiredTimeInOngoingQueue(userId)
-                .map(this::convertEpochToFormattedDate)
                 .orElseThrow(() -> new CommonException(ResponseCode.NOT_EXIST_WAITING_USER, ResponseCode.NOT_EXIST_WAITING_USER.getMessage()));
 
         return QueueStatusResponse.builder()
                 .expiredTime(ttl)
                 .build();
-    }
-
-    public String convertEpochToFormattedDate (Long expiredTime) {
-        return Instant.ofEpochSecond(expiredTime)
-                .atZone(ZoneId.systemDefault())
-                .toLocalDateTime()
-                .format(DATE_TIME_FORMATTER);
     }
 
     public void expire(Long userId) {
